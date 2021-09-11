@@ -1,0 +1,35 @@
+#!/bin/bash
+
+fentry()
+{
+    # $1 je počet dní zpět, například -1 nebo -263
+    [ -z "$1" ] && DAYS_BACK=0 || DAYS_BACK=$(echo $1 | sed 's/^-//')
+    echo $DAYS_BACK | egrep '^[0-9]*$' >/dev/null || \
+        { echo "Expected number of days into past (try -1 or -30)"; exit 1; }
+
+    CURDATE=$(date -I --date="@$[$(date +%s)-86400*$DAYS_BACK]");
+    FILENAME=$(echo "$CURDATE" | sed 's/$/.md/')
+    vim + "$D/$FILENAME"
+}
+
+flist_dir()
+{
+    ls "$D"
+}
+
+
+NOTEROOT=/home/nick/Shrine/dokumenty/plaintext
+
+case "$1" in
+    yume) D=$NOTEROOT/yume; shift;;
+    food) D=$NOTEROOT/food; shift;;
+    *) D=$NOTEROOT/Deník;;
+esac
+
+case "$1" in
+    list)   flist_dir;;
+    read)   true;;
+    *)  fentry "$1";;
+esac
+
+
