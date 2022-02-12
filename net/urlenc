@@ -1,5 +1,6 @@
 #!/usr/bin/python3
+# encode unicode to url code %li%ke%th%is%bu%ti%nh%ex
 
 import urllib.parse
-print(urllib.parse.quote(raw_input()))
+print(urllib.parse.quote(input()))
 

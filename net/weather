@@ -1,4 +1,6 @@
 #!/bin/bash
 V2=""
-[ "$1" = "v2" ] && V2='v2.' && shift
-curl "http://${V2}wttr.in/T%C5%99eb%C3%AD%C4%8D"
+[ "$1" = "v2" ] && { V2='v2.'; shift; }
+
+curl "http://${V2}wttr.in/$(echo "$1" | urlenc)"
+

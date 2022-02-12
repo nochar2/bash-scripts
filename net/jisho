@@ -1,4 +1,5 @@
 #!/bin/bash
+# query jisho.org from command line, read json response in less
 
 query=$(echo "$1" | urlenc)
 curl "https://jisho.org/api/v1/search/words?keyword=$query" 2>/dev/null | jq --color-output | less -R
