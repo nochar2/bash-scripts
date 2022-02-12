@@ -1,0 +1,100 @@
+
+# Disable BEL?
+set bell-style=none
+
+# Some custom made aliases
+alias cal='ncal -b -M -w'
+alias cls='clear'
+alias less='less -q'
+alias munic='cd /mnt/c/users/karel/desktop/muni/bc2/pb071\ c/'
+alias munix='cd /mnt/c/users/karel/desktop/muni/bc2/pv004\ unix/'
+alias gcc='gcc -std=c99 -pedantic -Wall -Wextra'
+alias s='ssh xsebela2@aisa.fi.muni.cz'
+alias goto='cd "$(dirname -- "$(locate --regex ${1}\$ | head -1)")"'  # todo:
+alias u='sudo apt update && sudo apt upgrade -y'
+alias update='u'
+alias wincmd='cmd.exe /C'
+
+
+## Removes color codes
+alias stripcolors='sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[mGK]//g"'
+
+## Writes a note to a diary
+alias diary="cd ~/Shrine/dokumenty/plaintext/deník \
+    && date +%F | sed 's/$/.md/' | xargs -o vim +; cd - >/dev/null"
+
+## Runs .bashrc again
+alias reload=". ~/.bashrc"
+alias python="python3"
+
+
+# Aliases from cmdrc.cmd
+## ----- paths -----
+USERPROFILE="/mnt/c/users/karel"
+APPDATA="$USERPROFILE/appdata/roaming"
+LOCALAPPDATA="$USERPROFILE/appdata/local"
+shr="~/Shrine"
+doc="$shr/Dokumenty"
+
+## ----- shrine dirs -----
+alias shrine="cd $shr"
+alias doc="cd $doc"
+alias doku=doc
+alias dokumenty=doc
+alias lit="cd $doc/Literatura"
+alias kni="cd $doc/Literatura/Knihy"
+alias book=kni
+alias books=kni
+alias inf="cd $shr/Informatika"
+alias bat="cd $shr/Informatika/.bat"
+alias pic="cd $shr/Obrázky"
+alias pics=pic
+alias img=pic
+
+
+## ----- MUNI -----
+munidir="$USERPROFILE/Desktop/MUNI"
+mdir1="$munidir/bc1"
+mdir2="$munidir/bc2"
+
+alias muni="cd $munidir"
+alias ib000="cd '$mdir1/IB000 Matematické základy informatiky'"
+alias ib015="cd '$mdir1/IB015 Neimperativní programování'"
+alias ib111="cd '$mdir1/IB111 Základy programování'"
+alias pb151="cd '$mdir1/PB151 Výpočetní systémy'"
+alias pb154="cd '$mdir1/PB154 Základy databázových systémů'"
+alias vb035="cd '$mdir1/VB035 English I'"
+alias ib002="cd '$mdir2/IB002 ADS'"
+alias mb151="cd '$mdir2/MB151 LM'"
+alias pb071="cd '$mdir2/PB071 C'"
+alias pb152="cd '$mdir2/PB152 OS'"
+alias pb156="cd '$mdir2/PB156 PS'"
+alias pv004="cd '$mdir2/PV004 UNIX'"
+
+# ----- Other directories -----
+alias home="cd $USERPROFILE"
+alias desk="cd $USERPROFILE/Desktop"
+alias desktop=desk
+alias sshots="cd $USERPROFILE/Documents/ShareX/Screenshots"
+alias dl="cd $USERPROFILE/Downloads"
+alias repos="cd $USERPROFILE/source/repos"
+alias vid="cd $USERPROFILE/Videos"
+alias vids=vid
+alias appdata="cd $APPDATA"
+alias localad="cd $LOCALAPPDATA"
+alias prog="cd /mnt/c/Program\ Files"
+alias prog32="cd /mnt/c/Program\ Files\ (x86)"
+
+
+# ----- Command shortcuts -----
+alias win="cmd.exe /c"
+alias yt="youtube-dl --format bestvideo[height<=?720][vcodec!=?vp9]+bestaudio $*"
+# sort by name and directories first
+alias p="ping www.google.com"
+alias s="ssh xsebela2@fi.muni.cz"
+alias pluckb="win pluck verdicts | findstr block"
+alias plucke="win pluck export"
+alias plucki="win pluck import"
+
+alias termania="cd $shr/Informatika/Python/termania/"
+mt="~/Shrine/Informatika/Python/MasteryTimer"

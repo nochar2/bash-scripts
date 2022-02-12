@@ -1,0 +1,29 @@
+#!/bin/bash
+
+idea_arr=(
+    "Co takhle přečíst si knihu?"
+    "Ukliď si ten binec na stole."
+    "Nějaké prádlo na vyprání?"
+    "Nechceš se napít?"
+    "Třeba se podívat na kus přednášky..."
+    "Napiš do deníku, jak se cítíš."
+    "Hochu, taky bych si zahrál, ale je noc, nemůžeš dělat kravál."
+    "Začíná noční doba studia, prosím o klid na domově, děkuji."
+    "Ten prach nikdo nestíral tak dva měsíce..."
+    "日本語の学習はどうですか？"
+    "Vyjdi na chodbu a udělej deset kliků, uleví se ti."
+    "Vyčistil jsem si vůbec zuby?"
+)
+
+ideas()
+{
+    arr_len=${#idea_arr[@]}
+    item=$[$RANDOM % $arr_len]
+    output=${idea_arr[$item]}
+    echo "$output" 
+    true 
+}
+
+hour=$(date +%H)
+[ $hour -ge 22 -o $hour -lt 6 ] && ideas || "ett"
+

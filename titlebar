@@ -1,0 +1,99 @@
+#!/bin/bash
+assert()
+{
+    "$@" || { echo "Assertion failed on command: $@"; exit 16; }
+}
+
+fbatwarn()
+{
+    bat_perc=$1
+    if [ $bat_perc -le 20 ]; then bat_sym="🔶";
+    elif [ $bat_perc -le 10 ]; then bat_sym="❌";
+    else bat_sym="🔋";
+    fi
+    echo $bat_sym
+}
+
+fbrightness()
+{
+    brightness=$[$(brightnessctl get)/960]
+    if [ $brightness -le 10 ]; then bri_sym='🌑'
+    elif [ $brightness -le 25 ]; then bri_sym='🌒'
+    elif [ $brightness -le 40 ]; then bri_sym='🌓'
+    elif [ $brightness -le 70 ]; then bri_sym='🌔'
+    else bri_sym='🌕';
+    fi
+    echo "$bri_sym $brightness%"
+}
+
+fbattery()
+{
+    batinfo_dir="/sys/class/power_supply/BAT0"
+
+    bat_sym_dis="🔋"
+    bat_sym_ch="🔌"
+    bat_sym_warn="❌"
+
+    bat_perc=$(cat $batinfo_dir/capacity)
+
+    case $(cat $batinfo_dir/status) in
+        Unknown) bat_state=$bat_sym_ch?;;
+        Discharging) bat_state=$(fbatwarn $bat_perc);;
+        Charging) bat_state=$bat_sym_ch;;
+        # *) assert false "status was $(cat $batinfo_dir/status)";;
+    esac
+
+
+
+    echo "$bat_state $bat_perc%"
+}
+
+faudio()
+{
+    sp_sym_mute='🔇'
+    sp_sym_quiet='🔈'
+    sp_sym_mid='🔉'
+    sp_sym_loud='🔊'
+    sp_sym_clip='💥'
+    sp_sym=' '
+    audiolevel=$(pacmd list-sinks | grep "volume: front-left:" | sed -E "s/\///g;s/[\ \t]+/ /g;s/%//g" | cut -d" " -f5)
+    
+    if [ $audiolevel -le 15 ]; then sp_sym=$sp_sym_quiet;
+    elif [ $audiolevel -le 50 ]; then sp_sym=$sp_sym_mid;
+    elif [ $audiolevel -le 100 ] ; then sp_sym=$sp_sym_loud;
+    else sp_sym=$sp_sym_loud$sp_sym_clip;
+    fi
+    
+    echo $sp_sym $audiolevel%
+    
+}
+
+fcurdate()
+{
+    echo "$(date +'%Y-%m-%d %H:%M:%S')"
+}
+
+main()
+{
+    [ "$1" == "once" ] && { once="y"; }
+    trap "{ echo 'Broken pipe, exiting'; exit 2; }" SIGPIPE
+    bri=""
+    
+    while true; do
+        [ $[i%20] -eq 0 ] && {  bat=$(fbattery); }
+        [ $[i%9] -eq 0 ] && { dat=$(fcurdate); }
+        [ $[i%1] -eq 0 ] && { aud=$(faudio); bri=$(fbrightness); }
+
+        # [ $[i%10] -eq 0 ] && bat=$(fbattery)
+        # [ $[i%10] -eq 0 ] && dat=$(fcurdate)
+        
+        echo "$bri | $aud | $bat | $dat" || { exit 2; }  # sigpipe
+        # echo "$(fbrightness) │ $(faudio) │ $(fbattery) │ $(fcurdate)"
+
+        [ -n "$once" ] && break;
+        sleep .1
+        i=$[i+1]
+    done
+}
+
+main $@

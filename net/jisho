@@ -1,0 +1,4 @@
+#!/bin/bash
+
+query=$(echo "$1" | urlenc)
+curl "https://jisho.org/api/v1/search/words?keyword=$query" 2>/dev/null | jq --color-output | less -R

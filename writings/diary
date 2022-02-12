@@ -18,7 +18,7 @@ flist_dir()
 }
 
 
-NOTEROOT=/home/nick/Shrine/dokumenty/plaintext
+NOTEROOT=$HOME/Shrine/Dokumenty/Plaintext
 
 case "$1" in
     yume) D=$NOTEROOT/yume; shift;;

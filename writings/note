@@ -1,0 +1,37 @@
+#!/bin/bash
+#
+
+fusage()
+{
+    echo "note - Skript pro zaznamenávání poznámek."
+    echo "Použití: note [verb [object]]"
+    echo ""
+    echo "note l[ist]               Vypíše seznam poznámek."
+    echo "note s[how] name          Vypíše poznámku, případně vytvoří novou."
+    echo "note e[dit] name          Otevře poznámku ve Vimu, případně vytvoří novou."
+    echo "note r[ename] old new     Přejmenuje poznámku old na new."
+    echo "note d[elete] name        Přesune poznámku do adresáře trash vedle poznámek"
+    echo "note fd[elete] name       Smaže poznámku natrvalo"
+}
+
+flistdir()
+{
+    ls *.md
+}
+shopt -s expand_aliases
+BASEPATH=$HOME/Shrine/Dokumenty/Plaintext/Poznámky
+NOTENAME="$2".md
+
+cd "$BASEPATH"
+
+case "$1" in
+    help|h) fusage;;
+    list|l|"") flistdir;;
+    show|s) cat "$NOTENAME";;
+    edit|e) $EDITOR "$NOTENAME";;
+    rename|r) [ "$3" != "" ] && mv "$NOTENAME" "$3".md;;
+    delete|d) mkdir -p trash; mv "$NOTENAME" trash;;
+    fdelete|fd) rm "$NOTENAME";;
+    *) fusage; exit 1;;
+esac
+
