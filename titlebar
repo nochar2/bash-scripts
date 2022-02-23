@@ -7,8 +7,8 @@ assert()
 fbatwarn()
 {
     bat_perc=$1
-    if [ $bat_perc -le 20 ]; then bat_sym="🔶";
-    elif [ $bat_perc -le 10 ]; then bat_sym="❌";
+    if [ "$bat_perc" -le 10 ]; then bat_sym="❌";
+    elif [ "$bat_perc" -le 20 ]; then bat_sym="🔶";
     else bat_sym="🔋";
     fi
     echo $bat_sym
@@ -33,6 +33,7 @@ fbattery()
     bat_sym_dis="🔋"
     bat_sym_ch="🔌"
     bat_sym_warn="❌"
+    bat_sym_full="💯"
 
     bat_perc=$(cat $batinfo_dir/capacity)
 
@@ -40,6 +41,7 @@ fbattery()
         Unknown) bat_state=$bat_sym_ch?;;
         Discharging) bat_state=$(fbatwarn $bat_perc);;
         Charging) bat_state=$bat_sym_ch;;
+        Full) echo "$bat_sym_ch FULL%"; return;;
         # *) assert false "status was $(cat $batinfo_dir/status)";;
     esac
 
@@ -58,9 +60,9 @@ faudio()
     sp_sym=' '
     audiolevel=$(pacmd list-sinks | grep "volume: front-left:" | sed -E "s/\///g;s/[\ \t]+/ /g;s/%//g" | cut -d" " -f5)
     
-    if [ $audiolevel -le 15 ]; then sp_sym=$sp_sym_quiet;
-    elif [ $audiolevel -le 50 ]; then sp_sym=$sp_sym_mid;
-    elif [ $audiolevel -le 100 ] ; then sp_sym=$sp_sym_loud;
+    if [ "$audiolevel" -le 15 ]; then sp_sym=$sp_sym_quiet;
+    elif [ "$audiolevel" -le 50 ]; then sp_sym=$sp_sym_mid;
+    elif [ "$audiolevel" -le 100 ] ; then sp_sym=$sp_sym_loud;
     else sp_sym=$sp_sym_loud$sp_sym_clip;
     fi
     

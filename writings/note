@@ -1,37 +1,55 @@
 #!/bin/bash
-#
 
 fusage()
 {
-    echo "note - Skript pro zaznamenávání poznámek."
+    echo "note - Skript pro zaznamenávání a správu poznámek."
     echo "Použití: note [verb [object]]"
+    echo "         note object"
     echo ""
+    echo "note [h[elp]]             Vypíše tuto nápovědu."
     echo "note l[ist]               Vypíše seznam poznámek."
-    echo "note s[how] name          Vypíše poznámku, případně vytvoří novou."
+    echo "note s[how] name          Vypíše poznámku."
     echo "note e[dit] name          Otevře poznámku ve Vimu, případně vytvoří novou."
     echo "note r[ename] old new     Přejmenuje poznámku old na new."
     echo "note d[elete] name        Přesune poznámku do adresáře trash vedle poznámek"
     echo "note fd[elete] name       Smaže poznámku natrvalo"
+    echo "note name                 Stejné jako note e[dit] name (name nesmí být sloveso)"
 }
 
 flistdir()
 {
     ls *.md
 }
-shopt -s expand_aliases
+
+fcheck()
+{
+    [ -z "$1" ] && { echo "No note specified"; return 1; }
+    [ -f "$1" ] || { echo "$1 doesn't exist or is not a regular file"; return 1; }
+    return 0;
+}
+
+frename()
+{
+    fcheck "$1" || return 1;
+    [ "$2" == ".md" ] && { echo "New name not specified"; return 1; }
+    [ -d "$2" ] && { echo "Target $2 is an existing directory; I want to rename, not move"; return 1; }
+    mv "$1" "$2"
+}
+
+# shopt -s expand_aliases
 BASEPATH=$HOME/Shrine/Dokumenty/Plaintext/Poznámky
 NOTENAME="$2".md
 
 cd "$BASEPATH"
 
 case "$1" in
-    help|h) fusage;;
-    list|l|"") flistdir;;
-    show|s) cat "$NOTENAME";;
-    edit|e) $EDITOR "$NOTENAME";;
-    rename|r) [ "$3" != "" ] && mv "$NOTENAME" "$3".md;;
+    help|h|"") fusage;;
+    list|l) flistdir;;
+    show|s) fcheck "$NOTENAME" && cat "$NOTENAME";;
+    edit|e) fcheck "$NOTENAME" && $EDITOR "$NOTENAME";;
+    rename|r) frename "$NOTENAME" "$3".md;;
     delete|d) mkdir -p trash; mv "$NOTENAME" trash;;
     fdelete|fd) rm "$NOTENAME";;
-    *) fusage; exit 1;;
+    *) $EDITOR "$1".md
 esac
 
