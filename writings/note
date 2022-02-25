@@ -21,9 +21,14 @@ flistdir()
     ls *.md
 }
 
-fcheck()
+fspecified()
 {
     [ -z "$1" ] && { echo "No note specified"; return 1; }
+    return 0;
+}
+
+fexists()
+{
     [ -f "$1" ] || { echo "$1 doesn't exist or is not a regular file"; return 1; }
     return 0;
 }
@@ -45,8 +50,8 @@ cd "$BASEPATH"
 case "$1" in
     help|h|"") fusage;;
     list|l) flistdir;;
-    show|s) fcheck "$NOTENAME" && cat "$NOTENAME";;
-    edit|e) fcheck "$NOTENAME" && $EDITOR "$NOTENAME";;
+    show|s) fspecified "$NOTENAME" fexists $NOTENAME && cat "$NOTENAME";;
+    edit|e) fspecified "$NOTENAME" && $EDITOR "$NOTENAME";;
     rename|r) frename "$NOTENAME" "$3".md;;
     delete|d) mkdir -p trash; mv "$NOTENAME" trash;;
     fdelete|fd) rm "$NOTENAME";;
