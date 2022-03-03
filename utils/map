@@ -1,0 +1,11 @@
+#!/bin/bash
+command="$1"
+shift
+for f in *; do 
+    if [ -z "$@" ]; then 
+        "$command" "$f"
+    else
+        "$command" "$@" "$f"
+    fi
+done
+
