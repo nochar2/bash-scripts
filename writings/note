@@ -35,14 +35,14 @@ fexists()
 
 frename()
 {
-    fcheck "$1" || return 1;
+    [ -f "$1" ] || return 1;
     [ "$2" == ".md" ] && { echo "New name not specified"; return 1; }
     [ -d "$2" ] && { echo "Target $2 is an existing directory; I want to rename, not move"; return 1; }
     mv "$1" "$2"
 }
 
 # shopt -s expand_aliases
-BASEPATH=$HOME/Shrine/Dokumenty/Plaintext/Poznámky
+BASEPATH=$(ptpath)
 NOTENAME="$2".md
 
 cd "$BASEPATH"
