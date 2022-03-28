@@ -21,9 +21,13 @@ from hashlib import md5
 import subprocess
 import time
 
+
 URL = r"http://192.168.4.1/login"
 USERNAME = "sebela"
-PASSWORD = "precedence"
+with open("wpassword") as f:
+    pwstr = "".join(f.readlines()).rstrip("\n")
+    PASSWORD = bytes(pwstr, encoding="utf-8")
+
 
 headers=[
     "User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:98.0) Gecko/20100101 Firefox/98.0",
@@ -38,6 +42,7 @@ headers=[
     "Referer: http://192.168.4.1/login?",
     "Upgrade-Insecure-Requests: 1"
 ]
+
 
 dummy_data="username=sebela&password=b2506f213502ff7d789cad682bab6862&dst=&popup=true"
 
@@ -69,7 +74,7 @@ def scrape_salt(content):
     return (salt1, salt2)
 
 
-def pwhash(pw, salt):
+def compute_pwhash(pw, salt):
     salt1, salt2 = salt
     for x in [salt1, pw, salt2]:
         assert type(x) == bytes
@@ -114,11 +119,12 @@ def main():
 
     salt = scrape_salt(resp.content)
     print("[debug] Got salts: " + str(salt))
-    pw = pwhash(b"precedence", salt)
-    print("[debug] Hashed: " + pw)
-    return login("sebela", pw)
 
-    
+    pwhash = compute_pwhash(PASSWORD, salt)
+    print("[debug] Hashed: " + pwhash)
+
+    return login(USERNAME, pwhash)
+
 
 if __name__ == "__main__":
     sys.exit(main())
