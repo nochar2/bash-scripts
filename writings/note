@@ -13,7 +13,7 @@ fusage()
     echo "note r[ename] old new     Přejmenuje poznámku old na new."
     echo "note d[elete] name        Přesune poznámku do adresáře trash vedle poznámek"
     echo "note fd[elete] name       Smaže poznámku natrvalo"
-    echo "note name                 Stejné jako note e[dit] name (name nesmí být sloveso)"
+    echo "note name                 Stejné jako note s[how] name (name nesmí být sloveso)"
 }
 
 flistdir()
@@ -42,7 +42,7 @@ frename()
 }
 
 # shopt -s expand_aliases
-BASEPATH=$(ptpath)
+BASEPATH=$(ptpath)/note
 NOTENAME="$2".md
 
 cd "$BASEPATH"
@@ -50,11 +50,11 @@ cd "$BASEPATH"
 case "$1" in
     help|h|"") fusage;;
     list|l) flistdir;;
-    show|s) fspecified "$NOTENAME" fexists $NOTENAME && cat "$NOTENAME";;
+    show|s) fspecified "$NOTENAME" && fexists $NOTENAME && cat "$NOTENAME";;
     edit|e) fspecified "$NOTENAME" && $EDITOR "$NOTENAME";;
     rename|r) frename "$NOTENAME" "$3".md;;
     delete|d) mkdir -p trash; mv "$NOTENAME" trash;;
     fdelete|fd) rm "$NOTENAME";;
-    *) $EDITOR "$1".md
+    *) cat "$1".md
 esac
 

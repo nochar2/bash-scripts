@@ -1,4 +1,4 @@
 #!/bin/bash
-echo "$HOME/Shrine/docs/Plaintext"
+echo "$HOME/Shrine/docs/plain"
 
 

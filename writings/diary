@@ -25,10 +25,14 @@ flist_dir()
 
 NOTEROOT=$(ptpath)
 
-case "$1" in
-    yume) D=$NOTEROOT/yume; shift;;
-    food) D=$NOTEROOT/food; shift;;
-    *) D=$NOTEROOT/Deník;;
+
+# You can create symlinks to this script and call them with the same arguments
+# $0 will decide which directory to write your daily notes into
+case "$(basename "$0")" in
+    yume) D=$NOTEROOT/yume;;
+    food) D=$NOTEROOT/food;;
+    diary) D=$NOTEROOT/diary;;
+    *) echo "Unknown \$0, exiting"; exit 1;;
 esac
 
 case "$1" in

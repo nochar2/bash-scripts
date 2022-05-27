@@ -5,7 +5,7 @@ Logs in to a stupid dormitory router without having to open the landing page and
 clicking "OK" and being redirected to stupid google.cz, ignoring the url I
 wanted to go to in the first place.
 
-First, it scrapes salt strings from the website, unescapes them and sends a POST with the username and the md5 password hash (imagine using md5 in 2022 LOL).
+First, it scrapes salt strings from the website, unescapes them and sends a POST with the username and the md5 password hash (using md5 in 2022, lol).
 
 Shoutout to Wireshark for helping to get the headers right.
 
@@ -24,7 +24,7 @@ import time
 
 URL = r"http://192.168.4.1/login"
 USERNAME = "sebela"
-with open("wpassword") as f:
+with open("/home/karel/scripts/wpassword") as f:
     pwstr = "".join(f.readlines()).rstrip("\n")
     PASSWORD = bytes(pwstr, encoding="utf-8")
 

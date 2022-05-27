@@ -1,0 +1,26 @@
+#!/bin/sh
+# redirect all output into a logfile
+# exec 1>> /tmp/test.log 2>&1
+
+case "$1" in
+wlp2s0)
+    case "$2" in
+    CONNECTED)
+        # do stuff on connect with wlan0
+        echo wlan0 connected
+        echo $WPA_CTRL_DIR
+        echo $WPA_ID
+        echo $WPA_ID_STR
+        ;;
+    DISCONNECTED)
+        # do stuff on disconnect with wlan0
+        echo wlan0 disconnected
+        ;;
+    *)
+        >&2 echo empty or undefined event for wlan0: "$2"
+        exit 1
+        ;;
+    esac
+    ;;
+esac
+

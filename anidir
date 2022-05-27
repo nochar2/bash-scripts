@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# A dumb script that mounts an external drive and opens a file browser
+# with anime listings, to ease setting up an Anki workflow for Japanese
+# vocab mining.
+# TODO: look for some udev setup to automate this
+mount | grep "/media/karel/0232CF2132CF1915" >/dev/null || 
+{ echo "Running 'sudo mount -a' to connect an external drive..."; sudo mount -a; }
+ranger ~/d/Videos/アニメ
