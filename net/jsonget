@@ -1,0 +1,12 @@
+#!/bin/bash
+# query jisho.org from command line, read json response in less
+
+query=$(echo "$1" | urlenc)
+
+case $(basename "$0") in
+    jisho) url="https://jisho.org/api/v1/search/words?keyword=$query";;
+    endict) url="https://api.dictionaryapi.dev/api/v2/entries/en/$query";;
+    *) echo "jsonget expected to be run from a symlink context. To add a new dictionary, make a symlink and add a case entry inside jsonget.">&2; exit 1;;
+esac
+
+curl "$url" 2>/dev/null | jq --color-output | less -R

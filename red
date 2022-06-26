@@ -25,7 +25,7 @@ redshift_is_running=$[$(ps ax | grep redshift | wc -l) - 1]
 
 [ -z "$1" ] && {
     redshift -P 2>&1 >/dev/null & 
-    disown redshift; 
+    disown redshift;
 } || { 
     redshift -P -O $1 >/dev/null; 
 }
