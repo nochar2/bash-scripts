@@ -1,2 +1,2 @@
-#!/bin/bash
+#!/bin/sh
 zathura $HOME/bc4/rozvrh.pdf

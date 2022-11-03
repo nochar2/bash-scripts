@@ -1,5 +1,5 @@
 #!/bin/bash
-# query jisho.org from command line, read json response in less
+# query website from command line, read json response in less
 
 query=$(echo "$1" | urlenc)
 

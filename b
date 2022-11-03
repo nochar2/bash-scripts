@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # Sets brightness using brightnessctl set xx%. Refuses to set zero brightness.
 
 
