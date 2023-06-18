@@ -1,36 +1,62 @@
 #!/bin/sh
 
-# Redshift is a nice red light filter, but nearly impossible to
-# configure at runtime, applying the temperature on top of current
-# temperature, conflicting with other instances of itself (flickering),
-# etc.
-
-# This script allows to set a color (run "red DESIRED_COLOR_TEMP") 
-# or run redshift as a daemon (run "red").
+date +"%s.%N"
+usage() {
+     echo "usage: $0 TEMP|up|down"
+     echo "TEMP    temperature from 1000 to 25000 K"
+     echo "down    multiplies current temp by 1.1, capping at 6500 K (white)"
+     echo "up      divides current temp by 1.1, capping at 1000 K (red)"
+}
 
 isdigit() {
     [ "$1" -eq "$1" ]
 }
 
-([ -n "$1" ] && ! isdigit "$1") && { 
-    echo "Argument is not a number" >&2; exit 1; 
+min() {
+    echo $(( $1 < $2 ? $1 : $2 ))
 }
 
-# Check if redshift is running. If not, there is only one line with 
-# "redshift", the grep process itself
-running_instances=$(ps ax | grep redshift | wc -l)
+max() {
+    echo $(( $1 > $2 ? $1 : $2 ))
+}
 
+[ -z $1 ] && { usage; exit 0; }
+
+date +"%s.%N"
+max_temp=6500
+min_temp=1000
+
+current_temp=$(cat /tmp/red-colortemp)
+
+# failsafes: when running this script 20+ times a second (holding a key),
+# sometimes the file would be cleared without any value being set.
+# This fixes it hopefully
+[ -z $current_temp ] && current_temp=6500
+echo $current_temp > "/tmp/red-colortemp"
+
+# fixme: this shouldn't ever happen
+
+if [ "$1" = "up" ]; then
+    desired_temp=$(min $max_temp $(bc <<< "($current_temp * 1.1) / 1"))
+elif [ "$1" = "down" ]; then
+    desired_temp=$(max $min_temp $(bc <<< "$current_temp / 1.1"))
+elif isdigit "$1"; then
+    desired_temp=$1
+else
+    echo "Argument is not a number" >&2; exit 1; 
+fi
+
+date +"%s.%N"
+
+# output asap, not after waiting ~30 ms for redshift to do its job
+echo $desired_temp > "/tmp/red-colortemp"
+
+running_instances=$(ps ax | grep redshift | wc -l)
 [ "$running_instances" -gt 1 ] && {
-    # SIGKILLing bypasses the long restoring color animation. It will
-    # keep the current color, but we'll reset to white before applying
-    # an effect with the -P switch.
+    # bypass the long restore animation
     killall -KILL redshift;
 }
 
-[ -z "$1" ] && {
-    redshift -P 2>&1 >/dev/null & 
-    disown redshift;
-} || { 
-    redshift -P -O $1 >/dev/null; 
-}
-
+date +"%s.%N"
+redshift -P -O $desired_temp >/dev/null
+date +"%s.%N"

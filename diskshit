@@ -1,0 +1,27 @@
+#!/bin/bash
+
+IFS=" "
+label="$1"
+files=$(ls /dev/disk/by-label | sed -e '/^NO_LABEL$/d' | sed -e '/^swap$/d')
+
+f_mnt() {
+    drive=$(echo $files | dmenu -p "Which device to mount?")
+    [ -z "$drive" ] && exit 1
+    notify-send udisksctl "$(udisksctl mount -b "/dev/disk/by-label/$drive" 2>&1)"
+}
+
+f_umount() {
+    drive=$(echo $files | dmenu -p "Which device to unmount?")
+    [ -z "$drive" ] && exit 1
+    notify-send udisksctl "$(udisksctl unmount -b "/dev/disk/by-label/$drive" 2>&1)"
+
+    poweroff_info="$(udisksctl power-off -b "/dev/disk/by-label/$drive" 2>&1)"
+    [ -z $poweroff_info ] && poweroff_info="Drive $drive is now powered off."
+    notify-send udisksctl "$poweroff_info"
+}
+
+case "$(basename $0)" in
+    amount) f_mnt;;
+    aumount) f_umount;;
+    *) notify-send diskshit "bad symlink, got $0"; exit 1;;
+esac

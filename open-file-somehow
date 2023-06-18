@@ -1,0 +1,63 @@
+#!/bin/bash
+
+# don't know why this works
+args-to-lines() {
+    for line in "$@"; do
+        echo -en "$line\n"
+    done
+}
+
+dmenu-with-opts() {
+    IFS=" "
+    echo "this is dmenu-with-opts"
+    echo "$@"
+    prompt="How should I open this?"
+    echo $(args-to-lines "$@") | dmenu -p "$prompt"
+}
+
+suitable-program-for() {
+    filename="$1"
+    mime=$(file -b --mime-type "$filename")
+    case "$mime" in
+        application/epub+zip) echo zathura;;
+        application/json) dmenu-with-opts "jq ." vim kwrite;;
+        application/pdf) echo zathura;;
+        audio/*) echo mpv;;
+        document/*) echo zathura;;
+        html/*) echo firefox;;
+        image/vnd.djvu) echo zathura;;
+        image/*) echo sxiv;;
+        inode/directory) echo dolphin;;
+        inode/x-empty) echo $EDITOR;;
+        text/*) echo $EDITOR;;
+        video/*) echo mpv;;
+        *) echo xdg-open;;
+    esac
+}
+
+main() {
+        
+    file="$1"
+
+    program="$(suitable-program-for "$file")"
+    # check if i3 is running somehow
+
+    echo "suitable-program-for returned $program for $file"
+
+    case "$program" in
+        # JUST_RUN_IT_DUH) "$file";;
+        zathura|mpv|sxiv) swallow $program "$file";;
+        $EDITOR) 
+            if [ -w "$file" ]; then 
+                 $EDITOR "$file";
+             else
+                 echo "Not writable, trying sudoedit..."
+                 sudoedit "$file";
+             fi;;
+        "") echo "bug in suitable-program-for, should return xdg-open"; exit 1;;
+        *) $program "$file";;  # program is unquoted to allow for args
+    esac
+
+}
+
+main "$@"

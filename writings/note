@@ -13,7 +13,7 @@ fusage()
     echo "note r[ename] old new     Přejmenuje poznámku old na new."
     echo "note d[elete] name        Přesune poznámku do adresáře trash vedle poznámek"
     echo "note fd[elete] name       Smaže poznámku natrvalo"
-    echo "note name                 Stejné jako note s[how] name (name nesmí být sloveso)"
+    echo "note name                 Stejné jako note s[how] name (když name není list/show/...)"
 }
 
 flistdir()

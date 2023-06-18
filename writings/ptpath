@@ -1,4 +1,4 @@
 #!/bin/bash
-echo "$HOME/Shrine/docs/plain"
+echo "$HOME/Trunk/notes/System.Reflection"
 
 

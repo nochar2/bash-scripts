@@ -1,7 +1,8 @@
-#!/bin/bash
+#!/bin/sh
 # query website from command line, read json response in less
 
 query=$(echo "$1" | urlenc)
+
 
 case $(basename "$0") in
     jisho) url="https://jisho.org/api/v1/search/words?keyword=$query";;

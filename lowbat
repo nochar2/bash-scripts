@@ -1,0 +1,52 @@
+#!/bin/bash
+
+bat="/sys/class/power_supply/BAT0"
+
+debug() {
+	:
+	#echo $@
+}
+
+get_battery_perc() {
+	cat "$bat/capacity"
+}
+
+is_battery_discharging() {
+	grep -q "Discharging" "$bat/status"
+}
+
+upper_limit=15
+lower_limit=7
+mark=upper
+
+while true; do 
+	perc=$(get_battery_perc) 
+	debug "perc is $perc"
+
+	if is_battery_discharging; then 
+		debug "Battery is discharging"
+		debug "mark is $mark"
+
+		case $mark in
+		upper) 
+			if [[ $perc -le $upper_limit ]]; then
+				debug "sending notification"
+				notify-send "Battery is low" "Currently at $perc %"
+				mark=lower
+			fi;;
+		lower) 
+			if [[ $perc -le $lower_limit ]]; then
+				debug "sending notification"
+				notify-send -u critical "Critical battery level" "Currently at $perc %"
+				mark=none
+			fi;;
+		esac
+
+	else
+		debug "Battery is charging"
+		mark=upper
+	fi 
+
+	sleep 3
+done
+

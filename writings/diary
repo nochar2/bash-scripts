@@ -9,7 +9,7 @@ fentry()
         *) vim + "$D/$1.md"; return;;   # filename -> edit filename
     esac
     
-    echo $days_back | egrep '^[0-9]*$' >/dev/null || \
+    echo $days_back | grep -E '^[0-9]*$' >/dev/null || \
         { echo "Expected number of days into past (try -1 or -30)"; exit 1; }
 
     curdate=$(date -I --date="@$[$(date +%s)-86400*$days_back]");   # format stuff into ISO-8601
@@ -31,7 +31,7 @@ NOTEROOT=$(ptpath)
 case "$(basename "$0")" in
     yume) D=$NOTEROOT/yume;;
     food) D=$NOTEROOT/food;;
-    diary) D=$NOTEROOT/diary;;
+    diary) D="$HOME/Trunk/notes/System.Reflection";;
     *) echo "Unknown \$0, exiting"; exit 1;;
 esac
 

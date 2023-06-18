@@ -1,6 +1,0 @@
-#!/bin/bash
-
-OUTDIR="/mnt/d/Entertainment nonsense/Etterna/Songs/[o] o!m LN practice"
-cat om-ln-maps | sed -E 's/([^0-9]+)([0-9]{3,7})([^0-9]+)([0-9]+)/\2/' |\
-sort | uniq | (while read NUM; do [ $NUM -eq $NUM ] && curl -L -o \
-"$OUTDIR/$NUM.osz" "https://api.chimu.moe/v1/download/$NUM?n=1"; done)
