@@ -14,7 +14,7 @@ int main() {
         for (char *s = in; *s; s++) {
             unsigned char c = *s;
 
-            if (c & 128) {
+            if (c & 128 || c == ' ') {
                 out[out_i++] = '%';
                 out[out_i++] = HEX[c / 16];
                 out[out_i++] = HEX[c % 16];

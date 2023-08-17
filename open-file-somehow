@@ -17,12 +17,12 @@ dmenu-with-opts() {
 
 suitable-program-for() {
     filename="$1"
-    mime=$(file -b --mime-type "$filename")
+    mime=$(file -L -b --mime-type "$filename")
     case "$mime" in
         application/epub+zip) echo zathura;;
         application/json) dmenu-with-opts "jq ." vim kwrite;;
         application/pdf) echo zathura;;
-        audio/*) echo mpv;;
+        audio/*) echo command mpv;;
         document/*) echo zathura;;
         html/*) echo firefox;;
         image/vnd.djvu) echo zathura;;
@@ -31,6 +31,7 @@ suitable-program-for() {
         inode/x-empty) echo $EDITOR;;
         text/*) echo $EDITOR;;
         video/*) echo mpv;;
+        application/vnd.ms-htmlhelp) echo kchmviewer;;
         *) echo xdg-open;;
     esac
 }
