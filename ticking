@@ -4,7 +4,6 @@ fwarn()
     notify-send -u critical \
         "Unfortunately, the clock is ticking" \
         "The hours are passing by. The past increases, the future recedes. Possibilities decreasing, regrets mounting."
-        
 }
 
 while true; do
