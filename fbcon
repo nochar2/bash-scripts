@@ -1,0 +1,2 @@
+[ $(whoami) = root ] || { echo "Need to run kmscon as root"; exit 1; }
+kmscon --xkb-layout cz --xkb-variant qwerty --xkb-repeat-rate 17

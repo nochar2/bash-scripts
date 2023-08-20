@@ -17,12 +17,12 @@ dmenu-with-opts() {
 
 suitable-program-for() {
     filename="$1"
-    mime=$(file -b --mime-type "$filename")
+    mime=$(file -L -b --mime-type "$filename")
     case "$mime" in
         application/epub+zip) echo zathura;;
         application/json) dmenu-with-opts "jq ." vim kwrite;;
         application/pdf) echo zathura;;
-        audio/*) echo mpv;;
+        audio/*) echo command mpv;;
         document/*) echo zathura;;
         html/*) echo firefox;;
         image/vnd.djvu) echo zathura;;
@@ -31,33 +31,34 @@ suitable-program-for() {
         inode/x-empty) echo $EDITOR;;
         text/*) echo $EDITOR;;
         video/*) echo mpv;;
+        application/vnd.ms-htmlhelp) echo kchmviewer;;
         *) echo xdg-open;;
     esac
 }
 
 main() {
+
+    # spawn in a new terminal if -t is given
+    prefix=""
+    [ "$1" = "-t" ] && { prefix="$TERMINAL -e "; shift; }
         
     file="$1"
-
     program="$(suitable-program-for "$file")"
-    # check if i3 is running somehow
 
     echo "suitable-program-for returned $program for $file"
 
     case "$program" in
-        # JUST_RUN_IT_DUH) "$file";;
-        zathura|mpv|sxiv) swallow $program "$file";;
+        zathura|mpv|sxiv) $prefix swallow $program "$file";;
         $EDITOR) 
             if [ -w "$file" ]; then 
-                 $EDITOR "$file";
+                 $prefix $EDITOR "$file";
              else
                  echo "Not writable, trying sudoedit..."
-                 sudoedit "$file";
+                 $prefix sudoedit "$file";
              fi;;
         "") echo "bug in suitable-program-for, should return xdg-open"; exit 1;;
-        *) $program "$file";;  # program is unquoted to allow for args
+        *) $prefix $program "$file";;  # program is unquoted to allow for args
     esac
-
 }
 
 main "$@"

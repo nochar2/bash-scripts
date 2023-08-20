@@ -1,0 +1,6 @@
+#!/bin/sh
+xset r rate 210 45
+setxkbmap "cz(qwerty),de(qwerty)"
+setxkbmap -option grp:alt_shift_toggle
+setxkbmap -option caps:swapescape 
+setxkbmap -option terminate:ctrl_alt_bksp 
