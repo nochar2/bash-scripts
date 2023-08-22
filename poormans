@@ -1,0 +1,15 @@
+#!/bin/sh
+
+maybe_sudo=""
+options="-geometry 1920x1080+0+0"
+
+case "$1" in
+    hotspot) maybe_sudo=sudo;;
+    alacritty) options="";;
+esac
+
+prog=$1
+shift
+
+sleep 1
+$maybe_sudo xinit /usr/bin/$prog $options "$@" -- :0 vt3
