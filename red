@@ -21,7 +21,7 @@ max() {
     echo $(( $1 > $2 ? $1 : $2 ))
 }
 
-[ -z $1 ] && { usage; exit 0; }
+[ -z "$1" ] && { usage; exit 0; }
 
 max_temp=6500
 min_temp=1000
@@ -31,8 +31,8 @@ current_temp=$(cat /tmp/red-colortemp)
 # failsafes: when running this script 20+ times a second (holding a key),
 # sometimes the file would be cleared without any value being set.
 # This fixes it hopefully
-[ -z $current_temp ] && current_temp=6500
-echo $current_temp > "/tmp/red-colortemp"
+[ -z "$current_temp" ] && current_temp=6500
+echo "$current_temp" > "/tmp/red-colortemp"
 
 # fixme: this shouldn't ever happen
 
@@ -47,18 +47,17 @@ else
 fi
 
 # output asap, not after waiting ~30 ms for redshift to do its job
-echo $desired_temp > "/tmp/red-colortemp"
+echo "$desired_temp" > "/tmp/red-colortemp"
 
 running_instances=$(pgrep redshift)
-[ -n "$running_instances" ] && {
+[ -z "$running_instances" ] && {
     # bypass the long restore animation
     killall -KILL redshift;
 }
 
 lastid=$(cat /tmp/last-notification)
 [ -n "$lastid" ] && lastid_switch="-r $lastid" || lastid_switch=""
-
-# intentionally unquoted
+# shellcheck disable=SC2086
 newid=$(notify-send $lastid_switch -p -t 700 "red" "Setting scrren color temp to ${desired_temp}K")
-redshift -P -O $desired_temp >/dev/null
+redshift -P -O "$desired_temp" >/dev/null
 echo "$newid" > /tmp/last-notification
