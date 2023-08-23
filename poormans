@@ -1,15 +1,21 @@
 #!/bin/sh
 
-maybe_sudo=""
-options="-geometry 1920x1080+0+0"
+sudo_commands="hotspot"
+geom_commands="hotspot mpv"
 
-case "$1" in
-    hotspot) maybe_sudo=sudo;;
-    alacritty) options="";;
-esac
+must_use_sudo_for()
+{
+    echo "$sudo_commands" | grep -q "$1"
+}
+
+must_use_geom_for()
+{
+    echo "$geom_commands" | grep -q "$1"
+}
 
 prog=$1
 shift
+must_use_sudo_for $prog && maybe_sudo="sudo"
+must_use_geom_for $prog && maybe_geom="-geometry 1920x1080+0+0"
 
-sleep 1
-$maybe_sudo xinit /usr/bin/$prog $options "$@" -- :0 vt3
+$maybe_sudo xinit /usr/bin/$prog $maybe_geom "$@" -- :0 vt3
