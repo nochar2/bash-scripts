@@ -1,21 +1,27 @@
 #!/bin/sh
 
-sudo_commands="hotspot"
-geom_commands="hotspot mpv"
+pathprefix='/usr/bin/'
+commands_that_need_sudo="hotspot"
+commands_that_need_geom="hotspot mpv"
+geom_broken="zathura" # cant fix with geom
 
 must_use_sudo_for()
 {
-    echo "$sudo_commands" | grep -q "$1"
+    echo "$commands_that_need_sudo" | grep -q "$1"
 }
 
 must_use_geom_for()
 {
-    echo "$geom_commands" | grep -q "$1"
+    echo "$commands_that_need_geom" | grep -q "$1"
 }
 
 prog=$1
 shift
+
+islocal=$1
+[ $islocal == local ] && pathprefix=""
+
 must_use_sudo_for $prog && maybe_sudo="sudo"
 must_use_geom_for $prog && maybe_geom="-geometry 1920x1080+0+0"
 
-$maybe_sudo xinit /usr/bin/$prog $maybe_geom "$@" -- :0 vt3
+$maybe_sudo xinit ${pathprefix}${prog} $maybe_geom "$@" -- :0 vt${fgconsole}
