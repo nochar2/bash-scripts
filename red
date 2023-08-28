@@ -49,11 +49,10 @@ fi
 # output asap, not after waiting ~30 ms for redshift to do its job
 echo "$desired_temp" > "/tmp/red-colortemp"
 
-running_instances=$(pgrep redshift)
-[ -z "$running_instances" ] && {
-    # bypass the long restore animation
-    killall -KILL redshift;
-}
+# bypass the long restore animation. 
+# Unconditional, it's much faster than pgrep
+killall -KILL redshift 2>/dev/null
+
 
 lastid=$(cat /tmp/last-notification)
 [ -n "$lastid" ] && lastid_switch="-r $lastid" || lastid_switch=""
