@@ -1,5 +1,12 @@
+#!/bin/sh
 [ $(whoami) = root ] || { echo "Need to run kmscon as root"; exit 1; }
+
+# 21 is in ms
 kmscon --xkb-layout cz \
        --xkb-variant qwerty \
        --xkb-repeat-rate 21 \
-       --xkb-options caps:swapescape
+       --xkb-options caps:swapescape \
+       --sb-size 20000 \
+       --font-dpi 120 \
+       --hwaccel \
+       --login -- /bin/bash -i
