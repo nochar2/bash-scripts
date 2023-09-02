@@ -9,8 +9,6 @@ args-to-lines() {
 
 dmenu-with-opts() {
     IFS=" "
-    echo "this is dmenu-with-opts"
-    echo "$@"
     prompt="How should I open this?"
     echo $(args-to-lines "$@") | dmenu -p "$prompt"
 }
@@ -36,11 +34,18 @@ suitable-program-for() {
     esac
 }
 
+can-swallow()
+{
+    # how do I check if i3 is running?
+    # ??? && echo swallow || echo ""
+    [ "$WM" = i3 ] && echo "swallow" || echo ""
+}
+
 main() {
 
     # spawn in a new terminal if -t is given
-    prefix=""
-    [ "$1" = "-t" ] && { prefix="$TERMINAL -e "; shift; }
+    termprefix=""
+    [ "$1" = "-t" ] && { termprefix="$TERMINAL -e "; shift; }
         
     file="$1"
     program="$(suitable-program-for "$file")"
@@ -48,16 +53,16 @@ main() {
     echo "suitable-program-for returned $program for $file"
 
     case "$program" in
-        zathura|mpv|sxiv) $prefix swallow $program "$file";;
+        zathura|mpv|sxiv) $termprefix $(can-swallow) $program "$file";;
         $EDITOR) 
             if [ -w "$file" ]; then 
-                 $prefix $EDITOR "$file";
+                 $termprefix $EDITOR "$file";
              else
                  echo "Not writable, trying sudoedit..."
-                 $prefix sudoedit "$file";
+                 $termprefix sudoedit "$file";
              fi;;
         "") echo "bug in suitable-program-for, should return xdg-open"; exit 1;;
-        *) $prefix $program "$file";;  # program is unquoted to allow for args
+        *) $termprefix $program "$file";;  # program is unquoted to allow for args
     esac
 }
 
