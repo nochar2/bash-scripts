@@ -1,0 +1,3 @@
+#!/bin/sh
+# xdg cleanup (probably won't work, have to make it system-wide somehow)
+/usr/bin/debuginfod -d ~/.local/state/debuginfod/debuginfod.sqlite

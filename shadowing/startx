@@ -1,2 +1,0 @@
-#!/bin/sh
-mpv $HOME/Obrázky/why/thenstayinbed-darker.jpg >/dev/null 2>&1
