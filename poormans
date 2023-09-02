@@ -19,7 +19,7 @@ prog=$1
 shift
 
 islocal=$1
-[ $islocal == local ] && pathprefix=""
+[ "$islocal" = local ] && pathprefix=""
 
 must_use_sudo_for $prog && maybe_sudo="sudo"
 must_use_geom_for $prog && maybe_geom="-geometry 1920x1080+0+0"
