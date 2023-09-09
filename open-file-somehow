@@ -20,6 +20,7 @@ suitable-program-for() {
         application/epub+zip) echo zathura;;
         application/json) dmenu-with-opts "jq ." vim kwrite;;
         application/pdf) echo zathura;;
+        application/javascript) echo $EDITOR;;  # .lua is detected as this
         audio/*) echo command mpv;;
         document/*) echo zathura;;
         html/*) echo firefox;;
@@ -38,7 +39,7 @@ can-swallow()
 {
     # how do I check if i3 is running?
     # ??? && echo swallow || echo ""
-    [ "$WM" = i3 ] && echo "swallow" || echo ""
+    pgrep i3 >/dev/null && echo "swallow" || echo ""
 }
 
 main() {
