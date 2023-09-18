@@ -29,6 +29,8 @@ max() {
 
 color() 
 {
+    temp_change=1.02   # multiplicative
+    bri_change=0.05    # additive
     max_temp=6500
     min_temp=1000
     current_temp=$(cat /tmp/red-colortemp)
@@ -43,16 +45,15 @@ color()
     [ -z "$current_temp" ] && current_temp=6500
     [ -z "$current_bri" ] && current_bri="1.0"
 
-    # need to have when changing the brightness too
     desired_temp="$current_temp"
     desired_bri="$current_bri"
 
     if [ "$cmd" = "-b" ]; then
         if [ "$1" = "up" ]; then
-            desired_bri=$(python -c "print(max(min(1.0, $current_bri+0.05), 0.1))") \
+            desired_bri=$(python -c "print(max(min(1.0, $current_bri+$bri_change), 0.1))") \
                 || { echo "bad number"; exit 1; }
         elif [ "$1" = "down" ]; then
-            desired_bri=$(python -c "print(max(min(1.0, $current_bri-0.05), 0.1))") \
+            desired_bri=$(python -c "print(max(min(1.0, $current_bri-$bri_change), 0.1))") \
                 || { echo "bad number"; exit 1; }
         # TODO: missing case for immediate value (check if it's float)
         else
@@ -60,9 +61,9 @@ color()
         fi
     elif [ "$cmd" = "-c" ]; then
         if [ "$1" = "up" ]; then
-            desired_temp=$(min "$max_temp" "$(echo "($current_temp * 1.1) / 1" | bc)")
+            desired_temp=$(min "$max_temp" "$(echo "($current_temp * $temp_change) / 1" | bc)")
         elif [ "$1" = "down" ]; then
-            desired_temp=$(max "$min_temp" "$(echo "$current_temp / 1.1" | bc)")
+            desired_temp=$(max "$min_temp" "$(echo "$current_temp / $temp_change" | bc)")
         elif isdigit "$1"; then
             desired_temp=$1
         else
@@ -74,13 +75,13 @@ color()
     echo "$desired_bri" > "/tmp/red-colorbri"
 
     # bypass the long restore animation. 
-    # Unconditional, it's much faster than pgrep
+    # Unconditional, pgrep is surprisingly slow btw
     killall -KILL redshift 2>/dev/null
 
     lastid=$(cat /tmp/last-notification)
     [ -n "$lastid" ] && lastid_switch="-r $lastid" || lastid_switch=""
     # shellcheck disable=SC2086
-    newid=$(notify-send $lastid_switch -p -t 700 "red" "Setting scrren color temp to ${desired_temp}K")
+    newid=$(notify-send $lastid_switch -p -t 700 "$0" "Setting scrren color temp to ${desired_temp}K")
     echo "$desired_bri"
     redshift -P -b ${desired_bri}:1.0 -O "$desired_temp" >/dev/null
     echo "$newid" > /tmp/last-notification
