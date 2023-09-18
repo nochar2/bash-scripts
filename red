@@ -31,29 +31,47 @@ color()
 {
     max_temp=6500
     min_temp=1000
-
     current_temp=$(cat /tmp/red-colortemp)
+    current_bri=$(cat /tmp/red-colorbri)
+
+    cmd="$1"
+    shift
 
     # failsafes: when running this script 20+ times a second (holding a key),
     # sometimes the file would be cleared without any value being set.
     # This fixes it hopefully
     [ -z "$current_temp" ] && current_temp=6500
-    echo "$current_temp" > "/tmp/red-colortemp"
+    [ -z "$current_bri" ] && current_bri="1.0"
 
-    # fixme: this shouldn't ever happen
+    # need to have when changing the brightness too
+    desired_temp="$current_temp"
+    desired_bri="$current_bri"
 
-    if [ "$1" = "up" ]; then
-        desired_temp=$(min "$max_temp" "$(echo "($current_temp * 1.1) / 1" | bc)")
-    elif [ "$1" = "down" ]; then
-        desired_temp=$(max "$min_temp" "$(echo "$current_temp / 1.1" | bc)")
-    elif isdigit "$1"; then
-        desired_temp=$1
-    else
-        echo "Argument is not a number" >&2; exit 1; 
+    if [ "$cmd" = "-b" ]; then
+        if [ "$1" = "up" ]; then
+            desired_bri=$(python -c "print(max(min(1.0, $current_bri+0.05), 0.1))") \
+                || { echo "bad number"; exit 1; }
+        elif [ "$1" = "down" ]; then
+            desired_bri=$(python -c "print(max(min(1.0, $current_bri-0.05), 0.1))") \
+                || { echo "bad number"; exit 1; }
+        # TODO: missing case for immediate value (check if it's float)
+        else
+            echo "Argument is not a number" >&2; exit 1; 
+        fi
+    elif [ "$cmd" = "-c" ]; then
+        if [ "$1" = "up" ]; then
+            desired_temp=$(min "$max_temp" "$(echo "($current_temp * 1.1) / 1" | bc)")
+        elif [ "$1" = "down" ]; then
+            desired_temp=$(max "$min_temp" "$(echo "$current_temp / 1.1" | bc)")
+        elif isdigit "$1"; then
+            desired_temp=$1
+        else
+            echo "Argument is not a number" >&2; exit 1; 
+        fi
     fi
 
-    # output asap, not after waiting ~30 ms for redshift to do its job
     echo "$desired_temp" > "/tmp/red-colortemp"
+    echo "$desired_bri" > "/tmp/red-colorbri"
 
     # bypass the long restore animation. 
     # Unconditional, it's much faster than pgrep
@@ -63,16 +81,12 @@ color()
     [ -n "$lastid" ] && lastid_switch="-r $lastid" || lastid_switch=""
     # shellcheck disable=SC2086
     newid=$(notify-send $lastid_switch -p -t 700 "red" "Setting scrren color temp to ${desired_temp}K")
-    redshift -P -O "$desired_temp" >/dev/null
+    echo "$desired_bri"
+    redshift -P -b ${desired_bri}:1.0 -O "$desired_temp" >/dev/null
     echo "$newid" > /tmp/last-notification
 }
 
 
+
 [ "$#" != 2 ] && { usage; exit 0; }
-cmd="$1"
-shift
-case "$cmd" in
-    -b) brightness "$@";;
-    -c) color "$@";;
-    *) usage; exit 1;;
-esac
+color "$@"
