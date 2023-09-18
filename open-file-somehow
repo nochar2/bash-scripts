@@ -1,4 +1,5 @@
 #!/bin/bash
+# ^ don't ever run shell scripts interactively with -i, this destroys your history
 
 # don't know why this works
 args-to-lines() {
@@ -42,29 +43,38 @@ can-swallow()
     pgrep i3 >/dev/null && echo "swallow" || echo ""
 }
 
-main() {
+whattorun() {
+    echo "whattorun is run with these arguments:" >&2
+    echo "$@" >&2
 
     # spawn in a new terminal if -t is given
     termprefix=""
     [ "$1" = "-t" ] && { termprefix="$TERMINAL -e "; shift; }
         
-    file="$1"
+    # bandaid fix, should fix how this script is really called
+    file="$*"
     program="$(suitable-program-for "$file")"
 
-    echo "suitable-program-for returned $program for $file"
+    echo "suitable-program-for returned $program for $file" >&2
 
     case "$program" in
-        zathura|mpv|sxiv) $termprefix $(can-swallow) $program "$file";;
+        zathura|mpv|sxiv) 
+            echo $termprefix $(can-swallow) $program \"$file\"
+        ;;
         $EDITOR) 
             if [ -w "$file" ]; then 
-                 $termprefix $EDITOR "$file";
+                 echo $termprefix $EDITOR "$file";
              else
-                 echo "Not writable, trying sudoedit..."
-                 $termprefix sudoedit "$file";
-             fi;;
-        "") echo "bug in suitable-program-for, should return xdg-open"; exit 1;;
+                 echo "Not writable, trying sudoedit..." >&2;
+                 echo $termprefix sudoedit \"$file\";
+             fi
+        ;;
+        "") echo "bug in suitable-program-for, should return xdg-open" >&2; exit 1;;
         *) $termprefix $program "$file";;  # program is unquoted to allow for args
     esac
 }
 
-main "$@"
+cmd="$(whattorun $@)"
+echo "$cmd"
+echo $cmd >> $HOME/.local/state/bash/history
+eval "$cmd"
