@@ -1,3 +1,0 @@
-#!/bin/sh
-echo -e "\033[38;2;255;90;0mTo je vůl. Proč to nemůže prostě udělat a nenervit se z toho?"
-#mpv $HOME/Obrázky/why/thenstayinbed-darker.jpg >/dev/null 2>&1
