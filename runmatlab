@@ -1,0 +1,6 @@
+#!/bin/sh
+sudo openvpn \
+    --config $HOME/scripts/muni-main-linux.ovpn \
+    --auth-user-pass $HOME/scripts/secrets/openvpn-up  &
+matlab
+sudo killall openvpn
