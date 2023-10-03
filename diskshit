@@ -1,20 +1,15 @@
 #!/bin/bash
 
-IFS=" "
-notifysend="echo"
-[ "$1" = "--notify" ] && { notify=1; notifysend="notify-send -t 4000"; shift; }
-files=$(ls /dev/disk/by-label | sed -e '/^NO_LABEL$/d' | sed -e '/^swap$/d')
-
 selector() {
-    if [ -z "$notify" ]; then
+    if [ -z "$can_notify" ]; then
         fzf
     else
         dmenu -p "$1"
     fi
 }
 
-
-f_mnt() {
+f_mnt() 
+{
     drive="$1"
     [ -z "$drive" ] && {
         drivebase=$(echo "$files" | selector "Which device to mount?")
@@ -24,8 +19,10 @@ f_mnt() {
     $notifysend udisksctl "$(udisksctl mount -b "$drive" 2>&1)"
 }
 
-f_umount() {
+f_umount()
+{
     drive="$1"
+
     [ -z "$drive" ] && {
         drivebase=$(echo "$files" | selector "Which device to unmount?")
         [ -z "$drivebase" ] && exit 1
@@ -33,10 +30,29 @@ f_umount() {
     }
     $notifysend udisksctl "$(udisksctl unmount -b "$drive" 2>&1)"
 
-    poweroff_info="$(udisksctl power-off -b "$drive" 2>&1)"
-    [ -z "$poweroff_info" ] && poweroff_info="Drive $drive is now powered off."
-    $notifysend udisksctl "$poweroff_info"
+    [ -n "$poweroff" ] && {
+        poweroff_info="$(udisksctl power-off -b "$drive" 2>&1)"
+        [ -z "$poweroff_info" ] && {
+            poweroff_info="Drive $drive is now powered off."
+        }
+        $notifysend udisksctl "$poweroff_info"
+    }
 }
+
+IFS=" "
+notifysend="echo"
+poweroff=""
+
+for arg in "$@"; do
+    case "$arg" in
+        --notify) can_notify=1; notifysend="notify-send -t 4000"; shift;;
+        -p|--poweroff) poweroff=1; shift;;
+        -*) echo "unknown arg"; exit 1;;
+        *) ;;
+    esac
+done
+
+files=$(ls /dev/disk/by-label | sed -e '/^NO_LABEL$/d' | sed -e '/^swap$/d')
 
 case "$(basename "$0")" in
     amount) f_mnt "$@";;
