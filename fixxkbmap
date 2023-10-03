@@ -1,5 +1,5 @@
 #!/bin/sh
-xset r rate 210 45
+xset r rate 210 50
 setxkbmap "cz(qwerty),de(qwerty)"
 setxkbmap -option grp:alt_shift_toggle
 setxkbmap -option caps:swapescape 
