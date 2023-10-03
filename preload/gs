@@ -1,1 +1,3 @@
-echo '(This would run Ghostscript, use "g s".)'
+#!/bin/sh
+git status
+# echo '(This would run Ghostscript, use "g s".)'
