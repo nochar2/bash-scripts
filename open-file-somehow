@@ -58,7 +58,7 @@ whattorun() {
     echo "suitable-program-for returned $program for $file" >&2
 
     case "$program" in
-        zathura|mpv|sxiv) 
+        zathura|sxiv) 
             echo $termprefix $(can-swallow) $program \"$file\"
         ;;
         $EDITOR) 
@@ -70,11 +70,17 @@ whattorun() {
              fi
         ;;
         "") echo "bug in suitable-program-for, should return xdg-open" >&2; exit 1;;
-        *) $termprefix $program "$file";;  # program is unquoted to allow for args
+        *) echo $termprefix $program "$file";;  # program is unquoted to allow for args
     esac
 }
 
-cmd="$(whattorun $@)"
-echo "$cmd"
-echo $cmd >> $HOME/.local/state/bash/history
-eval "$cmd"
+wholecmd="$(whattorun $@)"
+
+# thanks Luke (youtu.be/QXineadwG4E)
+cmd="${wholecmd%% *}"
+args="${wholecmd#* }"
+echo cmd is $cmd
+echo args is $args
+"$cmd" "${args[@]}"
+
+echo "$wholecmd" >> $HOME/.local/state/bash/history
