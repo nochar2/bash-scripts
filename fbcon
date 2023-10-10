@@ -23,6 +23,7 @@ kmscon --xkb-layout cz \
        --xkb-repeat-rate 21 \
        --xkb-options caps:swapescape \
        --sb-size 30000 \
+       --font-name "JetBrains Mono Bold" \
        --font-dpi 120 \
        --hwaccel \
        --login -- /bin/bash -i
