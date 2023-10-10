@@ -79,9 +79,9 @@ color()
     killall -KILL redshift 2>/dev/null
 
     lastid=$(cat /tmp/last-notification)
-    [ -n "$lastid" ] && lastid_switch="-r $lastid" || lastid_switch=""
+    [ -n "$lastid" ] && lastid_arg="-r $lastid" || lastid_arg=""
     # shellcheck disable=SC2086
-    newid=$(notify-send $lastid_switch -p -t 700 "$(basename "$0")" "Setting screen color temp to ${desired_temp}K")
+    newid=$(notify-send $lastid_arg -p -t 700 "$(basename "$0")" "Setting screen color temp to ${desired_temp}K")
     echo "$desired_bri"
     redshift -P -b ${desired_bri}:1.0 -O "$desired_temp" >/dev/null
     echo "$newid" > /tmp/last-notification
