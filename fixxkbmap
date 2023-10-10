@@ -1,10 +1,8 @@
 #!/bin/sh
+# would love to know if there is a way to do this in an actual config file
+# running it once with all params is much faster (170 ms vs 40 ms)
 xset r rate 210 50
-setxkbmap "cz(qwerty),de(qwerty)"
-setxkbmap -option grp:alt_shift_toggle
-setxkbmap -option caps:swapescape 
-setxkbmap -option terminate:ctrl_alt_bksp 
-setxkbmap -option compose:ins
+setxkbmap "cz(qwerty),de(qwerty)" -option grp:alt_shift_toggle,caps:swapescape,terminate:ctrl_alt_bksp,compose:ins
 # I wish but layout switching just won't work if this is enabled
 # setxkbmap -option shift:both_capslock
 
