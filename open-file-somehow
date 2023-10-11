@@ -43,6 +43,9 @@ can-swallow()
     pgrep i3 >/dev/null && echo "swallow" || echo ""
 }
 
+cmd=""
+file=""
+
 whattorun() {
     echo "whattorun is run with these arguments:" >&2
     echo "$@" >&2
@@ -59,28 +62,26 @@ whattorun() {
 
     case "$program" in
         zathura|sxiv) 
-            echo $termprefix $(can-swallow) $program \"$file\"
+            cmd="${termprefix} $(can-swallow) $program"
         ;;
         $EDITOR) 
             if [ -w "$file" ]; then 
-                 echo $termprefix $EDITOR "$file";
+                 cmd="$termprefix $EDITOR"
              else
                  echo "Not writable, trying sudoedit..." >&2;
-                 echo $termprefix sudoedit \"$file\";
+                 cmd="$termprefix sudoedit"
              fi
         ;;
         "") echo "bug in suitable-program-for, should return xdg-open" >&2; exit 1;;
-        *) echo $termprefix $program "$file";;  # program is unquoted to allow for args
+        *) cmd="$termprefix $program";;  # program is unquoted to allow for args
     esac
 }
 
-wholecmd="$(whattorun $@)"
+whattorun $@
 
-# thanks Luke (youtu.be/QXineadwG4E)
-cmd="${wholecmd%% *}"
-args="${wholecmd#* }"
 echo cmd is $cmd
-echo args is $args
-"$cmd" "${args[@]}"
+echo file is $file
+$cmd "$file"
 
-echo "$wholecmd" >> $HOME/.local/state/bash/history
+# haven't checked this and I don't really want this that much
+echo "$cmd \"$file\"" >> $HOME/.local/state/bash/history
