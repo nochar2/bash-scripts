@@ -1,10 +1,14 @@
 #!/bin/bash
-# ^ don't ever run shell scripts interactively with -i, this destroys your history
+# ^ don't ever run shell scripts interactively with -i, this destroys your history.
 
-# don't know why this works
+# This is similar to xdg-query / xdg-open. It is much easier to customize
+# and faster (xdg-open takes like .5 seconds for no reason). Still,
+# xdg-open/xdg-query is used in some system apps (firefox?) which is 
+# inconsistent but I can live with it.
+
 args-to-lines() {
     for line in "$@"; do
-        echo -en "$line\n"
+        echo "$line"
     done
 }
 
@@ -16,10 +20,17 @@ dmenu-with-opts() {
 
 suitable-program-for() {
     filename="$1"
+    ext="${1##*.}"
+
+    # priority extensions
+    case "$ext" in
+        qpf|qsf|bsf|bdf) echo quartus; return;;
+    esac
+
     mime=$(file -L -b --mime-type "$filename")
     case "$mime" in
         application/epub+zip) echo zathura;;
-        application/json) dmenu-with-opts "jq ." vim kwrite;;
+        application/json) dmenu-with-opts "jq ." vim helix kwrite;;
         application/pdf) echo zathura;;
         application/javascript) echo $EDITOR;;  # .lua is detected as this
         audio/*) echo command mpv;;
@@ -36,33 +47,22 @@ suitable-program-for() {
     esac
 }
 
-can-swallow()
+swallow-under-i3()
 {
-    # how do I check if i3 is running?
-    # ??? && echo swallow || echo ""
     pgrep i3 >/dev/null && echo "swallow" || echo ""
 }
 
-cmd=""
-file=""
-
-whattorun() {
-    echo "whattorun is run with these arguments:" >&2
-    echo "$@" >&2
-
-    # spawn in a new terminal if -t is given
-    termprefix=""
-    [ "$1" = "-t" ] && { termprefix="$TERMINAL -e "; shift; }
+cmd-to-open() {
+    # echo "whattorun is run with these arguments:" >&2
+    # echo "$@" >&2
         
-    # bandaid fix, should fix how this script is really called
-    file="$*"
     program="$(suitable-program-for "$file")"
 
-    echo "suitable-program-for returned $program for $file" >&2
+    # echo "suitable-program-for returned $program for $file" >&2
 
     case "$program" in
-        zathura|sxiv) 
-            cmd="${termprefix} $(can-swallow) $program"
+        zathura|sxiv|mpv|quartus) 
+            cmd="${termprefix} $(swallow-under-i3) $program"
         ;;
         $EDITOR) 
             if [ -w "$file" ]; then 
@@ -73,15 +73,40 @@ whattorun() {
              fi
         ;;
         "") echo "bug in suitable-program-for, should return xdg-open" >&2; exit 1;;
-        *) cmd="$termprefix $program";;  # program is unquoted to allow for args
+        *) cmd="$termprefix $program";;
     esac
+
+    echo "$cmd"
 }
 
-whattorun $@
+main() {
+    [ "$1" = "-n" ] && { just_echo=1; shift; }
+    [ "$1" = "-t" ] && { termprefix="$TERMINAL -e "; shift; }
+    [ "$#" != 1 ] && { 
+        echo "usage:  $(basename $0) [-t] [-n] file" >&2;
+        echo "-n: don't actually run the cmd"
+        echo "-t: open in a terminal"
+    }
 
-echo cmd is $cmd
-echo file is $file
-$cmd "$file"
+    file="$*"
+    cmd=$(cmd-to-open "$file")
 
-# haven't checked this and I don't really want this that much
-echo "$cmd \"$file\"" >> $HOME/.local/state/bash/history
+    #echo cmd is $cmd
+    #echo file is $file
+
+    echo $cmd "$file"
+    # cmd can be multiple words so it has to be unquoted
+    [ -n "$just_echo" ] || { $cmd "$file"; }
+
+    # echo "command has ended"
+
+    # don't really use this
+    echo "$cmd \"$file\"" >> $HOME/.local/state/bash/history;
+
+    # echo "exiting main"
+}
+
+#echo "arguments are $@"
+main "$@"
+
+# echo "this is literally the last line of the script"
