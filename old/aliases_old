@@ -1,4 +1,4 @@
-
+#!/bin/sh
 # Disable BEL?
 set bell-style=none
 

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 findpid=$1
 
 known_windows=$(xwininfo -root -children|sed -e 's/^ *//'|grep -E "^0x"|awk '{ print $1 }')

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # make unzip actually work like any sane linux program
 while [ -f "$1" ]; do
     unzip "$1"

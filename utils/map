@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 fusage()
 {
@@ -21,15 +21,15 @@ ftypematches()
     esac
 }
 
-[ "$#" == 0 ] && { fusage; exit 2; }
+[ "$#" = 0 ] && { fusage; exit 2; }
 opts="$1"
 cmd="$2"
-[ "${opts#'-'}" == "$opts" ] && { opts="-df"; cmd="$1"; shift 1; } || { shift 2; }
+[ "${opts#'-'}" = "$opts" ] && { opts="-df"; cmd="$1"; shift 1; } || { shift 2; }
 
 
 for f in *; do 
     if ftypematches "$f" "$opts"; then
-        if [ -z "$@" ]; then 
+        if [ -z "$*" ]; then 
             "$cmd" "$f"
         else
             "$cmd" "$@" "$f"

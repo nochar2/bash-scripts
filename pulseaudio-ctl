@@ -1,4 +1,5 @@
 #!/bin/bash
+# bash required for echo -e
 #
 # pulseaudio-ctl
 #

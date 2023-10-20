@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # ^ don't ever run shell scripts interactively with -i, this destroys your history.
 
 # This is similar to xdg-query / xdg-open. It is much easier to customize

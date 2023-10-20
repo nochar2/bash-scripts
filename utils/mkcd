@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # obviously doesn't work, you would have to source it:
 # . mkcd <dir>
 # which is almost as fast as

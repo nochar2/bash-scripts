@@ -15,7 +15,7 @@
 # - fbpdf?
 # - fgconsole         number of current console term
 
-[ $(whoami) = root ] || { echo "Need to run kmscon as root"; exit 1; }
+[ "$(whoami)" = root ] || { echo "Need to run kmscon as root"; exit 1; }
 
 # 21 is in ms
 kmscon --xkb-layout cz \

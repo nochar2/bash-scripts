@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 fusage()
 {
@@ -13,7 +13,7 @@ fusage()
 # Picks a random letter from $1.
 pickfrom()
 {
-    echo "${1:$[$RANDOM % ${#1}]:1}"
+    echo "${1:$(($RANDOM % ${#1})):1}"
 }
 
 wovels="aeiouy"
@@ -34,4 +34,4 @@ for (( i=0; i<${#mask}; i++)); do
         *) echo "Invalid letter, expected only c or w"; exit 1;;
     esac
 done
-echo $result
+echo "$result"
