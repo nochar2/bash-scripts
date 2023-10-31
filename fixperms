@@ -1,2 +1,4 @@
-find . -type d -exec chmod 755 {} \;
-find . -type f -exec chmod 644 {} \;
+#!/bin/sh
+find . -type d -exec chmod 755 {} +
+find . -type f -exec chmod 644 {} +
+find . -exec chown karel:karel {} +
