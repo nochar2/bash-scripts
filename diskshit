@@ -2,14 +2,17 @@
 
 selector() {
     if [ -z "$can_notify" ]; then
+        assert ihave fzf
         fzf
     else
+        assert ihave dmenu
         dmenu -p "$1"
     fi
 }
 
 f_mnt() 
 {
+    echo asdjfl
     drive="$1"
     [ -z "$drive" ] && {
         drivebase=$(echo "$files" | selector "Which device to mount?")
@@ -39,23 +42,53 @@ f_umount()
     }
 }
 
-IFS=" "
-notifysend="echo"
-poweroff=""
+ihave() {
+    command -v "$1" >/dev/null
+}
 
-for arg in "$@"; do
-    case "$arg" in
-        --notify) can_notify=1; notifysend="notify-send -t 4000"; shift;;
-        -p|--poweroff) poweroff=1; shift;;
-        -*) echo "unknown arg"; exit 1;;
-        *) ;;
+assert() {
+    cmd="$1"
+    shift
+    "$cmd" "$@" || { $notifysend "$prog" "assertion '$cmd $@' failed"; exit 1; }
+}
+
+usage() {
+    echo "usage: $0 --notify|-p|--poweroff|-h|--help"
+    echo "-n|--notify     use notify-send instead of echo"
+    echo "-p|--poweroff   unmount will also poweroff"
+    echo "-h|--help       this help"
+}
+
+notifications_work() {
+    timeout 0.2 notify-send -t 1 $0 "testing if notifications are consumed. If you are reading this, your DE/WM ignores the notification timeout, because it should be gone after a millisecond. Suggest how to do this better."  # non-zero on timeout
+}
+
+main() {    
+    IFS=" "
+    notifysend="echo"
+    prog="$(basename "$0")"
+    poweroff=""
+
+    assert ihave udisksctl
+
+    for arg in "$@"; do
+        case "$arg" in
+            -n|--notify) assert notifications_work; can_notify=1; notifysend="notify-send -t 4000"; shift;;
+            -p|--poweroff) poweroff=1; shift;;
+            -h|--help) usage; exit 0;;
+            -*) usage; exit 1;;
+            *) ;;
+        esac
+    done
+
+    files=$(ls /dev/disk/by-label | sed -e '/^NO_LABEL$/d' | sed -e '/^swap$/d')
+
+    case "$(basename "$0")" in
+        amount) f_mnt "$@";;
+        aumount) f_umount "$@";;
+        *) notify-send -u critical "diskshit" "bad symlink, got $0"; exit 1;;
     esac
-done
 
-files=$(ls /dev/disk/by-label | sed -e '/^NO_LABEL$/d' | sed -e '/^swap$/d')
+}
 
-case "$(basename "$0")" in
-    amount) f_mnt "$@";;
-    aumount) f_umount "$@";;
-    *) notify-send -u critical "diskshit" "bad symlink, got $0"; exit 1;;
-esac
+main "$@"
