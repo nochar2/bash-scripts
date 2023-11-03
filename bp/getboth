@@ -19,8 +19,13 @@ getio()
 
    iostat -xz 1 |\
       stdbuf -o0 grep nvme0n1 |\
-      stdbuf -o0 sed "s/^/$($datecmd)  /" |\
+      prepend_timestamp |\
       stdbuf -o0 awk '{print $1, $9, $23}' >$iof
+}
+
+prepend_timestamp()
+{
+	while read n; do echo "$($datecmd) $n"; done
 }
 
 
@@ -30,7 +35,7 @@ getnet()
 	 # date avg iface rxpck txpck rxkB txkB rxcmp txcmp rxmcst %ifutil
 	 sar -n DEV 1 |\
 	    stdbuf -o0 grep wlan0 |\
-	    stdbuf -o0 sed "s/^/$($datecmd)  /" |\
+	    prepend_timestamp fuckyou |\
 	    stdbuf -o0 awk '{print $1, $4, $11}' >$netf
 }
 
@@ -45,15 +50,19 @@ collectboth() {
 	cat ${iof}_s
 	echo "---------bpnets--------"
 	cat ${netf}_s
-	join ${iof}_s ${netf}_s
+	echo "---------both----------"
+	join -a 1 -a 2 -e 0,00 -o auto ${netf}_s ${iof}_s
 }
 
->${iof}
->${netf}
->${iof}_s
->${netf}_s
+# wipe them
+:>${iof}
+:>${netf}
+:>${iof}_s
+:>${netf}_s
+
+# run them both
 getio&
 getnet&
-trap collectboth SIGINT
 
-sleep 10000
+trap collectboth INT
+sleep 60
