@@ -19,13 +19,16 @@ getio()
 
    iostat -xz 1 |\
       stdbuf -o0 grep nvme0n1 |\
-      prepend_timestamp |\
+      prepend_seconds_since_start |\
       stdbuf -o0 awk '{print $1, $9, $23}' >$iof
 }
 
-prepend_timestamp()
+starttime=$(date +"%s")
+prepend_seconds_since_start()
 {
-	while read n; do echo "$($datecmd) $n"; done
+	while read n; do \
+		echo "$(($(date +%s) - starttime)) $n"; \
+	 done
 }
 
 
@@ -35,7 +38,7 @@ getnet()
 	 # date avg iface rxpck txpck rxkB txkB rxcmp txcmp rxmcst %ifutil
 	 sar -n DEV 1 |\
 	    stdbuf -o0 grep wlan0 |\
-	    prepend_timestamp fuckyou |\
+	    prepend_seconds_since_start |\
 	    stdbuf -o0 awk '{print $1, $4, $11}' >$netf
 }
 
@@ -43,15 +46,15 @@ getnet()
 collectboth() {
 	pkill getio
 	pkill getnet
-	sort $iof > ${iof}_s
-	sort $netf > ${netf}_s
+	sort $iof  | sed "s/[[:space:]]\+/,/g" > ${iof}_s
+	sort $netf | sed "s/[[:space:]]\+/,/g" > ${netf}_s
 	
 	echo "---------bpios---------"
 	cat ${iof}_s
 	echo "---------bpnets--------"
 	cat ${netf}_s
 	echo "---------both----------"
-	join -a 1 -a 2 -e 0,00 -o auto ${netf}_s ${iof}_s
+	join -t , -a 1 -a 2 -e 0.00 -o auto ${netf}_s ${iof}_s
 }
 
 # wipe them
