@@ -8,19 +8,17 @@ datecmd="date --iso-8601=seconds"
 
 getio()
 {
-   # device            r/s rKB ???x4 
-   # w/s wkB/s ???x4   d/s? dKB%s? ???x4
-   # f/s f_await aqu-sz %util
+   # (01-07) device            r/s rKB ???x4 
+   # (08-19) w/s wkB/s ???x4   d/s? dKB%s? ???x4
+   # (20-23) f/s f_await aqu-sz %util
 
-   # asi fajn je 
-   # wKB/s ($8)
-   # %util ($22)
+   # asi fajn je   rKB/s ($4)     %util ($23)
    # +1 for date
 
    iostat -xz 1 |\
       stdbuf -o0 grep nvme0n1 |\
       prepend_seconds_since_start |\
-      stdbuf -o0 awk '{print $1, $9, $23}' >$iof
+      stdbuf -o0 awk '{print $1, $4, $24}' >$iof
 }
 
 starttime=$(date +"%s")
@@ -34,12 +32,13 @@ prepend_seconds_since_start()
 
 getnet()
 {
-	 #   1              4                                         11
-	 # date avg iface rxpck txpck rxkB txkB rxcmp txcmp rxmcst %ifutil
-	 sar -n DEV 1 |\
+	 #   1                4                                  11
+	 # date iface rxpck txpck rxkB txkB rxcmp txcmp rxmcst %ifutil
+
+	 sar -n DEV 1 |
 	    stdbuf -o0 grep wlan0 |\
 	    prepend_seconds_since_start |\
-	    stdbuf -o0 awk '{print $1, $4, $11}' >$netf
+	    stdbuf -o0 awk '{print $1, $5, $12}' >$netf
 }
 
 
