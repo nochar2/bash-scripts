@@ -1,7 +1,0 @@
-#!/bin/sh
-# Removes square brackets and their content from a file name
-# "[deleteme] name.md" -> "name.md"
-
-file="$1"
-dst=$(echo "$file" | sed "s/\[.*\] //")
-mv -n "$file" "$dst"

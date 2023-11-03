@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+// written in C because the shell version was too slow
 int main() {
     char buf[BUFSIZ];
 
@@ -11,17 +12,17 @@ int main() {
         int bri = 0;
 
         // read brightness
-        FILE *bri_file = fopen("/sys/class/backlight/intel_backlight/brightness", "r");
-        if (!bri_file) {
-            perror("cannot open file");
-            return 1;
+        {
+            FILE *fh = fopen("/sys/class/backlight/intel_backlight/brightness", "r");
+            if (!fh) {
+                perror("cannot open file");
+                return 1;
+            }
+            fread(bri_s, 7, 1, fh);
+            sscanf(bri_s, "%d", &bri);
+            fclose(fh);
         }
-        fread(bri_s, 7, 1, bri_file);
-        sscanf(bri_s, "%d", &bri);
-        // printf("str: -%s-, int: -%d-\n", bri_s, bri);
-        fclose(bri_file);
 
-        //fscanf(bri_file, "%6d", &brightness);
         if (bri == 0) {
             system("brightnessctl set 1");
         }

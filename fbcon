@@ -9,7 +9,6 @@
 # - mpv still works
 # - viewing pdfs works with difficulty
 # - things are fast
-# - viewing pdfs works, but with difficulty
 
 # Relevant tools
 # - fbpdf?
@@ -22,7 +21,7 @@ kmscon --xkb-layout cz \
        --xkb-variant qwerty \
        --xkb-repeat-rate 21 \
        --xkb-options caps:swapescape \
-       --sb-size 30000 \
+       --sb-size 70000 \
        --font-name "JetBrains Mono Bold" \
        --font-dpi 120 \
        --hwaccel \
