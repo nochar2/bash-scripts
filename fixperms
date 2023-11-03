@@ -1,4 +1,28 @@
 #!/bin/sh
-find . -type d -exec chmod 755 {} +
-find . -type f -exec chmod 644 {} +
-find . -exec chown karel:karel {} +
+usage() {
+  echo "usage: $0 -odfsh"
+  echo "crudely fixes some file attributes that were messed up by copying to other disk/ntfs. very unsafe, it's literally just find -exec"
+  echo "-o     set ownership to karel"
+  echo "-d     set all dir perms to 755"
+  echo "-f     set all regular file perms to 644"
+  echo "-s     set all regular file perms to 755 (assume they are scripts)"
+  echo "-h     help"
+}
+case "$PWD" in
+  /|/home|/etc|/usr|/var|/bin|/lib)
+    echo "Sorry, I don't feel that suicidal today."; exit 1;;
+esac 
+
+
+[ -z "$*" ] && { usage; exit 0; }
+
+for i in "$@"; do
+  case "$i" in
+    -o|--ownership) find . -exec chown karel:karel {} +; shift;;
+    -d|--dirperms) find . -type d -exec chmod 755 {} +; shift;;
+    -f|--fileperms) find . -type f -exec chmod 644 {} +; shift;;
+    -s|--scriptperms) find . -type f -exec chmod 755 {} +; shift;;
+    -h|--help) usage; exit 0;;
+    ""|*) usage; exit 1;;
+  esac
+done
