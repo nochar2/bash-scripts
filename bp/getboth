@@ -48,11 +48,12 @@ collectboth() {
 	sort $iof  | sed "s/[[:space:]]\+/,/g" > ${iof}_s
 	sort $netf | sed "s/[[:space:]]\+/,/g" > ${netf}_s
 	
-	echo "---------bpios---------"
-	cat ${iof}_s
-	echo "---------bpnets--------"
-	cat ${netf}_s
-	echo "---------both----------"
+	# echo "---------bpios---------"
+	# cat ${iof}_s
+	# echo "---------bpnets--------"
+	# cat ${netf}_s
+	# echo "---------both----------"
+	echo "second #,tx pck/s,net util,read KB,io util"
 	join -t , -a 1 -a 2 -e 0.00 -o auto ${netf}_s ${iof}_s
 }
 
@@ -67,4 +68,5 @@ getio&
 getnet&
 
 trap collectboth INT
+trap collectboth TERM
 sleep 60
