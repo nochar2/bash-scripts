@@ -71,12 +71,13 @@ recreate()
 	put_next_to_each_other $tf/col1 $tf/recentnotes
 	put_next_to_each_other $tf/col1 $tf/recentnotes >$tf/result
 
-	convert -size 1600x900 xc:black \
+	# used to have  -size 1600x900 xc:black   for a blank pic
+	convert $HOME/pic/nature_darkblur_small.jpg \
 		-font "JetBrains-Mono-Light" -pointsize 22 -fill white \
 		-gravity center \
-		-annotate +30+30 "@$tf/result" $tf/result.png
+		-annotate +30+30 "@$tf/result" $tf/result.jpg
 
-	xwallpaper --center $tf/result.png
+	xwallpaper --center $tf/result.jpg
 }
 
 
