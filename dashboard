@@ -1,0 +1,49 @@
+#!/bin/bash
+
+# temp files
+tf=/tmp/dashboard
+notes=$HOME/notes
+ptd=$notes/Plain/priv-todostack.md
+mkdir -p $tf
+
+
+cut_md_section()
+{
+	# file="$1"
+	section="$1"
+	sed -ne "/^# $section/,/^#/p;" | sed "1 d; $ d"
+}
+
+list_recent_files_in()
+{
+	ls -tuF "$1" | grep -v "[/@*]$" | head
+}
+
+box_with_title()
+{
+	boxes -d boxquote | sed -e "1s/.*/,----[ $1 ]/"
+}
+
+put_next_to_each_other()
+{
+	# the expand in pr doesn't work and I don't know why
+
+	# wish it was aligned on the longest line but
+	# i can't find a way to do it
+	# and I don't know how to split streams and magically
+	# reassemble the results
+	pr -t -m -v "$@" | expand | awk '{printf "%-70s\n", $0}'  | expand
+}
+
+cat $ptd | cut_md_section Todo    | box_with_title "To do" >$tf/todo
+cat $ptd | cut_md_section Doing   | box_with_title "Working on" >$tf/doing
+list_recent_files_in $notes/Plain | box_with_title "Recent notes" >$tf/recentnotes
+
+put_next_to_each_other <(cat $tf/todo $tf/doing) $tf/recentnotes
+put_next_to_each_other <(cat $tf/todo $tf/doing) $tf/recentnotes >$tf/result
+
+convert -size 1600x900 xc:black \
+	-font "JetBrains-Mono-Light" -pointsize 22 -fill white \
+	-gravity center \
+	-annotate +30+30 "@$tf/result" $tf/result.png
+
