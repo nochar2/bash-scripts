@@ -35,43 +35,68 @@ int len_of_longest_line_in(char *file)
 }
 
 #include <locale.h>
+
+#define MAXFILES 20
+#define STR(x) #x
+
+bool any_of(bool *a, int sz) {
+        for (int i = 0; i < sz; i++) {
+                if (a[i]) return true;
+        }
+        return false;
+}
+
+#define foreach(type, n, col) \
+        for (int _i = n, type it=*col; n >= 0; it++, n--)
+
 int main(int argc, char **argv)
 {
+        // todo: args would be cute also
+
+        const int col_gap = 5;
+
+        int i = 0;
+        FILE *ff[MAXFILES];
+        int maxwidths[MAXFILES];
+        Readbuf rbs[MAXFILES];
+        bool has_input[MAXFILES];
+        sds lines[MAXFILES];
+
+        int n_files = argc - 1;
+        assert(n_files < MAXFILES && "the maximum is " STR(MAXFILES) "files");
+                
         setlocale(LC_ALL, "en_US.UTF-8");
         assert(howlongisthis("přeskočil") == 9);
 
-        assert(argc >= 3 && "expect two files to merge");
-        int spaces_in_between = (argc >= 4) ? atoi(argv[3]) : 10;
-        
-        FILE *f = fopen(argv[1], "r");
-        FILE *g = fopen(argv[2], "r");
+        assert(argc >= 2 && "expected at least one file");
 
-        Readbuf fb = readbuf_wrap(f);
-        Readbuf gb = readbuf_wrap(g);
-        bool f_has_input, g_has_input;
-        f_has_input = g_has_input = true;
-        sds fl = sdsempty();
-        sds gl = sdsempty();
-
-        int width = 0;
-
-
-        int width_of_first = len_of_longest_line_in(argv[1]);
-
-        while (f_has_input || g_has_input) {
-                sdsclear(fl);
-                sdsclear(gl);
-
-                f_has_input = !sdsreadln(&fb, &fl, '\n');
-                g_has_input = !sdsreadln(&gb, &gl, '\n');
-
-                int pad = width_of_first - howlongisthis(fl);
-                printf("%s%*s%*s%s\n", fl, pad, "", spaces_in_between, "", gl);
+        for (i = 0; i < n_files; i++) {
+                ff[i] = fopen(argv[i+1], "r");
+                rbs[i] = readbuf_wrap(ff[i]);
+                lines[i] = sdsempty();
+                maxwidths[i] = len_of_longest_line_in(argv[i+1]);
+                has_input[i] = true;
         }
-        sdsfree(fl);
-        sdsfree(gl);
-        fclose(f);
-        fclose(g);
-        
+
+
+        while(any_of(has_input, n_files)) {
+                for (i = 0; i < n_files-1; i++) {
+                        sdsclear(lines[i]);
+                        has_input[i] = !sdsreadln(&rbs[i], &lines[i], '\n');
+                        int pad = maxwidths[i] - howlongisthis(lines[i]);
+
+                        printf("%s%*s%*s", lines[i], pad, "", col_gap, "");
+                }
+                sdsclear(lines[i]);
+                has_input[i] = !sdsreadln(&rbs[i], &lines[i], '\n');
+                int pad = maxwidths[i] - howlongisthis(lines[i]);
+
+                printf("%s%*s\n", lines[i], pad, "");
+        }
+
+        for (int i = 0; i < n_files; i++) {
+                fclose(ff[i]);
+                sdsfree(lines[i]);
+        }       
         return 0;
 }
