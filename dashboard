@@ -3,7 +3,8 @@
 # temp files
 tf=/tmp/dashboard
 notes=$HOME/notes
-ptd=$notes/Plain/priv-todostack.md
+plainnotes="$notes/Plain"
+ptd=$plainnotes/priv-todostack.md
 mkdir -p $tf
 
 
@@ -18,7 +19,7 @@ cut_md_section()
 
 list_recent_files_in()
 {
-	ls -tuF "$1" | grep -v "[/@*]$" | head
+	ls -tcF "$1" | grep -v "[/@*]$" | head
 }
 
 box_with_title()
@@ -26,6 +27,22 @@ box_with_title()
 	boxes -d boxquote | sed -e "1s/.*/,----[ $1 ]/"
 }
 
+# prostě multibyte znaky jsou průser a nefungují vůbec
+# musel bych si udělat vlastní  pr  defakto
+pad_to_ideal_width()
+{
+	width=$(wc -L "$1" | cut -d" " -f1)
+	# echo "ššš"
+	# echo "$1"
+	cat "$1" | (IFS="\n"; while read r; do
+		printf "%s%*s\n" "$r" "$[$width - $(wc -L <<< "$r")]" "";
+	done)
+
+# 	for i in "${a[@]}" "${b[@]}"
+# do printf "%s%*s|\n" "$i" "$[15 - $(wc -L <<< "$i")]" ""
+# done
+
+}
 put_next_to_each_other()
 {
 	# the expand in pr doesn't work and I don't know why
@@ -34,7 +51,14 @@ put_next_to_each_other()
 	# i can't find a way to do it
 	# and I don't know how to split streams and magically
 	# reassemble the results
-	pr -t -m -v "$@" | expand | awk '{printf "%-70s\n", $0}'  | expand
+
+	# IFS="\n";
+	# cat "$1" | (while read i; do
+	# 	wc -L <<<"$i";
+	# done)
+	pad_to_ideal_width "$1" >$tf/1al
+	pad_to_ideal_width "$2" >$tf/2al
+	sanepr "$tf/1al" "$tf/2al" | expand
 }
 
 recreate()
@@ -43,8 +67,9 @@ recreate()
 	cat $ptd | cut_md_section Doing   | box_with_title "Working on" >$tf/doing
 	list_recent_files_in $notes/Plain | box_with_title "Recent notes" >$tf/recentnotes
 
-	put_next_to_each_other <(cat $tf/todo $tf/doing) $tf/recentnotes
-	put_next_to_each_other <(cat $tf/todo $tf/doing) $tf/recentnotes >$tf/result
+	cat $tf/todo $tf/doing >$tf/col1
+	put_next_to_each_other $tf/col1 $tf/recentnotes
+	put_next_to_each_other $tf/col1 $tf/recentnotes >$tf/result
 
 	convert -size 1600x900 xc:black \
 		-font "JetBrains-Mono-Light" -pointsize 22 -fill white \
@@ -56,5 +81,6 @@ recreate()
 
 
 while true; do
-	inotifywait -e "close_write" $ptd && recreate;
+	recreate
+	inotifywait -t 20 -e "close_write" $plainnotes && recreate;
 done

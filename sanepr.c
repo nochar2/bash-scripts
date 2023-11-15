@@ -3,6 +3,7 @@ sanepr.c -- place two files in two columns next to each other,
             actually taking wcwidth into account.
 */
 #include <stdio.h>
+#include <stdlib.h>
 #include "ext/sds.h"
 #include "ext/wcwidth.h"
 #include "sdsreadln.c"
@@ -37,9 +38,11 @@ int len_of_longest_line_in(char *file)
 int main(int argc, char **argv)
 {
         setlocale(LC_ALL, "en_US.UTF-8");
-        (void)argc;
+        assert(howlongisthis("přeskočil") == 9);
+
+        assert(argc >= 3 && "expect two files to merge");
+        int spaces_in_between = (argc >= 4) ? atoi(argv[3]) : 10;
         
-        assert(argc == 3 && "expect two files to merge");
         FILE *f = fopen(argv[1], "r");
         FILE *g = fopen(argv[2], "r");
 
@@ -52,28 +55,18 @@ int main(int argc, char **argv)
 
         int width = 0;
 
-        printf("%d\n", howlongisthis("přeskočil"));
-        assert(howlongisthis("přeskočil") == 9);
 
         int width_of_first = len_of_longest_line_in(argv[1]);
 
         while (f_has_input || g_has_input) {
-
                 sdsclear(fl);
                 sdsclear(gl);
 
                 f_has_input = !sdsreadln(&fb, &fl, '\n');
                 g_has_input = !sdsreadln(&gb, &gl, '\n');
 
-
-                int n_spaces = width_of_first - howlongisthis(fl);
-                printf("%s%*s%s\n", fl, n_spaces, "", gl);
-
-
-                // if (fend) {
-
-                //         printf("%*s", "", 
-                // }
+                int pad = width_of_first - howlongisthis(fl);
+                printf("%s%*s%*s%s\n", fl, pad, "", spaces_in_between, "", gl);
         }
         sdsfree(fl);
         sdsfree(gl);
