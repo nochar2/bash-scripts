@@ -10,8 +10,10 @@ mkdir -p $tf
 cut_md_section()
 {
 	# file="$1"
+	# the uniq is a hack to ignore multiple whitespace
 	section="$1"
-	sed -ne "/^# $section/,/^#/p;" | sed "1 d; $ d"
+	sed -ne "/^# $section/,/^#/p;" | sed -e "1 d; $ d;" | cat -s
+
 }
 
 list_recent_files_in()
@@ -35,15 +37,24 @@ put_next_to_each_other()
 	pr -t -m -v "$@" | expand | awk '{printf "%-70s\n", $0}'  | expand
 }
 
-cat $ptd | cut_md_section Todo    | box_with_title "To do" >$tf/todo
-cat $ptd | cut_md_section Doing   | box_with_title "Working on" >$tf/doing
-list_recent_files_in $notes/Plain | box_with_title "Recent notes" >$tf/recentnotes
+recreate()
+{
+	cat $ptd | cut_md_section Todo    | box_with_title "To do" >$tf/todo
+	cat $ptd | cut_md_section Doing   | box_with_title "Working on" >$tf/doing
+	list_recent_files_in $notes/Plain | box_with_title "Recent notes" >$tf/recentnotes
 
-put_next_to_each_other <(cat $tf/todo $tf/doing) $tf/recentnotes
-put_next_to_each_other <(cat $tf/todo $tf/doing) $tf/recentnotes >$tf/result
+	put_next_to_each_other <(cat $tf/todo $tf/doing) $tf/recentnotes
+	put_next_to_each_other <(cat $tf/todo $tf/doing) $tf/recentnotes >$tf/result
 
-convert -size 1600x900 xc:black \
-	-font "JetBrains-Mono-Light" -pointsize 22 -fill white \
-	-gravity center \
-	-annotate +30+30 "@$tf/result" $tf/result.png
+	convert -size 1600x900 xc:black \
+		-font "JetBrains-Mono-Light" -pointsize 22 -fill white \
+		-gravity center \
+		-annotate +30+30 "@$tf/result" $tf/result.png
 
+	xwallpaper --center $tf/result.png
+}
+
+
+while true; do
+	inotifywait -e "close_write" $ptd && recreate;
+done
