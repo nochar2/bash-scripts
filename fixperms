@@ -16,6 +16,8 @@ esac
 
 [ -z "$*" ] && { usage; exit 0; }
 
+# todo: make -od work, there is a command for that and i forgot it
+# also -o username because you're root with sudo
 for i in "$@"; do
   case "$i" in
     -o|--ownership) find . -exec chown karel:karel {} +; shift;;

@@ -5,6 +5,8 @@ tf=/tmp/dashboard
 notes=$HOME/notes
 plainnotes="$notes/Plain"
 ptd=$plainnotes/priv-todostack.md
+td=$HOME/muni/bp/thesis/bpwork-todostack.md
+
 mkdir -p $tf
 
 
@@ -63,13 +65,17 @@ put_next_to_each_other()
 
 recreate()
 {
-	cat $ptd | cut_md_section Todo    | box_with_title "To do" >$tf/todo
-	cat $ptd | cut_md_section Doing   | box_with_title "Working on" >$tf/doing
-	list_recent_files_in $notes/Plain | box_with_title "Recent notes" >$tf/recentnotes
+	cat $ptd | cut_md_section Todo    | box_with_title "Ostatní práce" >$tf/todo
+	cat $ptd | cut_md_section Doing   | box_with_title "Elementární kroky" >$tf/doing
 
-	cat $tf/todo $tf/doing >$tf/col1
-	put_next_to_each_other $tf/col1 $tf/recentnotes
-	put_next_to_each_other $tf/col1 $tf/recentnotes >$tf/result
+	cat $td | cut_md_section "Break down further" | box_with_title "Bakalářka: práce na zpracování" >$tf/breakdown
+	cat $td | cut_md_section "To do" | box_with_title "Elementární kroky" >$tf/bpsteps
+	
+	# list_recent_files_in $notes/Plain | box_with_title "Recent notes" >$tf/recentnotes
+
+	cat $tf/breakdown $tf/bpsteps >$tf/col1
+	cat $tf/todo $tf/doing >$tf/col2
+	put_next_to_each_other $tf/col1 $tf/col2 >$tf/result
 
 	# used to have  -size 1600x900 xc:black   for a blank pic
 	convert $HOME/pic/nature_darkblur_small.jpg \
@@ -83,5 +89,5 @@ recreate()
 
 while true; do
 	recreate
-	inotifywait -t 20 -e "close_write" $plainnotes && recreate;
+	inotifywait -t 60 -e "close_write" $plainnotes $td && recreate;
 done

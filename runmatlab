@@ -1,6 +1,13 @@
 #!/bin/sh
+cleanup() {
+    sudo killall openvpn
+}
+
 sudo openvpn \
     --config $HOME/scripts/muni-main-linux.ovpn \
     --auth-user-pass $HOME/scripts/secrets/openvpn-up  &
 matlab
-sudo killall openvpn
+
+trap cleanup INT
+trap cleanup TERM
+cleanup

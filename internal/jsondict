@@ -1,7 +1,7 @@
 #!/bin/sh
 # query website from command line, read json response in less
 
-query=$(echo "$1" | internal/urlenc)
+query=$(echo "$1" | urlenc)
 
 bn=$(basename "$0")
 case $bn in

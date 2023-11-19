@@ -54,12 +54,8 @@ swallow_under_i3()
 }
 
 cmd_to_open() {
-    # echo "whattorun is run with these arguments:" >&2
-    # echo "$@" >&2
         
     program="$(suitable_program_for "$file")"
-
-    # echo "suitable-program-for returned $program for $file" >&2
 
     case "$program" in
         zathura|sxiv|mpv|quartus|firefox) 
@@ -85,6 +81,7 @@ usage() {
     echo "-n: don't actually run the cmd"
     echo "-t: open in a terminal"
 }
+
 main() {
     [ "$1" = "-n" ] && { just_echo=1; shift; }
     [ "$1" = "-t" ] && { termprefix="$TERMINAL -e "; shift; }
@@ -94,22 +91,13 @@ main() {
     file="$*"
     cmd=$(cmd_to_open "$file")
 
-    #echo cmd is $cmd
-    #echo file is $file
-
     echo "$cmd" "$file"
     # cmd can be multiple words so it has to be unquoted
     [ -n "$just_echo" ] || { $cmd "$file"; }
 
-    # echo "command has ended"
-
-    # don't really use this
+    # I don't really use this and I DO NOT want to debug this again ever
     echo "$cmd \"$file\"" >> "$HOME"/.local/state/bash/history;
 
-    # echo "exiting main"
 }
 
-#echo "arguments are $@"
 main "$@"
-
-# echo "this is literally the last line of the script"

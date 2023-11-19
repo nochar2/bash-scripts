@@ -1,19 +1,21 @@
 #!/bin/sh
 
+NOTE=$(basename "$0")
+
 fusage()
 {
-    echo "note - Skript pro zaznamenávání a správu poznámek."
-    echo "Použití: note [verb [object]]"
+    echo "$NOTE - Skript pro zaznamenávání a správu poznámek."
+    echo "Použití: $NOTE [verb [object]]"
     echo "         note object"
     echo ""
-    echo "note [h[elp]]             Vypíše tuto nápovědu."
-    echo "note l[ist]               Vypíše seznam poznámek."
-    echo "note s[how] name          Vypíše poznámku."
-    echo "note e[dit] name          Otevře poznámku ve Vimu, případně vytvoří novou."
-    echo "note r[ename] old new     Přejmenuje poznámku old na new."
-    echo "note d[elete] name        Přesune poznámku do adresáře trash vedle poznámek"
-    echo "note fd[elete] name       Smaže poznámku natrvalo"
-    echo "note name                 Stejné jako note s[how] name (když name není list/show/...)"
+    echo "$NOTE [h[elp]]             Vypíše tuto nápovědu."
+    echo "$NOTE l[ist]               Vypíše seznam poznámek."
+    echo "$NOTE s[how] name          Vypíše poznámku."
+    echo "$NOTE e[dit] name          Otevře poznámku ve Vimu, případně vytvoří novou."
+    echo "$NOTE r[ename] old new     Přejmenuje poznámku old na new."
+    echo "$NOTE d[elete] name        Přesune poznámku do adresáře trash vedle poznámek"
+    echo "$NOTE fd[elete] name       Smaže poznámku natrvalo"
+    echo "$NOTE name                 Stejné jako note s[how] name (když name není list/show/...)"
 }
 
 flistdir()
@@ -42,7 +44,7 @@ frename()
 }
 
 # shopt -s expand_aliases
-BASEPATH=$(ptpath)/note
+BASEPATH=$HOME/notes/Plain
 NOTENAME="$2".md
 
 cd "$BASEPATH"
