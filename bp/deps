@@ -1,0 +1,2 @@
+#!/bin/sh
+apt install automake libspeexdsp* libasound-dev uuid-dev libopencv-dev libglew-dev libgl1-mesa-dev libglfw3-dev libjack-jackd2-dev libavcodec-dev libavutil-dev libssl-dev libcurl4-nss-dev libsdl2-dev libsoxr-dev 
