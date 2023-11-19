@@ -86,7 +86,8 @@ main() {
     [ "$1" = "-n" ] && { just_echo=1; shift; }
     [ "$1" = "-t" ] && { termprefix="$TERMINAL -e "; shift; }
     [ "$1" = "--help" -o "$1" = "-h" ] && { usage; exit 0; }
-    [ "$#" != 1 ] && { usage; exit 1; }
+    [ "$#" != 1 -o -z "$1" ] && { usage; exit 1; }
+
 
     file="$*"
     cmd=$(cmd_to_open "$file")

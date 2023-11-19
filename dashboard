@@ -79,7 +79,7 @@ recreate()
 
 	# used to have  -size 1600x900 xc:black   for a blank pic
 	convert $HOME/pic/nature_darkblur_small.jpg \
-		-font "JetBrains-Mono-Light" -pointsize 22 -fill white \
+		-font "JetBrains-Mono-Light" -pointsize 20 -fill white \
 		-gravity center \
 		-annotate +30+30 "@$tf/result" $tf/result.jpg
 
