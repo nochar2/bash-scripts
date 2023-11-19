@@ -104,6 +104,7 @@ main() {
     # echo "command has ended"
 
     # don't really use this
+    mkdir -p "$HOME"/.local/state/bash
     echo "$cmd \"$file\"" >> "$HOME"/.local/state/bash/history;
 
     # echo "exiting main"
