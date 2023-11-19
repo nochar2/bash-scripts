@@ -96,7 +96,7 @@ main() {
     # cmd can be multiple words so it has to be unquoted
     [ -n "$just_echo" ] || { $cmd "$file"; }
 
-    # I don't really use this and I DO NOT want to debug this again ever
+    mkdir -p "$HOME"/.local/state/bash
     echo "$cmd \"$file\"" >> "$HOME"/.local/state/bash/history;
 
 }
