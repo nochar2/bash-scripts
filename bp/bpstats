@@ -17,7 +17,7 @@ getio()
 
 	# io rKB, %util
 
-	iostat -xz 1 |\
+	iostat -x 1 |\
 		stdbuf -o0 grep nvme0n1 |\
 		stdbuf -o0 awk '{print $3, $23}' |\
 		prepend_seconds_since_start >$iof
@@ -27,7 +27,7 @@ starttime=$(date +"%s")
 prepend_seconds_since_start()
 {
 	while read n; do \
-		echo "$(printf "%s" "$(($(date +%s) - starttime))")" "$n"; \
+		echo "$(printf "%.4d" "$(($(date +%s) - starttime))")" "$n"; \
 	 done
 }
 
@@ -55,7 +55,7 @@ getgpu()
 }
 
 
-collectboth() {
+collectall() {
 	pkill getio
 	pkill getnet
 	pkill getgpu
@@ -69,6 +69,7 @@ collectboth() {
 	# cat ${netf}_s
 	# echo "---------both----------"
 	echo "seconds,tx_pck,net_util,read_KB,io_util,gpu_util"
+	# join  -t, -a1 -a2 -e 0.00 -o auto ${netf}_s ${iof}_s 
 	join -t, -a1 -a2 -e 0.00 -o auto ${netf}_s ${iof}_s |\
 		join -t, - ${gpuf}_s
 }
@@ -83,6 +84,6 @@ getio&
 getnet&
 getgpu&
 
-trap collectboth INT
-trap collectboth TERM
+trap collectall INT
+trap collectall TERM
 sleep 60
