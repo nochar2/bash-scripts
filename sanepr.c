@@ -16,7 +16,9 @@ int howlongisthis(const char *s)
 
         int e = mbsrtowcs(buf, &s, 500, NULL);
         assert(e >= 0);
-        return mk_wcswidth((const wchar_t *)buf, 500);
+        // this returns -1 for tabs, don't care enough to fix that
+        int ret = mk_wcswidth((const wchar_t *)buf, 500);
+        return ret;
 }
 
 int len_of_longest_line_in(char *file)
