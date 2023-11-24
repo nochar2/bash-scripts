@@ -58,7 +58,7 @@ cmd_to_open() {
     program="$(suitable_program_for "$file")"
 
     case "$program" in
-        zathura|sxiv|mpv|quartus|firefox) 
+        zathura|sxiv|mpv|quartus|firefox|cvlc|vlc) 
             cmd="${termprefix} $(swallow_under_i3) $program"
         ;;
         "$EDITOR") 

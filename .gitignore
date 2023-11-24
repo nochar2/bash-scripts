@@ -4,3 +4,5 @@ unversioned/
 ext/
 secrets/
 sanepr
+a.out
+main.c

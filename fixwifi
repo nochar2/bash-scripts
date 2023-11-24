@@ -1,8 +1,13 @@
 #!/bin/sh
-[ "$1" = "-f" ] || { 
-  echo "This fixes a dead Atheros wifi firmware by unloading/reloading the ath10k_pci module."
-  echo "!! If you updated a kernel without reboot, you can't load the new module and will have an unusable wifi until reboot. !!"
-  echo "use -f to do it"; exit 0; 
+# reloads crashed Atheros wifi module
+
+ls /lib/modules | grep -q "$(uname -r)" || {
+  echo "(!) Kernel was updated but the system was not restarted yet."
+  echo "There are no kernel modules for the currently running kernel,"
+  echo "so unloading one would mean I can't reload it again."
+  echo "This would make wifi unusable until reboot."
+  exit 1
 }
+
 sudo rmmod ath10k_pci
 sudo modprobe ath10k_pci

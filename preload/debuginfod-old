@@ -1,0 +1,4 @@
+#!/bin/sh
+# xdg cleanup (probably won't work, have to make it system-wide somehow)
+mkdir -p $XDG_STATE_HOME/debuginfod
+/usr/bin/debuginfod -d $XDG_STATE_HOME/debuginfod/debuginfod.sqlite
