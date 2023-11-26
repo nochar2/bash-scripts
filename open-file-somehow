@@ -93,6 +93,8 @@ main() {
     cmd=$(cmd_to_open "$file")
 
     echo "$cmd" "$file"
+    settermtitle "$cmd" "$file"
+
     # cmd can be multiple words so it has to be unquoted
     [ -n "$just_echo" ] || { $cmd "$file"; }
 
