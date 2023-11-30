@@ -1,0 +1,17 @@
+#!/bin/sh
+# auto overwrite
+# assume yuv420p format, this size and this fps
+# this is an input file
+# copy video, convert it to yuv444p and play it
+
+#	-pix_fmt yuv444p  doesn't quite work with -c:v copy
+
+[ "$#" != 2 ] && { echo "use video and format (420 or 444)"; exit 1; }
+out=${1%.*}.y4m
+
+ffmpeg -y \
+	-pix_fmt yuv${2}p -s:v 1920x1080 -r 120 \
+	-i "$1" \
+	-c:v copy \
+	$out && mpv $out
+
