@@ -41,40 +41,43 @@ checkforroot()
 
 usage()
 { 
-	echo "usage: $0 [-n] [-v] [-g] [-l] [file|rtdxt|screen|logotext|network|...] [MTU]"
+	echo "usage: $0 [-nNvgl] [file|rtdxt|screen|logotext|network|...] [MTU]"
 	echo "calls UltraGrid with arguments for the given scenario."
-	echo "-n   does not use  perf record"
-	echo "-v   uses valgrind"
-	echo "-g   uses gdb"
-	echo "-l   instead of sending the video, display it locally on sdl screen"
+	echo "-n   only print the command to be executed"
+	echo "-N   only run UltraGrid, do not use  perf record"
+	echo "-v   valgrind instead of profiling"
+	echo "-g   gdb instead of profiling"
+	echo "-l   don't send the video to rpi, display it locally on sdl screen"
 	echo "MTU: himtu, 9000, 9k  sets it to 9000"
 	echo "     lomtu, 1500, 1k5 sets it to 1500"
-
-	exit 1; 
 }
 
 main() 
 {
-	# default measuring
-	pr="timeout $measuretime $perfrecord"
-	
 	out="$piaddr"
+	measuretime=10
+	echo_if_noop=""
 	
-	# alternatives
-	while getopts "nvgl" opt; do
+	while getopts "hnNvglt:" opt; do
 		case "$opt" in
-			n) pr="";;
+			t) measuretime=$OPTARG;;
+			n) echo_if_noop="echo";;
+			N) pr="";;
 			v) pr="valgrind --track-origins=yes";;
 			g) pr="gdb --args";;
 			l) out="-d sdl";;
+			h) usage; exit 0;;
 		esac
 	done
 	shift $((OPTIND-1))
 
+	[[ "$pr" =~ "perf" && -z "$echo_if_noop" ]] && {
+		pr="timeout $measuretime $perfrecord"
+		checkforroot
+	}
 
 	[ -z "$1" ] && { usage; exit 1; }
 	
-	[[ "$pr" =~ "perf" ]] && checkforroot
 
 	mtu=1500
 	case "$2" in
@@ -91,27 +94,27 @@ main()
 		screen)
 			cmd="$pr $uv -m $mtu -t screen:fps=60 -c libavcodec $out";
 			:;;
-		network)
+		network|net)
 			# TODO
 			cmd="$pr $uv -m $mtu -t testcard:fps=1000 -d dummy $out";
 			:;;
-		deinterlace)
+		deinterlace|deint)
 			# TODO
 			cmd="$pr $uv -m $mtu -t testcard:fps=1000 -d dummy $out";
 			:;;
-		logotext)
-			cmd="$pr $uv -m $mtu -t file:${uvfile}:loop -F logo:pic/uglogo.pam -F text:x=1000:y=1000:h=80:t=two_weeks_befoyre_deadlineÁ $out";
+		logotext|lt)
+			cmd="$pr $uv -m $mtu -t testcard:codec=RGBA -F logo:pic/uglogo.pam -F text:x=10:y=1:h=100:t=ÃǍÄ_lazy_example_text $out";
+			# cmd="$pr $uv -m $mtu -t file:${uvfile}:loop -F logo:pic/uglogo.pam -F text:x=10:y=800:h=100:t=ÃǍ_lazy_example_text $out";
 			:;;
 		*) usage; exit 1;;
 	esac
 
-	echo "cmd is:"
-	echo "$cmd"
-	echo "$pr $uv"
-	echo Running "$cmd" for "$measuretime" seconds.
+	# echo "cmd is:"
+	# echo "$cmd"
 
 	# necessary to split args, sadly breaks spaces
-	$cmd
+
+	$echo_if_noop $cmd
 
 }
 

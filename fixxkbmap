@@ -1,7 +1,7 @@
 #!/bin/sh
 # would love to know if there is a way to do this in an actual config file
 # running it once with all params is much faster (170 ms vs 40 ms)
-xset r rate 210 50
+xset r rate 210 55
 setxkbmap "cz(qwerty),us" -option grp:alt_shift_toggle,caps:swapescape,terminate:ctrl_alt_bksp,compose:ins
 # setxkbmap "cz(qwerty),de(qwerty)" -option grp:alt_shift_toggle,caps:swapescape,terminate:ctrl_alt_bksp,compose:ins
 
