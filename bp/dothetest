@@ -25,11 +25,11 @@ else
 fi
 
 perfrecord="sudo perf record $howtosample $whattosample  --call-graph dwarf,2048 --mmap-pages 16M -z --sample-cpu --"
-uv="/home/karel/zmisc/git-repos/UltraGrid/ug-myfork/bin/uv"
+uv="$HOME/zmisc/git-repos/UltraGrid/ug-myfork/bin/uv"
 # uv="/home/karel/uv"
 
 piaddr=169.254.2.2
-uvviddir=/home/karel/vid/ugvid/y4m
+uvviddir=$HOME/vid/ugvid/y4m
 uvfilersg=ReadySetGo_1920x1080_120fps_420_8bit_YUV.y4m
 uvfile="${uvviddir}/${uvfilersg}"
 
@@ -56,14 +56,14 @@ main()
 {
 	out="$piaddr"
 	measuretime=10
-	echo_if_noop=""
+	possibly_just_echo=""
 	
 	pr="$perfrecord"
 
 	while getopts "hnNvglt:" opt; do
 		case "$opt" in
 			t) measuretime=$OPTARG;;
-			n) echo_if_noop="echo";;
+			n) possibly_just_echo="echo";;
 			N) pr="";;
 			v) pr="valgrind --track-origins=yes";;
 			g) pr="gdb --args";;
@@ -73,9 +73,13 @@ main()
 	done
 	shift $((OPTIND-1))
 
-	[[ ! "$pr" =~ "perf" && -z "$echo_if_noop" && -n "$@" ]] && {
+	# I really requested perf
+	# noop is not set
+
+	possibly_elevate=""
+	[[ "$pr" =~ "perf" && -z "$possibly_just_echo" && -n "$@" ]] && {
 		pr="timeout $measuretime $perfrecord"
-		checkforroot
+		possibly_elevate="sudo"
 	}
 
 	[ -z "$1" ] && { usage; exit 1; }
@@ -117,7 +121,7 @@ main()
 
 	# necessary to split args, sadly breaks spaces
 
-	$echo_if_noop $cmd
+	$possibly_just_echo $possibly_elevate $cmd
 
 }
 
