@@ -92,6 +92,8 @@ main()
 	esac
 
 	case "$1" in
+		receive)
+			cmd="$pr $uv -d sdl";;
 		file)  # uvfile + libavcodec (mjpeg)
 			cmd="$pr $uv -m $mtu -t file:${uvfile}:loop -c libavcodec $out";
 			:;;
