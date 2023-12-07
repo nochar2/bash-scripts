@@ -55,7 +55,6 @@ usage()
 main() 
 {
 	out="$piaddr"
-	measuretime=10
 	possibly_just_echo=""
 	
 	pr="$perfrecord"
