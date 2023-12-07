@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ### settings: adjust these ###
-measuretime=10
+measuretime=30
 samplerate=100
 # samplerate=980
 eventperiod=10000
