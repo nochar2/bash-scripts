@@ -58,6 +58,8 @@ main()
 	measuretime=10
 	echo_if_noop=""
 	
+	pr="$perfrecord"
+
 	while getopts "hnNvglt:" opt; do
 		case "$opt" in
 			t) measuretime=$OPTARG;;
@@ -71,7 +73,7 @@ main()
 	done
 	shift $((OPTIND-1))
 
-	[[ "$pr" =~ "perf" && -z "$echo_if_noop" ]] && {
+	[[ ! "$pr" =~ "perf" && -z "$echo_if_noop" && -n "$@" ]] && {
 		pr="timeout $measuretime $perfrecord"
 		checkforroot
 	}
@@ -86,24 +88,25 @@ main()
 	esac
 
 	case "$1" in
-		file) cmd="$pr $uv -m $mtu -t file:${uvfile}:loop -c libavcodec $out";
+		file)  # uvfile + libavcodec (mjpeg)
+			cmd="$pr $uv -m $mtu -t file:${uvfile}:loop -c libavcodec $out";
 			:;;
-		rtdxt) 
+		rtdxt) # uvfile + rtdxt
 			cmd="$pr $uv -m $mtu -t file:${uvfile}:loop -c rtdxt:dxt1 $out";
 			:;;
-		screen)
+		screen) # screengrab + libavcodec
 			cmd="$pr $uv -m $mtu -t screen:fps=60 -c libavcodec $out";
 			:;;
-		network|net)
-			# TODO
+		network|net) # testcard
 			cmd="$pr $uv -m $mtu -t testcard:fps=1000 -d dummy $out";
 			:;;
-		deinterlace|deint)
-			# TODO
-			cmd="$pr $uv -m $mtu -t testcard:fps=1000 -d dummy $out";
+		deinterlace|deint) # uvfile + libavcodec + deinterlace
+			# this is file + deinterlace
+			echo "not figured out what to write"; exit 1;
+			cmd="$pr $uv -m $mtu -t file:${uvfile}:loop -c libavcodec - -d dummy $out";
 			:;;
-		logotext|lt)
-			cmd="$pr $uv -m $mtu -t testcard:codec=RGBA -F logo:pic/uglogo.pam -F text:x=10:y=1:h=100:t=ÃǍÄ_lazy_example_text $out";
+		logotext|lt) # uvfile + libavcodec + logo + text
+			cmd="$pr $uv -m $mtu -t testcard:codec=RGBA -F logo:pic/uglogo.pam -F text:x=10:y=1:h=100:t=Ã_lazy_example_text $out";
 			# cmd="$pr $uv -m $mtu -t file:${uvfile}:loop -F logo:pic/uglogo.pam -F text:x=10:y=800:h=100:t=ÃǍ_lazy_example_text $out";
 			:;;
 		*) usage; exit 1;;
