@@ -87,5 +87,5 @@ recreate()
 
 while true; do
 	recreate
-	inotifywait -t 60 -e "close_write" $plainnotes $td && recreate;
+	inotifywait -e "close_write" $plainnotes $td && recreate;
 done
