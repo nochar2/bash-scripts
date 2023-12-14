@@ -81,17 +81,17 @@ checkforroot()
 
 usage()
 { 
-	echo "usage: $0 [-ghlnNsv] [-t time] [-m mtu] [file|rtdxt|screen|logo|text|network|...]"
+	echo "usage: $0 [-gvnNhl] [-t time] [-m mtu] [file|rtdxt|screen|logo|text|network|...]"
 	echo "calls UltraGrid with arguments for the given scenario."
-	echo "-g      gdb --args uv"
+	echo "-g      use gdb instead of perf"
+	echo "-v      use valgrind instead of perf"
+	echo "-n      use nothing, only print the command"
+	echo "-N      run UltraGrid, but don't use perf at all"
 	echo "-h      help"
-	echo "-l      send to localhost instead of rpi"
-	echo "-n      (only print the command)"
-	echo "-N      uv (without perf record)"
-	echo "-s      uv -d sdl"
+	echo "-l      send to localhost instead of to remote"
+	# echo "-s      uv -d sdl"
 	echo "-t N    run for N seconds (default $def_measure_time_seconds)"
 	echo "-m MTU  MTU size (default $def_mtu) (aliases: himtu/jumbo/9k for 9000, lomtu/1k5 for 1500)"
-	echo "-v      valgrind uv"
 }
 
 main() 
@@ -103,17 +103,17 @@ main()
 	measure_time_seconds="$def_measure_time_seconds"
 	mtu="$def_mtu"
 
-	while getopts "ghlm:nNst:v" opt; do
+	while getopts "gvnNhlt:m:" opt; do
 		case "$opt" in
 			g) pr="gdb --args";;
+			v) pr="valgrind --track-origins=yes";;
+			n) possibly_noop=":";;  # : command does nothing
+			N) pr="";;
 			h) usage; exit 0;;
 			l) out="$(where_to_send_to local)";;
-			n) possibly_noop=":";;  # : command does nothing
-			m) mtu="$OPTARG";;
-			N) pr="";;
-			s) out="-d sdl";;
 			t) measure_time_seconds="$OPTARG";;
-			v) pr="valgrind --track-origins=yes";;
+			m) mtu="$OPTARG";;
+			# s) out="-d sdl";;
 			*) usage; exit 1;;
 		esac
 	done
