@@ -1,0 +1,24 @@
+#!/bin/sh
+
+run_this_as_sudo()
+{
+	whoami
+	echo $(whoami)
+	echo $(whoami)
+	echo $(whoami)
+	echo $(whoami)
+}
+
+run_this_as_normal_user()
+{
+	echo $(whoami)         # Might not be Mabel, after all.
+	echo $(whoami)
+}
+
+main()
+{
+	run_this_as_normal_user
+	sudo run_this_as_sudo
+	run_this_as_normal_user
+}
+main

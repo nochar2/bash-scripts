@@ -1,0 +1,1 @@
+sudo ip link set wlan0 down; sudo ip link set wlan0 address "40:21:43:85:4d:c6"; sudo ip link set wlan0 up

@@ -1,37 +1,73 @@
 #!/bin/bash
 
-### settings: adjust these ###
-measuretime=30
-samplerate=100
-# samplerate=980
-eventperiod=10000
-### ---------------------- ####
+#################################
+#   settings: adjust these      #
+#################################
 
+### MEASUREMENT ###
+measure_time_seconds=30   # default
+samplerate=990
+# eventperiod=40000
 
-# two options: X times per second, or once every X events
+# choose how to sample: -F samples all events at the same speed, might be more cpu intensive,  -c samples once per X events
 howtosample="-F $samplerate"
 # howtosample="-c $eventperiod"
 
-on_rpi()
+### DEVICES ### 
+pcaddr=169.254.1.1
+pcusername="karel"
+piaddr=169.254.2.2
+piusername="rpi"
+
+### PATH ###
+# of the binary
+uv="/home/$(whointheworldami)/zmisc/git-repos/UltraGrid/ug-myfork/bin/uv"
+# of the test file
+uvviddir=$HOME/vid/ugvid/y4m
+uvfilersg=ReadySetGo_1920x1080_120fps_420_8bit_YUV.y4m
+uvfile="${uvviddir}/${uvfilersg}"
+#######################################################
+
+where_to_send_to()
 {
-	uname -n | grep rpi
+	islocal="$1"
+	if on_rpi; then
+		if [ -n "$islocal" ]; then
+			echo "$piaddr"
+		else
+			echo "$pcaddr"
+		fi
+	else
+		if [ -n "$islocal" ]; then
+			echo "$pcaddr"
+		else
+			echo "$piaddr"
+		fi
+	fi
 }
 
+# detect the correct user even if sudo is used
+whointheworldami() 
+{
+	on_rpi && echo "$piusername" || echo "$pcusername"
+}
+
+on_rpi()
+{
+	uname -n | grep -q rpi
+}
+
+# pi cannot record LLC misses
 if on_rpi; then
-	# pi cannot record LLC misses
+	# shellcheck disable=SC2089
 	whattosample="-e '{cycles,branch-misses,L1-dcache-load-misses}:ppp'"
 else
+	# shellcheck disable=SC2089
 	whattosample="-e '{cycles,branch-misses,L1-dcache-load-misses,LLC-load-misses}:ppp'"
 fi
 
 perfrecord="sudo perf record $howtosample $whattosample  --call-graph dwarf,2048 --mmap-pages 16M -z --sample-cpu --"
-uv="$HOME/zmisc/git-repos/UltraGrid/ug-myfork/bin/uv"
-# uv="/home/karel/uv"
 
-piaddr=169.254.2.2
-uvviddir=$HOME/vid/ugvid/y4m
-uvfilersg=ReadySetGo_1920x1080_120fps_420_8bit_YUV.y4m
-uvfile="${uvviddir}/${uvfilersg}"
 
 
 checkforroot()
@@ -41,15 +77,17 @@ checkforroot()
 
 usage()
 { 
-	echo "usage: $0 [-nNvgl] [file|rtdxt|screen|logotext|network|...] [MTU]"
+	echo "usage: $0 [-ghlnNsv] [-t time] [-m mtu] [file|rtdxt|screen|logo|text|network|...]"
 	echo "calls UltraGrid with arguments for the given scenario."
-	echo "-n   only print the command to be executed"
-	echo "-N   only run UltraGrid, do not use  perf record"
-	echo "-v   valgrind instead of profiling"
-	echo "-g   gdb instead of profiling"
-	echo "-l   don't send the video to rpi, display it locally on sdl screen"
-	echo "MTU: himtu, 9000, 9k  sets it to 9000"
-	echo "     lomtu, 1500, 1k5 sets it to 1500"
+	echo "-g      gdb --args uv"
+	echo "-h      help"
+	echo "-l      send to localhost instead of rpi"
+	echo "-n      (only print the command)"
+	echo "-N      uv (without perf record)"
+	echo "-s      uv -d sdl"
+	echo "-t N    run for N seconds (default 30)"
+	echo "-m MTU  MTU size (himtu/jumbo/9k is 9000, lomtu/1k5 is 1500)"
+	echo "-v      valgrind uv"
 }
 
 main() 
@@ -59,44 +97,48 @@ main()
 	
 	pr="$perfrecord"
 
-	while getopts "hnNvglt:" opt; do
+	mtu=1500
+	while getopts "ghlm:nNst:v" opt; do
 		case "$opt" in
-			t) measuretime=$OPTARG;;
-			n) possibly_just_echo="echo";;
-			N) pr="";;
-			v) pr="valgrind --track-origins=yes";;
 			g) pr="gdb --args";;
-			l) out="-d sdl";;
 			h) usage; exit 0;;
+			l) out="127.0.0.1";;
+			n) possibly_just_echo="echo";;
+			m) mtu="$OPTARG";;
+			N) pr="";;
+			s) out="-d sdl";;
+			t) measure_time_seconds="$OPTARG";;
+			v) pr="valgrind --track-origins=yes";;
+			*) usage; exit 1;;
 		esac
 	done
 	shift $((OPTIND-1))
 
-	# I really requested perf
-	# noop is not set
-
-	possibly_elevate=""
-	[[ "$pr" =~ "perf" && -z "$possibly_just_echo" && -n "$@" ]] && {
-		pr="timeout $measuretime $perfrecord"
-		possibly_elevate="sudo"
-	}
-
-	[ -z "$1" ] && { usage; exit 1; }
-	
-
-	mtu=1500
-	case "$2" in
-		himtu|9000|9k) mtu=9000;;
-		lomtu|1500|1k5) mtu=1500;;
+	case "$mtu" in
+		himtu|9k)  mtu=9000;;
+		lomtu|1k5) mtu=1500;;
+		""|*[!0-9]*) echo "mtu is not a number"; exit 1;;
 	esac
 
+	# If we're measuring for real, set the perf command
+	possibly_elevate=""
+	[[ "$pr" =~ "perf" && -z "$possibly_just_echo" && -n "$*" ]] && {
+		pr="timeout $measure_time_seconds $perfrecord"
+		possibly_elevate="sudo"
+	}
+	
+	[ -z "$1" ] && { usage; exit 1; }
 	case "$1" in
-		receive)
-			cmd="$pr $uv -d sdl";;
+		receive|receiver|recv)
+			cmd="$pr $uv -d sdl";
+			:;;
+		vulkan|vulk)
+			cmd="$pr $uv -d vulkan_sdl2";
+			:;;
 		file)  # uvfile + libavcodec (mjpeg)
 			cmd="$pr $uv -m $mtu -t file:${uvfile}:loop -c libavcodec $out";
 			:;;
-		rtdxt) # uvfile + rtdxt
+		rtdxt|dxt) # uvfile + rtdxt
 			cmd="$pr $uv -m $mtu -t file:${uvfile}:loop -c rtdxt:dxt1 $out";
 			:;;
 		screen) # screengrab + libavcodec
@@ -105,25 +147,35 @@ main()
 		network|net) # testcard
 			cmd="$pr $uv -m $mtu -t testcard:fps=1000 -d dummy $out";
 			:;;
-		deinterlace|deint) # uvfile + libavcodec + deinterlace
-			# this is file + deinterlace
-			echo "not figured out what to write"; exit 1;
-			cmd="$pr $uv -m $mtu -t file:${uvfile}:loop -c libavcodec - -d dummy $out";
+		# deinterlace|deint) # uvfile + libavcodec + deinterlace
+		# 	# this is file + deinterlace
+		# 	echo "not figured out what to write"; exit 1;
+		# 	cmd="$pr $uv -m $mtu -t file:${uvfile}:loop -c libavcodec - -d dummy $out";
+		# 	:;;
+		testcardunc|tcunc)
+			cmd="$pr $uv -m $mtu -t testcard:fps=60 $out";
 			:;;
-		logotext|lt) # uvfile + libavcodec + logo + text
-			cmd="$pr $uv -m $mtu -t testcard:codec=RGBA -F logo:pic/uglogo.pam -F text:x=10:y=1:h=100:t=Ã_lazy_example_text $out";
-			# cmd="$pr $uv -m $mtu -t file:${uvfile}:loop -F logo:pic/uglogo.pam -F text:x=10:y=800:h=100:t=ÃǍ_lazy_example_text $out";
+		testcard|tc)
+			cmd="$pr $uv -m $mtu -t testcard:fps=60 -c libavcodec:encoder=mjpeg_qsv $out";
 			:;;
+		text|txt)
+			cmd="$pr $uv -m $mtu -t file:${uvfile}:loop -c libavcodec -F text:x=10:y=1:h=100:t=A_sample_text $out";
+			:;;
+		textmid|txtm)
+			cmd="$pr $uv -m $mtu -t file:${uvfile}:loop -c libavcodec -F text:x=500:y=500:h=100:t=A_sample_text $out";
+			:;;
+		# logo|lg) # uvfile + libavcodec + logo
+		# 	cmd="$pr $uv -m $mtu -t testcard:fps=120 -c libavcodec -F logo:$HOME/pic/uglogo.pam $out";
+		# 	# cmd="$pr $uv -m $mtu -t file:${uvfile}:loop -F logo:pic/uglogo.pam -F text:x=10:y=800:h=100:t=A_sample_text $out";
+		# 	:;;
 		*) usage; exit 1;;
 	esac
 
 	# echo "cmd is:"
 	# echo "$cmd"
 
-	# necessary to split args, sadly breaks spaces
-
+	# intentionally unquoted
 	$possibly_just_echo $possibly_elevate $cmd
-
 }
 
 main "$@"
