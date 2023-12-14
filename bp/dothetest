@@ -16,8 +16,8 @@ whointheworldami()
 #################################
 
 ### MEASUREMENT ###
-measure_time_seconds=30   # default
-mtu=1500                  # default
+def_measure_time_seconds=30
+def_mtu=1500
 samplerate=990
 # eventperiod=40000
 
@@ -89,23 +89,26 @@ usage()
 	echo "-n      (only print the command)"
 	echo "-N      uv (without perf record)"
 	echo "-s      uv -d sdl"
-	echo "-t N    run for N seconds (default 30)"
-	echo "-m MTU  MTU size (himtu/jumbo/9k is 9000, lomtu/1k5 is 1500)"
+	echo "-t N    run for N seconds (default $def_measure_time_seconds)"
+	echo "-m MTU  MTU size (default $def_mtu) (aliases: himtu/jumbo/9k for 9000, lomtu/1k5 for 1500)"
 	echo "-v      valgrind uv"
 }
 
 main() 
 {
 	out="$(where_to_send_to)"
-	possibly_just_echo=""
+	possibly_noop=""
 	pr="$perfrecord"
+
+	measure_time_seconds="$def_measure_time_seconds"
+	mtu="$def_mtu"
 
 	while getopts "ghlm:nNst:v" opt; do
 		case "$opt" in
 			g) pr="gdb --args";;
 			h) usage; exit 0;;
 			l) out="$(where_to_send_to local)";;
-			n) possibly_just_echo="echo";;
+			n) possibly_noop=":";;  # : command does nothing
 			m) mtu="$OPTARG";;
 			N) pr="";;
 			s) out="-d sdl";;
@@ -177,7 +180,10 @@ main()
 	# echo "$cmd"
 
 	# intentionally unquoted
-	$possibly_just_echo $possibly_elevate $cmd
+	echo "THE FULL COMMAND IS: \"$possibly_elevate $cmd\""
+
+	[[ -z "$possibly_noop" && -n "$possibly_elevate" ]] && echo "(perf needs to be run as root)"
+	$possibly_noop $possibly_elevate $cmd
 }
 
 main "$@"
