@@ -17,6 +17,7 @@ whointheworldami()
 
 ### MEASUREMENT ###
 measure_time_seconds=30   # default
+mtu=1500                  # default
 samplerate=990
 # eventperiod=40000
 
@@ -95,17 +96,15 @@ usage()
 
 main() 
 {
-	out="$piaddr"
+	out="$(where_to_send_to)"
 	possibly_just_echo=""
-	
 	pr="$perfrecord"
 
-	mtu=1500
 	while getopts "ghlm:nNst:v" opt; do
 		case "$opt" in
 			g) pr="gdb --args";;
 			h) usage; exit 0;;
-			l) out="127.0.0.1";;
+			l) out="$(where_to_send_to local)";;
 			n) possibly_just_echo="echo";;
 			m) mtu="$OPTARG";;
 			N) pr="";;
