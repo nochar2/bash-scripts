@@ -196,6 +196,9 @@ main()
 
 	[[ -z "$possibly_noop" && -n "$possibly_elevate" ]] && echo "(perf needs to be run as root)"
 	$possibly_noop $possibly_elevate $cmd
+
+	# if I timeouted, everything is okay.
+	[ "$?" == 124 ] && true || false
 }
 
 main "$@"

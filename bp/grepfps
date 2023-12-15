@@ -1,2 +1,0 @@
-#!/bin/sh
-stdbuf -i0 -o0 grep -v "sdl\|dummy" | stdbuf -i0 -o0 grep "[0-9]*\.\?[0-9]* FPS" | stdbuf -i0 -o0 cut -d' ' -f8,9
