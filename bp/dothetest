@@ -70,7 +70,7 @@ else
 	whattosample="-e '{cycles,branch-misses,L1-dcache-load-misses,LLC-load-misses}:ppp'"
 fi
 
-perfrecord="sudo perf record $howtosample $whattosample  --call-graph dwarf,2048 --mmap-pages 16M -z --sample-cpu --"
+perfrecord="sudo perf record $howtosample $whattosample  --call-graph dwarf,2048 --mmap-pages 16M -z --sample-cpu -o perf.data --"
 
 
 
@@ -138,7 +138,7 @@ main()
 	
 	case "$scenario" in
 		receive|receiver|recv)
-			cmd="$pr $uv -d sdl $@";
+			cmd="$pr $uv -d sdl:display=0 $@";
 			:;;
 		vulkan|vulk)
 			cmd="$pr $uv -d vulkan_sdl2 $@";
