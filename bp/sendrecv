@@ -3,45 +3,64 @@ set -euo pipefail
 remote="rpi@169.254.2.2"
 username=karel
 
+run_remotely()
+{
+    sudo -u "$username" ssh -f "$remote" "$@"
+}
 end_remote_tracing()
 {
-    sudo -u "$username" ssh -f "$remote" killall dothetest
+    run_remotely sudo killall dothetest
+}
+calculate_average()
+{
+    awk '{ s+=$1; n++ } END { print s/n }'
 }
 
 sendfn()
 {
+    [ $EUID = 0 ] || { echo "perf requires root to start"; exit 1; }
+
     mkdir -p pctopi/$1
-    pushd pctopi/$1
+    cd pctopi/$1
 
-    # [ -f perf.data ] && { echo "A record for $1 already exists."; exit 0; }
+    [ -f perf.data ] && { echo "A record for $1 already exists."; exit 0; }
 
-    sudo -u "$username" ssh -f "$remote" scripts/bp/dothetest receive | tee remote-stdout
+    run_remotely sudo scripts/bp/dothetest -N receive | tee remote-stdout &
     dothetest $1  | tee local-stdout
-    end_remote_tracing
+    run_remotely sudo killall dothetest
+    run_remotely sudo killall uv
 
-    grep FPS local-stdout | ug-extractfps | awk '{ s+=$1; n++ } END { print s/n }' >average-fps-local
-    grep FPS remote-stdout | ug-extractfps | awk '{ s+=$1; n++ } END { print s/n }' >average-fps-remote
+    grep FPS local-stdout | ug-extractfps | calculate_average >average-fps-local
+    grep FPS remote-stdout | ug-extractfps | calculate_average >average-fps-remote
 }
 
 recvfn()
 {
+
     mkdir -p pitopc/$1
     cd pitopc/$1
 
-    sudo -u "$username" ssh -f "$remote" scripts/bp/dothetest $1 | tee remote-stdout
-    dothetest receive | tee local-stdout
-    sudo -u "$username" ssh -f "$remote" killall dothetest
+    [ -f perf.data ] && { echo "A record for $1 already exists."; exit 0; }
 
-    grep FPS local-stdout | ug-extractfps | awk '{ s+=$1; n++ } END { print s/n }' >average-fps-local
-    grep FPS remote-stdout | ug-extractfps | awk '{ s+=$1; n++ } END { print s/n }' >average-fps-remote
+    run_remotely scripts/bp/dothetest -N $1 | tee remote-stdout &
+    dothetest receive | tee local-stdout
+    run_remotely sudo killall dothetest
+    run_remotely sudo killall uv
+
+    grep FPS local-stdout | ug-extractfps | calculate_average >average-fps-local
+    grep FPS remote-stdout | ug-extractfps | calculate_average >average-fps-remote
 }
+
+fn=""
+case "$(basename $0)" in
+    send) fn=sendfn;;
+    receive) fn=recvfn;;
+    *) echo "use either the send or receive symlink"; exit 1;;
+esac
 
 [ $EUID = 0 ] || { echo "perf requires root to start"; exit 1; }
 
-case "$(basename $0)" in
-    send) sendfn "$@";;
-    receive) recvfn "$@";;
-esac
-
 trap end_remote_tracing INT
+"$fn" "$@"
+
 end_remote_tracing
