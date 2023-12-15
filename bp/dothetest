@@ -5,15 +5,15 @@ on_rpi()
 	uname -n | grep -q rpi
 }
 
-# detect the correct user even if sudo is used
+# guess the correct user on a given device, even if sudo is used
 whointheworldami() 
 {
 	on_rpi && echo "$piusername" || echo "$pcusername"
 }
 
-#################################
-#   settings: adjust these      #
-#################################
+################################################
+#   configurable global settings / defaults    #
+################################################
 
 ### MEASUREMENT ###
 def_measure_time_seconds=30
@@ -59,8 +59,6 @@ where_to_send_to()
 	fi
 }
 
-
-
 # pi cannot record LLC misses
 if on_rpi; then
 	# shellcheck disable=SC2089
@@ -72,17 +70,19 @@ fi
 
 perfrecord="sudo perf record $howtosample $whattosample  --call-graph dwarf,2048 --mmap-pages 16M -z --sample-cpu -o perf.data --"
 
-
-
-checkforroot()
-{
-	[ $EUID = 0 ] || { echo "perf requires root to start"; exit 1; }
-}
+# checkforroot()
+# {
+# 	[ $EUID = 0 ] || { echo "perf requires root to start"; exit 1; }
+# }
 
 usage()
 { 
 	echo "usage: $0 [-gvnNhl] [-t time] [-m mtu] [file|rtdxt|screen|logo|text|network|...] [extra UG args...]"
 	echo "calls UltraGrid with arguments for the given scenario."
+	echo "When recording between two devices, use:"
+	echo "        \"$(basename $0) SCENARIO\"  on sender,"
+	echo "        \"$(basename $0) receive\"   on receiver."
+	echo ""
 	echo "-g      use gdb instead of perf"
 	echo "-v      use valgrind instead of perf"
 	echo "-n      use nothing, only print the command"
@@ -101,6 +101,14 @@ main()
 	pr="$perfrecord"
 
 	measure_time_seconds="$def_measure_time_seconds"
+
+	# XXX: run the command on rpi indefinitely by default, because I cannot
+	# measure on it anyway and I don't want it to quit prematurely.
+	# (Pretend it is always broadcasting or always receiving the data.) 
+	# If both devices were traced, both devices would have the same timeout.
+	on_rpi && measure_time_seconds=100000000
+
+	
 	mtu="$def_mtu"
 
 	while getopts "gvnNhlt:m:" opt; do
@@ -125,35 +133,36 @@ main()
 		""|*[!0-9]*) echo "mtu is not a number"; exit 1;;
 	esac
 
-	# If we're measuring for real, set the perf command
+	# If we're measuring for real, set the perf command	
+	
 	possibly_elevate=""
 	[[ "$pr" =~ "perf" && -z "$possibly_just_echo" && -n "$*" ]] && {
 		pr="timeout $measure_time_seconds $perfrecord"
 		possibly_elevate="sudo"
 	}
-	
+
 	[ -z "$1" ] && { usage; exit 1; }
 	scenario="$1"
 	shift
-	
+
 	case "$scenario" in
 		receive|receiver|recv)
-			cmd="$pr $uv -d sdl:display=0 $@";
+			cmd="$pr $uv -d sdl:display=0 $*";
 			:;;
 		vulkan|vulk)
-			cmd="$pr $uv -d vulkan_sdl2 $@";
+			cmd="$pr $uv -d vulkan_sdl2 $*";
 			:;;
 		file)  # uvfile + libavcodec (mjpeg)
-			cmd="$pr $uv -m $mtu -t file:${uvfile}:loop -c libavcodec $@ $out";
+			cmd="$pr $uv -m $mtu -t file:${uvfile}:loop -c libavcodec $* $out";
 			:;;
 		rtdxt|dxt) # uvfile + rtdxt
-			cmd="$pr $uv -m $mtu -t file:${uvfile}:loop -c rtdxt:dxt1 $@ $out";
+			cmd="$pr $uv -m $mtu -t file:${uvfile}:loop -c rtdxt:dxt1 $* $out";
 			:;;
 		screen) # screengrab + libavcodec
-			cmd="$pr $uv -m $mtu -t screen:fps=60 -c libavcodec $@ $out";
+			cmd="$pr $uv -m $mtu -t screen:fps=60 -c libavcodec $* $out";
 			:;;
 		network|net) # testcard
-			cmd="$pr $uv -m $mtu -t testcard:fps=1000 -d dummy  $@ $out";
+			cmd="$pr $uv -m $mtu -t testcard:fps=1000 -d dummy  $* $out";
 			:;;
 		# deinterlace|deint) # uvfile + libavcodec + deinterlace
 		# 	# this is file + deinterlace
@@ -161,16 +170,16 @@ main()
 		# 	cmd="$pr $uv -m $mtu -t file:${uvfile}:loop -c libavcodec - -d dummy $out";
 		# 	:;;
 		testcardunc|tcunc)
-			cmd="$pr $uv -m $mtu -t testcard:fps=60 $@ $out";
+			cmd="$pr $uv -m $mtu -t testcard:fps=60 $* $out";
 			:;;
 		testcard|tc)
-			cmd="$pr $uv -m $mtu -t testcard:fps=60 -c libavcodec:encoder=mjpeg_qsv $@ $out";
+			cmd="$pr $uv -m $mtu -t testcard:fps=60 -c libavcodec:encoder=mjpeg_qsv $* $out";
 			:;;
 		text|txt)
-			cmd="$pr $uv -m $mtu -t file:${uvfile}:loop -c libavcodec -F text:x=10:y=1:h=100:t=A_sample_text $@ $out";
+			cmd="$pr $uv -m $mtu -t file:${uvfile}:loop -c libavcodec -F text:x=10:y=1:h=100:t=A_sample_text $* $out";
 			:;;
 		textmid|txtm)
-			cmd="$pr $uv -m $mtu -t file:${uvfile}:loop -c libavcodec -F text:x=500:y=500:h=100:t=A_sample_text $@ $out";
+			cmd="$pr $uv -m $mtu -t file:${uvfile}:loop -c libavcodec -F text:x=500:y=500:h=100:t=A_sample_text $* $out";
 			:;;
 		# logo|lg) # uvfile + libavcodec + logo
 		# 	cmd="$pr $uv -m $mtu -t testcard:fps=120 -c libavcodec -F logo:$HOME/pic/uglogo.pam $out";
