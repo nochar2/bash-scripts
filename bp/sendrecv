@@ -16,51 +16,109 @@ calculate_average()
     awk '{ s+=$1; n++ } END { print s/n }'
 }
 
+do_common_postprocessing()
+{
+    [ "$#" -eq 1 ] || set ""
+    
+    grep FPS local-stdout | ug-extractfps | calculate_average >average-fps-local
+    if [ "$1" == "-1" ]; then
+        printf "Average fps: local %s\n" "$(cat average-fps-local)"
+    else
+        grep FPS remote-stdout | ug-extractfps | calculate_average >average-fps-remote;
+        printf "Average fps: local %s, remote %s\n" "$(cat average-fps-local)" "$(cat average-fps-remote)"
+    fi
+
+    echo -n "Hotspot is transforming the data to a portable format..."
+    hotspot perf.data --exportTo perf.data.perfparser >/dev/null 2>&1
+    echo "done."
+
+    echo "Chowning everything back to $username."
+    chown $username:$username *
+    chmod 644 *
+}
+
 sendfn()
 {
     [ $EUID = 0 ] || { echo "perf requires root to start"; exit 1; }
 
-    mkdir -p pctopi/$1
-    cd pctopi/$1
+    mkdir -p pctopi/$scenario
+    cd pctopi/$scenario
 
-    [ -f perf.data ] && { echo "A record for $1 already exists."; exit 0; }
+    [ -f perf.data ] && { echo "A record for $(basename $0)ing |$1| to -$recver- already exists."; exit 0; } 
+    echo "Currently $(basename $0)ing a $1."
+    echo "Running   dothetest -N $recver  remotely..."
+    run_remotely sudo scripts/bp/dothetest -N recv$recver >remote-stdout
+    echo "Running   dothetest send$sender locally..."
+    dothetest send$sender  >local-stdout
 
-    run_remotely sudo scripts/bp/dothetest -N receive | tee remote-stdout &
-    dothetest $1  | tee local-stdout
+    echo "Done, terminating the remote end..."
     run_remotely sudo killall dothetest
     run_remotely sudo killall uv
 
-    grep FPS local-stdout | ug-extractfps | calculate_average >average-fps-local
-    grep FPS remote-stdout | ug-extractfps | calculate_average >average-fps-remote
+    do_common_postprocessing
 }
 
 recvfn()
 {
+    [ $EUID = 0 ] || { echo "perf requires root to start"; exit 1; }
 
-    mkdir -p pitopc/$1
-    cd pitopc/$1
+    mkdir -p pctopi/${scenario}
+    cd pctopi/${scenario}
 
-    [ -f perf.data ] && { echo "A record for $1 already exists."; exit 0; }
+    [ -f perf.data ] && { echo "A record for $(basename $0)ing |$1| to -$recver- already exists."; exit 0; }
 
-    run_remotely scripts/bp/dothetest -N $1 | tee remote-stdout &
-    dothetest receive | tee local-stdout
+    echo "Currently $(basename $0)ing a $1."
+    echo "Running   dothetest -N send$sender  remotely..."
+    run_remotely scripts/bp/dothetest -N send$sender >remote-stdout
+    echo "Running   dothetest recv$recver locally..."
+    dothetest recv$recver >local-stdout
+
+    echo "Done, terminating the remote end..."
     run_remotely sudo killall dothetest
     run_remotely sudo killall uv
 
-    grep FPS local-stdout | ug-extractfps | calculate_average >average-fps-local
-    grep FPS remote-stdout | ug-extractfps | calculate_average >average-fps-remote
+    do_common_postprocessing
 }
 
-fn=""
+onlylocalfn()
+{
+    [ $EUID = 0 ] || { echo "perf requires root to start"; exit 1; }
+
+    mkdir -p locally/${scenario}
+    cd locally/${scenario}
+
+    [ -f perf.data ] && { echo "A record for local loop of $1 already exists."; exit 0; }
+
+    echo "Currently looping a $1."
+    echo "Running   dothetest loop$sender on a local device..."
+    dothetest loop$sender >local-stdout
+
+    do_common_postprocessing -1
+}
+
+
+
+
+main=""
 case "$(basename $0)" in
-    send) fn=sendfn;;
-    receive) fn=recvfn;;
+    send)    main=sendfn;;
+    receive) main=recvfn;;
     *) echo "use either the send or receive symlink"; exit 1;;
 esac
 
-[ $EUID = 0 ] || { echo "perf requires root to start"; exit 1; }
+scenario="$1"
+ug-is-valid-scenario "$1" || { 
+    echo "I have no idea what a $1 scenario means."; exit 1; 
+}
+
+case "$scenario" in
+    vulkan) recver=vulkan; sender=file;;
+    limits)  recver="";  sender=limits; main=onlylocalfn;;
+    *) recver=sdl; sender=$scenario;;
+esac
+
+[ $EUID = 0 ] || { echo "perf requires root"; exit 1; }
 
 trap end_remote_tracing INT
-"$fn" "$@"
-
+"$main" "$@"
 end_remote_tracing

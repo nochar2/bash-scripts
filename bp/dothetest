@@ -1,11 +1,12 @@
 #!/bin/bash
+set -euo pipefail
 
 on_rpi()
 {
 	uname -n | grep -q rpi
 }
 
-# A great puzzle, after running this as sudo.
+# A great puzzle when the whole script is sudo
 whointheworldami() 
 {
 	on_rpi && echo "$piusername" || echo "$pcusername"
@@ -25,6 +26,7 @@ samplerate=990
 howtosample="-F $samplerate"
 # howtosample="-c $eventperiod"
 
+
 ### DEVICES ### 
 pcaddr=169.254.1.1
 pcusername="karel"
@@ -32,9 +34,9 @@ piaddr=169.254.2.2
 piusername="rpi"
 
 ### PATH ###
-# of the binary
+# - of the binary
 uv="/home/$(whointheworldami)/zmisc/git-repos/UltraGrid/ug-myfork/bin/uv"
-# of the test file
+# - of the test file
 uvviddir="/home/$(whointheworldami)/vid/ugvid/y4m"
 uvfilersg=ReadySetGo_1920x1080_120fps_420_8bit_YUV.y4m
 uvfile="${uvviddir}/${uvfilersg}"
@@ -43,23 +45,14 @@ uvfile="${uvviddir}/${uvfilersg}"
 
 where_to_send_to()
 {
-	islocal="$1"
 	if on_rpi; then
-		if [ -n "$islocal" ]; then
-			echo "$piaddr"
-		else
-			echo "$pcaddr"
-		fi
+		[ "$#" -gt 0 ] && echo "$piaddr" || echo "$pcaddr"
 	else
-		if [ -n "$islocal" ]; then
-			echo "$pcaddr"
-		else
-			echo "$piaddr"
-		fi
+		[ "$#" -eq 0 ] && echo "$piaddr" || echo "$pcaddr"
 	fi
 }
 
-# pi cannot record LLC misses
+# pi cannot record LLC misses (unused)
 if on_rpi; then
 	# shellcheck disable=SC2089
 	whattosample="-e '{cycles,branch-misses,L1-dcache-load-misses}:ppp'"
@@ -77,11 +70,14 @@ i_am_not_root()
 
 usage()
 { 
-	echo "usage: $0 [-gvnNhl] [-t time] [-m mtu] [file|rtdxt|screen|logo|text|network|...] [extra UG args...]"
+	echo "usage: $0 [-gvnNhl] [-t time] [-m mtu] [sendfile|senddxt|sendscreen|sendlogo|recvtext|looplimits|...] [extra UG args...]"
 	echo "calls UltraGrid with arguments for the given scenario."
+	echo ""
 	echo "When recording between two devices, use:"
-	echo "        \"$(basename $0) SCENARIO\"  on sender,"
-	echo "        \"$(basename $0) receive\"   on receiver."
+	echo "        \"$(basename "$0") sendXXX\"     on sender,"
+	echo "        \"$(basename "$0") recvXXX\"     on receiver."
+	echo "The exception is the  limits  scenario where nothing is sent out:"
+	echo "        \"$(basename "$0") looplimits\"  on a local computer"
 	echo ""
 	echo "-g      use gdb instead of perf"
 	echo "-v      use valgrind instead of perf"
@@ -89,7 +85,6 @@ usage()
 	echo "-N      run UltraGrid, but don't use perf at all"
 	echo "-h      help"
 	echo "-l      send to localhost instead of to remote"
-	# echo "-s      uv -d sdl"
 	echo "-t N    run for N seconds (default $def_measure_time_seconds)"
 	echo "-m MTU  MTU size (default $def_mtu) (aliases: himtu/jumbo/9k for 9000, lomtu/1k5 for 1500)"
 }
@@ -102,11 +97,14 @@ main()
 
 	measure_time_seconds="$def_measure_time_seconds"
 
-	# XXX: run the command on rpi indefinitely by default, because I cannot
-	# measure on it anyway and I don't want it to quit prematurely.
-	# (Pretend it is always broadcasting or always receiving the data.) 
-	# If both devices were traced, both devices would have the same timeout.
+	# XXX: run the command on rpi indefinitely
+	# since I'm measuring
+	#  (laptop) ---> pi,  pi ---> (laptop)
+	# instead of
+	#  (laptop) ---> (pi)
+	# because stack traces on pi are broken no matter what.
 	on_rpi && measure_time_seconds=100000000
+
 
 	
 	mtu="$def_mtu"
@@ -136,7 +134,7 @@ main()
 	# If we're measuring for real, set the perf command	
 	
 	possibly_elevate=""
-	[[ "$pr" =~ "perf" && -z "$possibly_just_echo" && -n "$*" ]] && {
+	[[ "$pr" =~ "perf" && -z "$possibly_noop" && -n "$*" ]] && {
 		pr="timeout $measure_time_seconds $perfrecord"
 		possibly_elevate="sudo -n"
 	}
@@ -146,39 +144,43 @@ main()
 	shift
 
 	case "$scenario" in
-		receive|receiver|recv)
+		recvsdl)
 			cmd="$pr $uv -d sdl:display=0 $*";
 			:;;
-		vulkan|vulk)
-			cmd="$pr $uv -d vulkan_sdl2 $*";
+		recvvulkan|recvvulk)
+			cmd="$pr $uv -d vulkan_sdl2:display=0 $*";
 			:;;
-		file)  # uvfile + libavcodec (mjpeg)
+		sendfile)  # uvfile + libavcodec (mjpeg)
 			cmd="$pr $uv -m $mtu -t file:${uvfile}:loop -c libavcodec $* $out";
 			:;;
-		rtdxt|dxt) # uvfile + rtdxt
+		sendfilenodec|sendfilenodecode)  # uvfile + libavcodec (mjpeg)
+			cmd="$pr $uv -m $mtu -t file:${uvfile}:loop:nodecode -c libavcodec $* $out";
+			:;;
+		sendrtdxt|senddxt) # uvfile + rtdxt
 			cmd="$pr $uv -m $mtu -t file:${uvfile}:loop -c rtdxt:dxt1 $* $out";
 			:;;
-		screen) # screengrab + libavcodec
+		sendscreen) # screengrab + libavcodec
 			cmd="$pr $uv -m $mtu -t screen:fps=60 -c libavcodec $* $out";
 			:;;
-		network|net) # testcard
-			cmd="$pr $uv -m $mtu -t testcard:fps=1000 -d dummy  $* $out";
+		looplimits|looplim) # dumb testcard
+			cmd="$pr $uv -m $mtu -t testcard:fps=1000 -d dummy  $*";
 			:;;
 		# deinterlace|deint) # uvfile + libavcodec + deinterlace
 		# 	# this is file + deinterlace
 		# 	echo "not figured out what to write"; exit 1;
 		# 	cmd="$pr $uv -m $mtu -t file:${uvfile}:loop -c libavcodec - -d dummy $out";
 		# 	:;;
-		testcardunc|tcunc)
-			cmd="$pr $uv -m $mtu -t testcard:fps=60 $* $out";
-			:;;
-		testcard|tc)
-			cmd="$pr $uv -m $mtu -t testcard:fps=60 -c libavcodec:encoder=mjpeg_qsv $* $out";
-			:;;
-		text|txt)
+
+		# sendtestcardunc|sendtcunc)
+		# 	cmd="$pr $uv -m $mtu -t testcard:fps=60 $* $out";
+		# 	:;;
+		# sendtestcard|sendtc)
+		# 	cmd="$pr $uv -m $mtu -t testcard:fps=60 -c libavcodec:encoder=mjpeg_qsv $* $out";
+		# 	:;;
+		sendtext|sendtxt)
 			cmd="$pr $uv -m $mtu -t file:${uvfile}:loop -c libavcodec -F text:x=10:y=1:h=100:t=A_sample_text $* $out";
 			:;;
-		textmid|txtm)
+		sendtextmid|sendtxtm)
 			cmd="$pr $uv -m $mtu -t file:${uvfile}:loop -c libavcodec -F text:x=500:y=500:h=100:t=A_sample_text $* $out";
 			:;;
 		# logo|lg) # uvfile + libavcodec + logo
@@ -195,10 +197,10 @@ main()
 		echo "perf needs to be run as root"; exit 1;
 	}
 
-	$possibly_noop $possibly_elevate $cmd
-
-	# if I timeouted, everything is okay.
-	[ "$?" == 124 ] && true || false
+	$possibly_noop $possibly_elevate $cmd ||  ( 
+		# If I timed out, everything is okay, don't fail.
+		[ "$?" == 124 ]
+	) 
 }
 
 main "$@"

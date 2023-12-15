@@ -1,0 +1,2 @@
+#!/bin/sh
+grep -q -e "^$1$" /home/karel/scripts/bp/scenarios 
