@@ -107,8 +107,8 @@ main()
 		case "$opt" in
 			g) pr="gdb --args";;
 			v) pr="valgrind --track-origins=yes";;
-			n) possibly_noop=":";;  # : command does nothing
-			N) pr="";;
+			n) possibly_noop=":";;                     # : command does nothing
+			N) pr=""; measure_time_seconds="10000000";;   # not measuring, pointless to timeout
 			h) usage; exit 0;;
 			l) out="$(where_to_send_to local)";;
 			t) measure_time_seconds="$OPTARG";;
