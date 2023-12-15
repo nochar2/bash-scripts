@@ -1,6 +1,12 @@
 #!/bin/sh
 set -euo pipefail
 remote="rpi@169.254.2.2"
+username=karel
+
+end_remote_tracing()
+{
+    sudo -u "$username" ssh -f "$remote" killall dothetest
+}
 
 sendfn()
 {
@@ -9,9 +15,9 @@ sendfn()
 
     # [ -f perf.data ] && { echo "A record for $1 already exists."; exit 0; }
 
-    ssh -f "$remote" scripts/bp/dothetest receive | tee remote-stdout &
+    sudo -u "$username" ssh -f "$remote" scripts/bp/dothetest receive | tee remote-stdout
     dothetest $1  | tee local-stdout
-    ssh -f "$remote" killall dothetest
+    end_remote_tracing
 
     grep FPS local-stdout | ug-extractfps | awk '{ s+=$1; n++ } END { print s/n }' >average-fps-local
     grep FPS remote-stdout | ug-extractfps | awk '{ s+=$1; n++ } END { print s/n }' >average-fps-remote
@@ -22,17 +28,20 @@ recvfn()
     mkdir -p pitopc/$1
     cd pitopc/$1
 
-    ssh -f "$remote" scripts/bp/dothetest $1 | tee remote-stdout
+    sudo -u "$username" ssh -f "$remote" scripts/bp/dothetest $1 | tee remote-stdout
     dothetest receive | tee local-stdout
-    ssh -f "$remote" killall dothetest
+    sudo -u "$username" ssh -f "$remote" killall dothetest
 
     grep FPS local-stdout | ug-extractfps | awk '{ s+=$1; n++ } END { print s/n }' >average-fps-local
     grep FPS remote-stdout | ug-extractfps | awk '{ s+=$1; n++ } END { print s/n }' >average-fps-remote
 }
 
-# [ $EUID = 0 ] || { echo "perf requires root to start"; exit 1; }
+[ $EUID = 0 ] || { echo "perf requires root to start"; exit 1; }
 
 case "$(basename $0)" in
     send) sendfn "$@";;
     receive) recvfn "$@";;
 esac
+
+trap end_remote_tracing INT
+end_remote_tracing

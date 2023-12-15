@@ -18,7 +18,7 @@ run_this_as_normal_user()
 main()
 {
 	run_this_as_normal_user
-	sudo run_this_as_sudo
+	sudo whoami
 	run_this_as_normal_user
 }
 main

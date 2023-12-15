@@ -5,7 +5,7 @@ on_rpi()
 	uname -n | grep -q rpi
 }
 
-# guess the correct user on a given device, even if sudo is used
+# A great puzzle, after running this as sudo.
 whointheworldami() 
 {
 	on_rpi && echo "$piusername" || echo "$pcusername"
@@ -35,7 +35,7 @@ piusername="rpi"
 # of the binary
 uv="/home/$(whointheworldami)/zmisc/git-repos/UltraGrid/ug-myfork/bin/uv"
 # of the test file
-uvviddir=$HOME/vid/ugvid/y4m
+uvviddir="/home/$(whointheworldami)/vid/ugvid/y4m"
 uvfilersg=ReadySetGo_1920x1080_120fps_420_8bit_YUV.y4m
 uvfile="${uvviddir}/${uvfilersg}"
 #######################################################
@@ -70,10 +70,10 @@ fi
 
 perfrecord="sudo perf record $howtosample $whattosample  --call-graph dwarf,2048 --mmap-pages 16M -z --sample-cpu -o perf.data --"
 
-# checkforroot()
-# {
-# 	[ $EUID = 0 ] || { echo "perf requires root to start"; exit 1; }
-# }
+i_am_not_root()
+{
+	[ $EUID != 0 ]
+}
 
 usage()
 { 
@@ -138,7 +138,7 @@ main()
 	possibly_elevate=""
 	[[ "$pr" =~ "perf" && -z "$possibly_just_echo" && -n "$*" ]] && {
 		pr="timeout $measure_time_seconds $perfrecord"
-		possibly_elevate="sudo"
+		possibly_elevate="sudo -n"
 	}
 
 	[ -z "$1" ] && { usage; exit 1; }
@@ -188,13 +188,13 @@ main()
 		*) usage; exit 1;;
 	esac
 
-	# echo "cmd is:"
-	# echo "$cmd"
-
-	# intentionally unquoted
 	echo "THE FULL COMMAND IS: \"$possibly_elevate $cmd\""
 
-	[[ -z "$possibly_noop" && -n "$possibly_elevate" ]] && echo "(perf needs to be run as root)"
+	# intentionally unquoted
+	[[ -z "$possibly_noop" && -n "$possibly_elevate" ]] && i_am_not_root && { 
+		echo "perf needs to be run as root"; exit 1;
+	}
+
 	$possibly_noop $possibly_elevate $cmd
 
 	# if I timeouted, everything is okay.
