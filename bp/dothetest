@@ -81,7 +81,7 @@ checkforroot()
 
 usage()
 { 
-	echo "usage: $0 [-gvnNhl] [-t time] [-m mtu] [file|rtdxt|screen|logo|text|network|...]"
+	echo "usage: $0 [-gvnNhl] [-t time] [-m mtu] [file|rtdxt|screen|logo|text|network|...] [extra UG args...]"
 	echo "calls UltraGrid with arguments for the given scenario."
 	echo "-g      use gdb instead of perf"
 	echo "-v      use valgrind instead of perf"
@@ -133,24 +133,27 @@ main()
 	}
 	
 	[ -z "$1" ] && { usage; exit 1; }
-	case "$1" in
+	scenario="$1"
+	shift
+	
+	case "$scenario" in
 		receive|receiver|recv)
-			cmd="$pr $uv -d sdl";
+			cmd="$pr $uv -d sdl $@";
 			:;;
 		vulkan|vulk)
-			cmd="$pr $uv -d vulkan_sdl2";
+			cmd="$pr $uv -d vulkan_sdl2 $@";
 			:;;
 		file)  # uvfile + libavcodec (mjpeg)
-			cmd="$pr $uv -m $mtu -t file:${uvfile}:loop -c libavcodec $out";
+			cmd="$pr $uv -m $mtu -t file:${uvfile}:loop -c libavcodec $@ $out";
 			:;;
 		rtdxt|dxt) # uvfile + rtdxt
-			cmd="$pr $uv -m $mtu -t file:${uvfile}:loop -c rtdxt:dxt1 $out";
+			cmd="$pr $uv -m $mtu -t file:${uvfile}:loop -c rtdxt:dxt1 $@ $out";
 			:;;
 		screen) # screengrab + libavcodec
-			cmd="$pr $uv -m $mtu -t screen:fps=60 -c libavcodec $out";
+			cmd="$pr $uv -m $mtu -t screen:fps=60 -c libavcodec $@ $out";
 			:;;
 		network|net) # testcard
-			cmd="$pr $uv -m $mtu -t testcard:fps=1000 -d dummy $out";
+			cmd="$pr $uv -m $mtu -t testcard:fps=1000 -d dummy  $@ $out";
 			:;;
 		# deinterlace|deint) # uvfile + libavcodec + deinterlace
 		# 	# this is file + deinterlace
@@ -158,16 +161,16 @@ main()
 		# 	cmd="$pr $uv -m $mtu -t file:${uvfile}:loop -c libavcodec - -d dummy $out";
 		# 	:;;
 		testcardunc|tcunc)
-			cmd="$pr $uv -m $mtu -t testcard:fps=60 $out";
+			cmd="$pr $uv -m $mtu -t testcard:fps=60 $@ $out";
 			:;;
 		testcard|tc)
-			cmd="$pr $uv -m $mtu -t testcard:fps=60 -c libavcodec:encoder=mjpeg_qsv $out";
+			cmd="$pr $uv -m $mtu -t testcard:fps=60 -c libavcodec:encoder=mjpeg_qsv $@ $out";
 			:;;
 		text|txt)
-			cmd="$pr $uv -m $mtu -t file:${uvfile}:loop -c libavcodec -F text:x=10:y=1:h=100:t=A_sample_text $out";
+			cmd="$pr $uv -m $mtu -t file:${uvfile}:loop -c libavcodec -F text:x=10:y=1:h=100:t=A_sample_text $@ $out";
 			:;;
 		textmid|txtm)
-			cmd="$pr $uv -m $mtu -t file:${uvfile}:loop -c libavcodec -F text:x=500:y=500:h=100:t=A_sample_text $out";
+			cmd="$pr $uv -m $mtu -t file:${uvfile}:loop -c libavcodec -F text:x=500:y=500:h=100:t=A_sample_text $@ $out";
 			:;;
 		# logo|lg) # uvfile + libavcodec + logo
 		# 	cmd="$pr $uv -m $mtu -t testcard:fps=120 -c libavcodec -F logo:$HOME/pic/uglogo.pam $out";
