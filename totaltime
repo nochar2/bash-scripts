@@ -1,0 +1,19 @@
+#!/bin/sh
+
+[ -z "$@" ] && {
+	echo "usage: $0 directories...";
+	echo "calculates total time of audio/video content in a directory";
+	exit 1;
+}
+
+find "$@" -type f \
+	| parallel --eta 'mediainfo {} --Inform="General;%Duration%"' \
+	| awk '{ ms+=$1 } END { 
+		s = ms / 1000;
+		h = s / 3600;
+		s = s % 3600;
+		m = s / 60;
+		s = s % 60;
+		printf "%d:%.2d:%.2d\n", h, m, s;
+	}
+	'

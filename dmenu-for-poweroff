@@ -1,0 +1,8 @@
+#!/bin/sh
+
+options="suspend
+hibernate
+poweroff
+reboot"
+choice="$(dmenu -p "What to do?" <<< "$options")"
+systemctl $choice

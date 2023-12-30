@@ -1,0 +1,11 @@
+#!/bin/sh
+
+lsipath=/etc/systemd/logind.conf.d/lidswitch-inhibit.conf
+
+case "$1" in
+	sleep) sudo mv ${lsipath} ${lsipath}.inactive || true;;
+	nosleep) sudo mv ${lsipath}.inactive ${lsipath} || true;;
+	*) echo "usage: $0 sleep/nosleep"; exit 1;;
+esac
+
+systemctl reload systemd-logind
