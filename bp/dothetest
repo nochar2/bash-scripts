@@ -17,12 +17,13 @@ whointheworldami()
 ################################################
 
 ### MEASUREMENT ###
-def_measure_time_seconds=30
+# def_measure_time_seconds=30   # recorded data currently
+def_measure_time_seconds=60     # what I'd like
 def_mtu=1500
 samplerate=990
 # eventperiod=40000
 
-# choose how to sample: -F samples all events at the same speed, might be more cpu intensive,  -c samples once per X events
+# choose how to sample: -F samples all events at the same speed, might be more cpu intensive,  -c samples once per X events 
 howtosample="-F $samplerate"
 # howtosample="-c $eventperiod"
 
@@ -61,7 +62,7 @@ else
 	whattosample="-e '{cycles,branch-misses,L1-dcache-load-misses,LLC-load-misses}:ppp'"
 fi
 
-perfrecord="sudo perf record $howtosample $whattosample  --call-graph dwarf,2048 --mmap-pages 16M -z --sample-cpu -o perf.data --"
+perfrecord="sudo -n perf record $howtosample $whattosample  --call-graph dwarf,2048 --mmap-pages 16M -z --sample-cpu -o perf.data --"
 
 i_am_not_root()
 {
@@ -116,7 +117,7 @@ main()
 			n) possibly_noop=":";;                     # : command does nothing
 			N) pr=""; measure_time_seconds="10000000";;   # not measuring, pointless to timeout
 			h) usage; exit 0;;
-			l) out="$(where_to_send_to local)";;
+			l) out="-d sdl $(where_to_send_to local)";;
 			t) measure_time_seconds="$OPTARG";;
 			m) mtu="$OPTARG";;
 			# s) out="-d sdl";;
@@ -132,14 +133,25 @@ main()
 	esac
 
 	# If we're measuring for real, set the perf command	
+	# echo "$pr"
+	# [[ "$pr" =~ "perf" ]]; echo "$?"
+	# echo "x${possibly_noop}x"
+	# # [[ "$possibly_noop" != ":" ]]; echo "$?"
+	# echo "args: $*"
+	# [[ -n "$@" ]]; echo "$?"
 	
-	possibly_elevate=""
-	[[ "$pr" =~ "perf" && -z "$possibly_noop" && -n "$*" ]] && {
+	
+	need_root=""
+	[[ "$pr" =~ "perf" && -n "$*" ]] && {
+		need_root=yes
 		pr="timeout $measure_time_seconds $perfrecord"
-		possibly_elevate="sudo -n"
 	}
 
-	[ -z "$1" ] && { usage; exit 1; }
+	if  [ -z "${1:-}" ]; then
+		 usage; exit 1;
+	else
+		true;
+	fi
 	scenario="$1"
 	shift
 
@@ -160,7 +172,7 @@ main()
 			cmd="$pr $uv -m $mtu -t file:${uvfile}:loop -c rtdxt:dxt1 $* $out";
 			:;;
 		sendscreen) # screengrab + libavcodec
-			cmd="$pr $uv -m $mtu -t screen:fps=60 -c libavcodec $* $out";
+			cmd="$pr $uv -m $mtu -t screen:fps=120 -c libavcodec $* $out";
 			:;;
 		looplimits|looplim) # dumb testcard
 			cmd="$pr $uv -m $mtu -t testcard:fps=1000 -d dummy  $*";
@@ -190,14 +202,18 @@ main()
 		*) usage; exit 1;;
 	esac
 
-	echo "THE FULL COMMAND IS: \"$possibly_elevate $cmd\""
+	echo "THE FULL COMMAND IS:"
+	echo "--------------------"
+	echo $cmd
+	echo "--------------------"
 
 	# intentionally unquoted
-	[[ -z "$possibly_noop" && -n "$possibly_elevate" ]] && i_am_not_root && { 
+	[[ -z "$possibly_noop" && -n "$need_root" ]] && i_am_not_root && { 
 		echo "perf needs to be run as root"; exit 1;
 	}
 
-	$possibly_noop $possibly_elevate $cmd ||  ( 
+	# (possible) sudo is already used inside cmd
+	$possibly_noop $cmd ||  ( 
 		# If I timed out, everything is okay, don't fail.
 		[ "$?" == 124 ]
 	) 
