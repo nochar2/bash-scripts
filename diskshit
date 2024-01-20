@@ -22,6 +22,7 @@ f_mnt()
     [ -z "$drive" ] && {
         drive=$(abs_drive_path $(echo "$files" | selector "Which device to mount?"))
     }
+    [ -z "$drive" ] && exit 1;
     $notifysend udisksctl "$(udisksctl mount -b "$drive" 2>&1)"
 }
 
@@ -35,6 +36,7 @@ f_umount()
         drive=$(abs_drive_path $(echo "$files" \
             | selector "Which device to unmount${maybe_disconnect}?"))
     }
+    [ -z "$drive" ] && exit 1;
     $notifysend udisksctl "$(udisksctl unmount -b "$drive" 2>&1)"
 
     [ -n "$poweroff" ] && {
