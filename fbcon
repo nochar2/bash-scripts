@@ -2,24 +2,28 @@
 # wrapper for kmscon
 # allows to do reasonable work at text only mode.
 
-# What is the experience like?
-# - byobu is the key (although ctrl- doesn't work)
-# - distractions literally do not exist
-# - xinit for individual apps works, although poorly
-# - mpv still works
-# - viewing pdfs works with difficulty
-# - things are fast
+# What does it feel like, working without an X server?
+# - no distractions whatsoever
+# - byobu <3
+#   - sadly, ctrl-X  and shift-X sometimes don't work => no splits, apps limited
+# - inside kmscon, mpv works
+#   - can view videos, music, images
+# - outside of the kmscon:
+#   - fbpdf somewhat works with difficulty
+#   - other apps work with xinit, although poorly 
+#     - can't resize, running as root -> no settings, ...
 
 # Relevant tools
 # - fbpdf?
-# - fgconsole         number of current console term
+# - fgconsole         number of current console term (prints 4 when on tty4)
+# search pacman for "framebuffer" i guess
 
 [ "$(whoami)" = root ] || { echo "Need to run kmscon as root"; exit 1; }
 
 # 21 is in ms
 kmscon --xkb-layout cz \
        --xkb-variant qwerty \
-       --xkb-repeat-rate 21 \
+       --xkb-repeat-rate 17 \
        --xkb-options caps:swapescape \
        --sb-size 70000 \
        --font-name "JetBrains Mono Bold" \
