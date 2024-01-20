@@ -2,10 +2,17 @@
 
 lsipath=/etc/systemd/logind.conf.d/lidswitch-inhibit.conf
 
+doitforreal()
+{
+	case "$1" in
+		sleep|s)    kdesu -c "mv ${lsipath} ${lsipath}.inactive || true; systemctl reload systemd-logind"; exit 0;;
+		nosleep|ns) kdesu -c "mv ${lsipath}.inactive ${lsipath} || true; systemctl reload systemd-logind"; exit 0;;
+	esac
+}
 case "$1" in
-	sleep) sudo mv ${lsipath} ${lsipath}.inactive || true;;
-	nosleep) sudo mv ${lsipath}.inactive ${lsipath} || true;;
-	*) echo "usage: $0 sleep/nosleep"; exit 1;;
+	sleep|s|nosleep|ns) doitforreal "$1";;
+	help|h) echo "usage: $0 sleep/nosleep";
+			echo "disables or enables a lid-switch suspend inhibit by moving a config file";;
+	*) set "$(dmenu -p "which one?" <<<"sleep
+nosleep" )"; doitforreal "$1";;
 esac
-
-systemctl reload systemd-logind
