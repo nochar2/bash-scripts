@@ -27,6 +27,11 @@ max() {
     echo $(( $1 > $2 ? $1 : $2 ))
 }
 
+is_running_under_X() {
+    # TODO: check if X server is running
+    false;
+}
+
 color() 
 {
     temp_change=1.03   # multiplicative
@@ -75,16 +80,21 @@ color()
     echo "$desired_bri" > "/tmp/red-colorbri"
 
     # bypass the long restore animation. 
-    # Unconditional, pgrep is surprisingly slow btw
+    # Unconditional, pgrep is really slow btw
     killall -KILL redshift 2>/dev/null
 
-    lastid=$(cat /tmp/last-notification)
-    [ -n "$lastid" ] && lastid_arg="-r $lastid" || lastid_arg=""
-    # shellcheck disable=SC2086
-    newid=$(notify-send $lastid_arg -p -t 700 "$(basename "$0")" "Setting screen color temp to ${desired_temp}K")
+    method="drm"
+
+    is_running_under_X && {
+        lastid="$(cat /tmp/last-notification)"
+        [ -n "$lastid" ] && lastid_arg="-r $lastid" || lastid_arg=""
+        # shellcheck disable=SC2086
+        newid="$(notify-send $lastid_arg -p -t 700 "$(basename "$0")" "Setting screen color temp to ${desired_temp}K")"
+        echo "$newid" > /tmp/last-notification
+        method="randr"
+    }
     echo "$desired_bri"
-    redshift -P -b ${desired_bri}:1.0 -O "$desired_temp" >/dev/null
-    echo "$newid" > /tmp/last-notification
+    redshift -P -b ${desired_bri}:1.0 -m "$method" -O "$desired_temp" >/dev/null
 }
 
 
