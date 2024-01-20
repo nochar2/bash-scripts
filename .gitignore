@@ -1,11 +1,23 @@
-wpassword
-*.ovpn
+# binaries
+sanepr   
+
+# personal
+preload/startx
+
+# one-off things
+main.c
+test
+
+# external 
 unversioned/
 ext/
-secrets/
-sanepr
-a.out
-main.c
-perf.data*
 
+# output junk
+perf.data*
+a.out
+
+# secret stuff
+*.ovpn
+secrets/
 setdefmac
+*password*
