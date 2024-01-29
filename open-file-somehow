@@ -37,7 +37,7 @@ suitable_program_for() {
         document/*) echo zathura;;
         html/*) echo firefox;;
         image/vnd.djvu) echo zathura;;
-        image/*) echo sxiv;;
+        image/*) echo mpv;;
         inode/directory) echo dolphin;;
         inode/x-empty) echo "$EDITOR";;
         text/html) dmenu_with_opts firefox $EDITOR;;
