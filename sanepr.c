@@ -1,6 +1,8 @@
 /*
 sanepr.c -- place two files in two columns next to each other,
             actually taking wcwidth into account.
+
+            Uses external sds.h and wcwidth.h (stdlib wcwidth is broken)
 */
 #include <stdio.h>
 #include <stdlib.h>
@@ -13,12 +15,21 @@ sanepr.c -- place two files in two columns next to each other,
 int howlongisthis(const char *s)
 {
         wchar_t buf[500] = {0};
+        bool got_invalid_char = false;
 
         int e = mbsrtowcs(buf, &s, 500, NULL);
-        assert(e >= 0);
-        // this returns -1 for tabs, don't care enough to fix that
-        int ret = mk_wcswidth((const wchar_t *)buf, 500);
-        return ret;
+        assert(e >= 0 && "howlongisthis: non-utf8 garbage in input");
+
+        int len = 0;
+        for (wchar_t *pc = (wchar_t *)buf; *pc; pc++) {
+                if (*pc == L'\t') { len += 8; continue; }
+                int charw = mk_wcwidth(*pc);
+                if (charw == -1) { got_invalid_char = true; len += 0; } else { len += charw; }
+        }
+        if (got_invalid_char) {
+                fprintf(stderr, "howlongisthis: garbage characters / control codes in input");
+        }
+        return len;
 }
 
 int len_of_longest_line_in(char *file)
@@ -39,7 +50,8 @@ int len_of_longest_line_in(char *file)
 #include <locale.h>
 
 #define MAXFILES 20
-#define STR(x) #x
+#define STR_(x) #x
+#define STR(x) STR_(x)
 
 bool any_of(bool *a, int sz) {
         for (int i = 0; i < sz; i++) {
@@ -68,7 +80,7 @@ int main(int argc, char **argv)
         assert(n_files < MAXFILES && "the maximum is " STR(MAXFILES) "files");
                 
         setlocale(LC_ALL, "en_US.UTF-8");
-        assert(howlongisthis("přeskočil") == 9);
+        assert(howlongisthis("křížala") == 7);
 
         assert(argc >= 2 && "expected at least one file");
 
