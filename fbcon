@@ -28,5 +28,11 @@ kmscon --xkb-layout cz \
        --sb-size 70000 \
        --font-name "JetBrains Mono Bold" \
        --font-dpi 120 \
-       --hwaccel \
+       --grab-zoom-in "" \
+       --grab-zoom-out "" \
        --login -- /bin/bash -i
+
+       # these don't fix anything
+       # --no-drm \  
+       # --hwaccel \
+       # --render-engine bblit \

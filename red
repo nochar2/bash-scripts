@@ -29,8 +29,9 @@ max() {
 
 is_running_under_X() {
     # TODO: check if X server is running
-    # true;
-    false;
+    # not using X11/wayland is kinda dumb so idc for now
+    true;
+    # false;
 }
 
 color() 

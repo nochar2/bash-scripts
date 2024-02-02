@@ -4,5 +4,5 @@ options="suspend
 hibernate
 poweroff
 reboot"
-choice="$(dmenu -p "What to do?" <<< "$options")"
+choice="$(dmenu -p "See you later." <<< "$options")"
 systemctl $choice
