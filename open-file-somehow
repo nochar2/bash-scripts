@@ -27,7 +27,7 @@ suitable_program_for() {
         qpf|qsf|bsf|bdf) echo quartus; return;;
     esac
 
-    mime=$(file -L -b --mime-type "$filename")
+    mime="$(file -L --brief --mime-type "$filename")"
     case "$mime" in
         application/epub+zip) echo zathura;;
         application/json) dmenu_with_opts "jq ." vim helix kwrite;;
@@ -37,10 +37,10 @@ suitable_program_for() {
         document/*) echo zathura;;
         html/*) echo firefox;;
         image/vnd.djvu) echo zathura;;
-        image/*) echo mpv;;
+        image/*) echo sxiv;;
         inode/directory) echo dolphin;;
         inode/x-empty) echo "$EDITOR";;
-        text/html) dmenu_with_opts firefox $EDITOR;;
+        text/html) dmenu_with_opts firefox "$EDITOR";;
         text/*) echo "$EDITOR";;
         video/*) echo mpv;;
         application/vnd.ms-htmlhelp) echo kchmviewer;;
@@ -85,8 +85,8 @@ usage() {
 main() {
     [ "$1" = "-n" ] && { just_echo=1; shift; }
     [ "$1" = "-t" ] && { termprefix="$TERMINAL -e "; shift; }
-    [ "$1" = "--help" -o "$1" = "-h" ] && { usage; exit 0; }
-    [ "$#" != 1 -o -z "$1" ] && { usage; exit 1; }
+    { [ "$1" = "--help" ] || [ "$1" = "-h" ]; } && { usage; exit 0; }
+    { [ "$#" != 1 ] || [ -z "$1" ]; } && { usage; exit 1; }
 
 
     file="$*"

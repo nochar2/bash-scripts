@@ -4,6 +4,7 @@ sanepr.c -- place two files in two columns next to each other,
 
             Uses external sds.h and wcwidth.h (stdlib wcwidth is broken)
 */
+#include <locale.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "ext/sds.h"
@@ -36,18 +37,15 @@ int len_of_longest_line_in(char *file)
 {
         assert(file != NULL);
         int ret;
-        static char buf[30];
-        static char cmd[50];
+        static char cmd[BUFSIZ];
 
-        snprintf(cmd, 50, "/bin/wc -L %s", file);
+        snprintf(cmd, BUFSIZ, "/bin/wc -L %s", file);
         FILE *f = popen(cmd, "r"); assert(f != NULL);
-        fgets(buf, sizeof(buf), f);
-
-        sscanf(buf, "%d", &ret);
+        fscanf(f, "%d", &ret);
+        pclose(f);
         return ret;
 }
 
-#include <locale.h>
 
 #define MAXFILES 20
 #define STR_(x) #x
@@ -80,7 +78,9 @@ int main(int argc, char **argv)
         assert(n_files < MAXFILES && "the maximum is " STR(MAXFILES) "files");
                 
         setlocale(LC_ALL, "en_US.UTF-8");
+        // comparing apples to plums smh
         assert(howlongisthis("křížala") == 7);
+        assert(howlongisthis("梅干し") == 6);  
 
         assert(argc >= 2 && "expected at least one file");
 

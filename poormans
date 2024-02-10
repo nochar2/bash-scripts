@@ -36,5 +36,5 @@ islocal=$1
 must_use_sudo_for $prog && maybe_sudo="sudo"
 must_use_geom_for $prog && maybe_geom="-geometry 1920x1080+0+0"
 
-echo $maybe_sudo xinit ${pathprefix}${prog} $maybe_geom "$@" -- :0 vt$(fgconsole)
-$maybe_sudo xinit ${pathprefix}${prog} $maybe_geom "$@" -- :0 vt$(fgconsole)
+echo $maybe_sudo xinit "${pathprefix}${prog}" $maybe_geom "$@" -- :0 "vt$(fgconsole)"
+$maybe_sudo xinit "${pathprefix}${prog}" $maybe_geom "$@" -- :0 "vt$(fgconsole)"

@@ -32,13 +32,13 @@ list_recent_files_in()
 	ls -tcF "$1" | grep -v "[/@*]$" | head
 }
 
-pad_to_ideal_width()
-{
-	width=$(wc -L "$1" | cut -d" " -f1)
-	cat "$1" | (IFS="\n"; while read r; do
-		printf "%s%*s\n" "$r" "$[$width - $(wc -L <<< "$r")]" "";
-	done)
-}
+# pad_to_ideal_width()
+# {
+# 	width=$(wc -L "$1" | cut -d" " -f1)
+# 	cat "$1" | (IFS="\n"; while read r; do
+# 		printf "%s%*s\n" "$r" "$[$width - $(wc -L <<< "$r")]" "";
+# 	done)
+# }
 
 put_next_to_each_other()
 {
@@ -57,13 +57,16 @@ recreate()
 
 	cat $ptd | tee \
 		>(cut_and_embox "Todo") \
+		>(cut_and_embox "Další poznámky") \
 		>(cut_and_embox "Doing") \
-		>(cut_and_embox "Zkoušky") >/dev/null | cat >$tf/col1
+		>(cut_and_embox "Zkoušky") \
+		>/dev/null | cat >$tf/col1
 
 	cat $td | tee \
 		>(cut_and_embox "Break down further" "Bakalářka: práce na zpracování") \
 		>(cut_and_embox "To do" "Elementární kroky") \
-		>(cut_and_embox "Zkoušky") >/dev/null | cat >$tf/col2
+		>(cut_and_embox "Zkoušky") \
+		>/dev/null | cat >$tf/col2
 		
 	put_next_to_each_other $tf/col1 $tf/col2 >$tf/result
 
