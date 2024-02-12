@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 
 # temp files
 tf=/tmp/dashboard
@@ -13,7 +14,7 @@ mkdir -p $tf
 cut_md_section()
 {
 	# section="$1"
-	sed -ne "/^# $1/,/^#/p;" | sed -e "1 d; $ d;" | cat -s
+	sed -ne "/^# $1/,/^#/p;" | sed -e "1 d;" | cat -s
 }
 
 box_with_title()
@@ -51,22 +52,59 @@ put_next_to_each_other()
 	sanepr "$tf/1al" "$tf/2al"
 }
 
+cut_and_embox_each_chunk()
+{
+	rejoined=""
+	chunk=""
+	title=""
+	actually_bother_reading_this=1;
+	while read l; do
+		# the rhs *has* to be unquoted
+		if [[ "$l" =~ ^#\ - ]]; then
+			actually_bother_reading_this=0;
+		elif [[ "$l" =~ ^#\ [^-] ]]; then
+			title="${l### }"
+			actually_bother_reading_this=1;
+		fi
+
+		if [ 0 -eq "$actually_bother_reading_this" ]; then
+			continue;
+		fi
+
+		if [ "$l" = "" ]; then
+			if [ "$chunk" != "" ]; then
+				rejoined="$rejoined
+$(cut_and_embox "$title" <<< "$chunk")
+";
+				chunk="";
+			fi
+		else
+				chunk="$chunk
+$l";
+		fi
+	done
+
+	echo "$rejoined"
+}
+
 recreate()
 {
 	# cat $ptd | tee >(cut_and_embox "Todo") >/dev/null | cat >$tf/col1
 
-	cat $ptd | tee \
-		>(cut_and_embox "Todo") \
-		>(cut_and_embox "Další poznámky") \
-		>(cut_and_embox "Doing") \
-		>(cut_and_embox "Zkoušky") \
-		>/dev/null | cat >$tf/col1
+	cat $ptd | cut_and_embox_each_chunk >$tf/col1
+	# cat $ptd | tee \
+	# 	>(cut_and_embox "Todo") \
+	# 	>(cut_and_embox "Další poznámky") \
+	# 	>(cut_and_embox "Doing") \
+	# 	>(cut_and_embox "Zkoušky") \
+	# 	>/dev/null | cat >$tf/col1
 
-	cat $td | tee \
-		>(cut_and_embox "Break down further" "Bakalářka: práce na zpracování") \
-		>(cut_and_embox "To do" "Elementární kroky") \
-		>(cut_and_embox "Zkoušky") \
-		>/dev/null | cat >$tf/col2
+	cat $td | cut_and_embox_each_chunk >$tf/col2
+	# cat $td | tee \
+	# 	>(cut_and_embox "Break down further" "Bakalářka: práce na zpracování") \
+	# 	>(cut_and_embox "To do" "Elementární kroky") \
+	# 	>(cut_and_embox "Zkoušky") \
+	# 	>/dev/null | cat >$tf/col2
 		
 	put_next_to_each_other $tf/col1 $tf/col2 >$tf/result
 
@@ -80,8 +118,15 @@ recreate()
 	xwallpaper --center $tf/result.jpg
 }
 
+main()
+{
+	while true; do
+		recreate
+		inotifywait -e "close_write" $plainnotes $HOME/pic/wallpaper && recreate;
+	done
+}
 
-while true; do
-	recreate
-	inotifywait -e "close_write" $plainnotes $td && recreate;
-done
+main "$@"
+
+# cat "$ptd" | cut_md_section ".*"
+# cat "$td" | cut_and_embox_each_chunk
