@@ -1,0 +1,3 @@
+#!/bin/sh
+notify-send -w "$(basename "$0")" "$(xprop | grep "^WM_CLASS\|^WM_NAME")"
+

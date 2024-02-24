@@ -1,0 +1,6 @@
+#!/bin/bash
+set -euo pipefail
+(date "+%Y-%m-%d_%H%M%S" \
+    | dmenu -p "Choose a screenshot name, or pick the date." \
+    | xargs -I{} maim $@ "$HOME/pic/sshot/{}.png") \
+    && notify-send "scrot" "Screenshot created in $HOME/pic/sshot."

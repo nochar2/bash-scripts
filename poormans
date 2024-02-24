@@ -3,7 +3,7 @@
 pathprefix='/usr/bin/'
 commands_that_need_sudo="hotspot"
 commands_that_need_geom="hotspot mpv"
-geom_broken="zathura firefox" # cant fix with geom
+# geom_broken="zathura firefox"      # can't fix by setting geometry
 
 must_use_sudo_for()
 {
@@ -33,8 +33,8 @@ shift
 islocal=$1
 [ "$islocal" = local ] && { pathprefix=""; shift; }
 
-must_use_sudo_for $prog && maybe_sudo="sudo"
-must_use_geom_for $prog && maybe_geom="-geometry 1920x1080+0+0"
+must_use_sudo_for "$prog" && maybe_sudo="sudo"
+must_use_geom_for "$prog" && maybe_geom="-geometry 1920x1080+0+0"
 
-echo $maybe_sudo xinit "${pathprefix}${prog}" $maybe_geom "$@" -- :0 "vt$(fgconsole)"
+echo "$maybe_sudo" xinit "${pathprefix}${prog}" $maybe_geom "$@" -- :0 "vt$(fgconsole)"
 $maybe_sudo xinit "${pathprefix}${prog}" $maybe_geom "$@" -- :0 "vt$(fgconsole)"

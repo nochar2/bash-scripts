@@ -39,6 +39,7 @@ int len_of_longest_line_in(char *file)
         int ret;
         static char cmd[BUFSIZ];
 
+        // this correctly uses wcwidth
         snprintf(cmd, BUFSIZ, "/bin/wc -L %s", file);
         FILE *f = popen(cmd, "r"); assert(f != NULL);
         fscanf(f, "%d", &ret);
