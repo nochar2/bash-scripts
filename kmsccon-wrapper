@@ -1,26 +1,31 @@
 #!/bin/sh
-# wrapper for kmscon
-# allows to do reasonable work at text only mode.
+# intentional typo in name
+#    nonroot kmscon<TAB><Enter> still runs kmscon and breaks your VT.
 
-# What does it feel like, working without an X server?
+# Allows to do some work under a Linux console (no X server, 1980s style).
+
+# Why? / What does it feel like?
 # - no distractions whatsoever
 # - byobu <3
 #   - sadly, ctrl-X  and shift-X sometimes don't work => no splits, apps limited
 # - inside kmscon, mpv works
 #   - can view videos, music, images
+#   - fbpdf/jfbview used to work but is now completely broken for me
 # - outside of the kmscon:
-#   - fbpdf somewhat works with difficulty
-#   - other apps work with xinit, although poorly 
+#   - other apps work with xinit, poorly
 #     - can't resize, running as root -> no settings, ...
+#     - see my 'poormans' wrapper
 
-# Relevant tools
-# - fbpdf?
+# Is it usable for serious usage?
+# - No.
+
+# Related tools?
 # - fgconsole         number of current console term (prints 4 when on tty4)
-# search pacman for "framebuffer" i guess
+# - search pacman/aur for "framebuffer", I guess. Good luck.
 
 [ "$(whoami)" = root ] || { echo "Need to run kmscon as root"; exit 1; }
 
-# 21 is in ms
+# 17 is in ms
 kmscon --xkb-layout cz \
        --xkb-variant qwerty \
        --xkb-repeat-rate 17 \

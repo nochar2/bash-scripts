@@ -20,7 +20,7 @@ f_mnt()
 {
     drive="$1"
     [ -z "$drive" ] && {
-        drive=$(abs_drive_path $(echo "$files" | selector "Which device to mount?"))
+        drive=$(abs_drive_path "$(echo "$files" | selector "Which device to mount?")")
     }
     [ -z "$drive" ] && exit 1;
     $notifysend udisksctl "$(udisksctl mount -b "$drive" 2>&1)"
@@ -33,8 +33,8 @@ f_umount()
     [ -n "$poweroff" ] && maybe_disconnect=" and power off"
 
     [ -z "$drive" ] && {
-        drive=$(abs_drive_path $(echo "$files" \
-            | selector "Which device to unmount${maybe_disconnect}?"))
+        drive=$(abs_drive_path "$(echo "$files" \
+            | selector "Which device to unmount${maybe_disconnect}?")")
     }
     [ -z "$drive" ] && exit 1;
     $notifysend udisksctl "$(udisksctl unmount -b "$drive" 2>&1)"
@@ -55,7 +55,7 @@ i_have_cmd() {
 assert() {
     cmd="$1"
     shift
-    "$cmd" "$@" || { $notifysend "$prog" "assertion '$cmd $@' failed"; exit 1; }
+    "$cmd" "$@" || { $notifysend "$prog" "assertion '$cmd $*' failed"; exit 1; }
 }
 
 usage() {
@@ -66,7 +66,12 @@ usage() {
 }
 
 notifications_work() {
-    timeout 0.2 notify-send -t 1 $0 "testing if notifications are consumed. If you are reading this, your DE/WM ignores the notification timeout, because it should be gone after a millisecond. Suggest how to do this better."  # non-zero on timeout
+    # non-zero exit if it timeouts
+    # also TODO check in other DE.
+    timeout 0.2 notify-send -t 1 "$prog" "Testing if notifications are consumed. If you are reading this, your DE/WM ignores the notification timeout, because it should be gone after a millisecond (dunst/other daemon not running?). 
+    
+    Please suggest how to check this better.
+    "  
 }
 
 main() {    
@@ -89,10 +94,10 @@ main() {
 
     files=$(cat <(ls /dev/disk/by-label) <(ls /dev/sd??) | sed -e '/^NO_LABEL$/d' | sed -e '/^swap$/d')
 
-    case "$(basename "$0")" in
-        amount) f_mnt "$@";;
-        aumount) f_umount "$@";;
-        *) notify-send -u critical "diskshit" "bad symlink, got $0"; exit 1;;
+    case "$prog" in
+        mount-picker-mount) f_mnt "$@";;
+        mount-picker-umount) f_umount "$@";;
+        *) notify-send -u critical "$prog" "bad symlink, got $0"; exit 1;;
     esac
 
 }
