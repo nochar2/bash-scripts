@@ -1,66 +1,85 @@
 #!/bin/bash
 set -euo pipefail
 
-on_rpi()
+this_device_is_my_own_laptop()
 {
-	uname -n | grep -q rpi
+	uname -n | grep -q arch0
 }
 
-# A great puzzle when the whole script is sudo
-whointheworldami() 
+this_device_is_a_school_desktop_machine()
 {
-	on_rpi && echo "$piusername" || echo "$pcusername"
+	uname -n | grep -q "^hd[1-8]$"
+}
+
+whointheworldami()
+{
+	if this_device_is_my_own_laptop; then
+		echo "karel"
+	elif this_device_is_a_school_desktop_machine; then
+		uname -n
+	else
+		echo "whointheworldami: Unreachable"
+		exit 1;
+	fi
 }
 
 ################################################
 #   configurable global settings / defaults    #
 ################################################
 
-### MEASUREMENT ###
-# def_measure_time_seconds=30   # recorded data currently
-def_measure_time_seconds=60     # what I'd like
+
+#### MEASUREMENT ####
+def_measure_time_seconds=60
 def_mtu=1500
+
+
+#### SAMPLING ####
+##  -F samples all events at the same speed
+##		might be more cpu intensive
+##  -c samples once per X events 
 samplerate=990
 # eventperiod=40000
-
-# choose how to sample: -F samples all events at the same speed, might be more cpu intensive,  -c samples once per X events 
 howtosample="-F $samplerate"
 # howtosample="-c $eventperiod"
 
 
-### DEVICES ### 
-pcaddr=169.254.1.1
-pcusername="karel"
-piaddr=169.254.2.2
-piusername="rpi"
+#### BINARY PATH ####
+## can't rely on $HOME when I'm running as root but the binaries
+## are elsewhere. Use hostname instead.
+uv_path_on_my_machines="/home/$(whointheworldami)/zmisc/git-repos/UltraGrid/ug-myfork/bin/uv"
+uv_path_on_hd_machines="/home/$(whointheworldami)/UltraGrid-continuous-x86_64.AppImage"
+uv_viddir_on_my_machines="/home/$(whointheworldami)/vid/ugvid/y4m";
+uv_viddir_on_hd_machines="/home/$(whointheworldami)/ug-benchmarks";
 
-### PATH ###
-# - of the binary
-uv="/home/$(whointheworldami)/zmisc/git-repos/UltraGrid/ug-myfork/bin/uv"
-# - of the test file
-uvviddir="/home/$(whointheworldami)/vid/ugvid/y4m"
-uvfilersg=ReadySetGo_1920x1080_120fps_420_8bit_YUV.y4m
-uvfile="${uvviddir}/${uvfilersg}"
-#######################################################
+#### VIDEO PATH ####
+uv_test_video_filename="ReadySetGo_1920x1080_120fps_420_8bit_YUV.y4m"
 
 
-where_to_send_to()
-{
-	if on_rpi; then
-		[ "$#" -gt 0 ] && echo "$piaddr" || echo "$pcaddr"
-	else
-		[ "$#" -eq 0 ] && echo "$piaddr" || echo "$pcaddr"
-	fi
-}
-
-# pi cannot record LLC misses (unused)
-if on_rpi; then
-	# shellcheck disable=SC2089
-	whattosample="-e '{cycles,branch-misses,L1-dcache-load-misses}:ppp'"
+if this_device_is_my_own_laptop; then
+	uv_path="$uv_path_on_my_machines";
+	uv_viddir="$uv_viddir_on_my_machines";
+elif this_device_is_a_school_desktop_machine; then
+	uv_path="$uv_path_on_hd_machines";
+	uv_viddir="$uv_viddir_on_hd_machines";
 else
+	echo "Unreachable"; exit 1;
+fi
+
+###################################################
+#   configurable global settings / defaults  end  #
+###################################################
+
+uv="$uv_path"
+uvfile="${uv_viddir}/${uv_test_video_filename}"
+
+## pi cannot record LLC misses (commented because unused)
+# if on_rpi; then
+	# shellcheck disable=SC2089
+	# whattosample="-e '{cycles,branch-misses,L1-dcache-load-misses}:ppp'"
+# else
 	# shellcheck disable=SC2089
 	whattosample="-e '{cycles,branch-misses,L1-dcache-load-misses,LLC-load-misses}:ppp'"
-fi
+# fi
 
 perfrecord="sudo -n perf record $howtosample $whattosample  --call-graph dwarf,2048 --mmap-pages 16M -z --sample-cpu -o perf.data --"
 
@@ -92,22 +111,13 @@ usage()
 
 main() 
 {
-	out="$(where_to_send_to)"
 	possibly_noop=""
+
+	out="localhost"  # XXX: for now
 	pr="$perfrecord"
 
 	measure_time_seconds="$def_measure_time_seconds"
 
-	# XXX: run the command on rpi indefinitely
-	# since I'm measuring
-	#  (laptop) ---> pi,  pi ---> (laptop)
-	# instead of
-	#  (laptop) ---> (pi)
-	# because stack traces on pi are broken no matter what.
-	on_rpi && measure_time_seconds=100000000
-
-
-	
 	mtu="$def_mtu"
 
 	while getopts "gvnNhlt:m:" opt; do
@@ -115,7 +125,7 @@ main()
 			g) pr="gdb --args";;
 			v) pr="valgrind --track-origins=yes";;
 			n) possibly_noop=":";;                     # : command does nothing
-			N) pr=""; measure_time_seconds="10000000";;   # not measuring, pointless to timeout
+			N) pr=""; unset measure_time_seconds;;   # not measuring, pointless to timeout
 			h) usage; exit 0;;
 			l) out="-d sdl $(where_to_send_to local)";;
 			t) measure_time_seconds="$OPTARG";;
@@ -130,16 +140,7 @@ main()
 		himtu|9k)  mtu=9000;;
 		lomtu|1k5) mtu=1500;;
 		""|*[!0-9]*) echo "mtu is not a number"; exit 1;;
-	esac
-
-	# If we're measuring for real, set the perf command	
-	# echo "$pr"
-	# [[ "$pr" =~ "perf" ]]; echo "$?"
-	# echo "x${possibly_noop}x"
-	# # [[ "$possibly_noop" != ":" ]]; echo "$?"
-	# echo "args: $*"
-	# [[ -n "$@" ]]; echo "$?"
-	
+	esac	
 	
 	need_root=""
 	[[ "$pr" =~ "perf" && -n "$*" ]] && {
@@ -204,7 +205,7 @@ main()
 
 	echo "THE FULL COMMAND IS:"
 	echo "--------------------"
-	echo $cmd
+	echo "$cmd"
 	echo "--------------------"
 
 	# intentionally unquoted
