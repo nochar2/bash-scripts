@@ -1,19 +1,23 @@
 #!/bin/bash
 
+# works fine, but not ideal
+# also, **incredibly** slow for longer (100+) words.
+
 fusage()
 {
-    echo "Skript  pwmask  vytváří uživatelsky určenou sekvenci souhlásek a samohlásek. Dá se použít třeba ke generování náhodných, ale vyslovitelných uživatelských jmen nebo hesel."
+    echo "$(basename "$0") creates a user-defined sequence of consonants and"
+    echo "wovels. It can be used for generating random usernames and passwords."
     echo ""
-    echo "Použití:   pwmask MASK"
+    echo "Usage: $(basename "$0") MASK"
     echo ""
-    echo "MASK je řetězec obsahující c a w: např. cwccwccwcwcwc"
-    echo "Znak 'c' se nahradí za náhodnou souhlásku, 'w' za náhodnou samohlásku."
+    echo "MASK is a string of c a w: e.g. cwccwccwcwcwc"
+    echo "c is replaced with a random consonant, w with a random wovel."
 }
 
 # Picks a random letter from $1.
 pickfrom()
 {
-    echo "${1:$(($RANDOM % ${#1})):1}"
+    echo "${1:$((RANDOM % ${#1})):1}"
 }
 
 wovels="aeiouy"

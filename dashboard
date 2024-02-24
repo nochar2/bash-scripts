@@ -2,6 +2,22 @@
 # shellcheck disable=SC2086 # exec $0
 # shellcheck disable=SC2093 # intentional unquoted variables
 
+
+usage()
+{
+	echo "$(basename "$0"): Draws note boxes on your wallpaper from your .md file."
+	echo ""
+	echo "This gets drawn:           This doesn't:"
+	echo "# To do                    # -- Really detailed plan"
+	echo "- create a thing           long verbose notes"
+	echo "- document it              more notes"
+	echo "- ...                      more notes"
+	echo "                           more notes"
+	echo "                           more notes"
+	echo "                           more notes"
+	echo "Requires the   boxes   binary. Also, it works ok-ish for me, but there are bugs."
+}
+
 set -euo pipefail
 
 # temp files
@@ -133,6 +149,9 @@ mainloop()
 
 main()
 {
+	case "$1" in
+		-h|--help) usage; exit 0;;
+	esac 
 	[ "$(pgrep dashboard | wc -l)" -gt 2 ] && {
 		notify-send -u low "dashboard" "Another instance is already running."
 		exit 1

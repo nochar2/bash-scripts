@@ -1,2 +1,0 @@
-#!/bin/sh
-sudoedit /etc/systemd/logind.conf && systemctl reload systemd-logind

@@ -6,20 +6,20 @@ fentry()
     case "$1" in
         '') days_back=0;;               # nothing  -> edit with current date
         -*) days_back=${1#"-"};;        # -NUMBER  -> edit NUMBER days in past
-        *) $EDITOR "$D/$1.md"; return;;   # filename -> edit filename
+        *) $EDITOR "$basedir/$1.md"; return;;   # filename -> edit filename
     esac
     
     echo "$days_back" | grep -E '^[0-9]*$' >/dev/null || \
         { echo "Expected number of days into past (try -1 or -30)"; exit 1; }
 
-    curdate=$(date -I --date="@$(($(date +%s) - 86400 * $days_back))");   # format stuff into ISO-8601
+    curdate=$(date -I --date="@$(($(date +%s) - 86400 * days_back))");   # format stuff into ISO-8601
     filename=$curdate.md
-    $EDITOR "$D/$filename"
+    $EDITOR "$basedir/$filename"
 }
 
 flist_dir()
 {
-    ls "$D"
+    ls "$basedir"
 }
 
 
@@ -29,15 +29,15 @@ NOTEROOT=$HOME/notes
 # You can create symlinks to this script and call them with the same arguments
 # $0 will decide which directory to write your daily notes into
 case "$(basename "$0")" in
-    yume) D=$NOTEROOT/Plain/yume;;
-    food) D=$NOTEROOT/Plain/food;;
-    diary) D="$NOTEROOT/System.Reflection";;
+    yume)  basedir=$NOTEROOT/Plain/yume;;
+    food)  basedir=$NOTEROOT/Plain/food;;
+    diary) basedir="$NOTEROOT/System.Reflection";;
     *) echo "Unknown \$0, exiting"; exit 1;;
 esac
 
 case "$1" in
     list)   flist_dir;;
-    *)  fentry "$1";;
+    *)      fentry "$1";;
 esac
 
 

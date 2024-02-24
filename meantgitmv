@@ -1,4 +1,0 @@
-#!/bin/sh
-echo "deleted: use M-t instead to swap two words (see man bash)"
-# git mv "$2" "$1"
-# git mv "$1" "$2"
