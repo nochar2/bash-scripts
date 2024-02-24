@@ -1,30 +1,61 @@
-#!/bin/sh
+#!/bin/bash
+set -euo pipefail
+
 usage() {
-  echo "usage: $0 -odfsh"
-  echo "crudely fixes some file attributes that were messed up by copying to other disk/ntfs. very unsafe, it's literally just find -exec"
-  echo "-o     set ownership to karel"
+  echo "usage: $0 [-dfsh] [-o username]"
+  echo "crudely fixes some file attributes that were messed up by copying to other disk/ntfs. Literally just mnemonic find -exec."
+  echo "-o     set ownership to username"
   echo "-d     set all dir perms to 755"
   echo "-f     set all regular file perms to 644"
   echo "-s     set all regular file perms to 755 (assume they are scripts)"
   echo "-h     help"
 }
-case "$PWD" in
-  /|/home|/etc|/usr|/var|/bin|/lib)
+
+refuse_stupid_dirs()
+{
+  case "$PWD" in
+  /|/home|/etc|/usr/bin|/usr/lib|/var|/bin|/lib)
     echo "Sorry, I don't feel that suicidal today."; exit 1;;
-esac 
+  esac 
+}
 
+main()
+{
 
-[ -z "$*" ] && { usage; exit 0; }
+  [ -z "$*" ] && { usage; exit 0; }
 
-# todo: make -od work, there is a command for that and i forgot it
-# also -o username because you're root with sudo
-for i in "$@"; do
-  case "$i" in
-    -o|--ownership) find . -exec chown karel:karel {} +; shift;;
-    -d|--dirperms) find . -type d -exec chmod 755 {} +; shift;;
-    -f|--fileperms) find . -type f -exec chmod 644 {} +; shift;;
-    -s|--scriptperms) find . -type f -exec chmod 755 {} +; shift;;
-    -h|--help) usage; exit 0;;
-    ""|*) usage; exit 1;;
-  esac
-done
+  getopt_result=$(getopt -o o:dfsh --long ownership:,dirperms,fileperms,scriptperms,help -- "$@")
+  if [ $? != 0 ] ; then echo "getopt failed, exiting." >&2 ; exit 1 ; fi
+  eval set -- "$getopt_result"
+  echo "$getopt_result"
+
+  [ "$#" = 0 ] && { usage; exit 0; };
+
+  while true; do
+    [ "$#" = 0 ] && break;
+
+    case "$1" in
+      -o|--ownership)
+        refuse_stupid_dirs;
+        username="$2"; 
+        [ -z "$username" ] && { echo "no username specified"; exit 1; }; 
+        find . -exec chown "$username:$username" {} +; shift 2;;
+      -d|--dirperms)
+        refuse_stupid_dirs;
+        find . -type d -exec chmod 755 {} +; shift;;
+      -f|--fileperms)
+        refuse_stupid_dirs;
+        find . -type f -exec chmod 644 {} +; shift;;
+      -s|--scriptperms)
+        refuse_stupid_dirs;
+        find . -type f -exec chmod 755 {} +; shift;;
+      -h|--help) 
+        usage; exit 0;;
+      --)
+        shift ;;
+      ""|*)
+        break;;
+    esac
+  done
+}
+main "$@"
