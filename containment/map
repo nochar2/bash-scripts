@@ -1,0 +1,39 @@
+#!/bin/bash
+
+fusage()
+{
+    echo "Usage: map [-{fd}] COMMAND [ARGS...]"
+    echo "Applies COMMAND with ARGS on each file in current directory."
+    echo "Assumes COMMAND expects the file name as its last argument."
+    echo "When  -f  flag is set, apply on regular files."
+    echo "When  -d  flag is set, apply on directories."
+}
+
+ftypematches()
+{
+    file="$1"
+    types="$2"
+    case "$types" in
+        -d) [ -d "$file" ]; return $?;;
+        -f) [ -f "$file" ]; return $?;;
+        -df|-fd) [ -d "$file" -o -f "$file" ]; return $?;;
+        *) fusage; exit 1;;
+    esac
+}
+
+[ "$#" == 0 ] && { fusage; exit 2; }
+opts="$1"
+cmd="$2"
+[ "${opts#'-'}" == "$opts" ] && { opts="-df"; cmd="$1"; shift 1; } || { shift 2; }
+
+
+for f in *; do 
+    if ftypematches "$f" "$opts"; then
+        if [ -z "$@" ]; then 
+            "$cmd" "$f"
+        else
+            "$cmd" "$@" "$f"
+        fi
+    fi
+done
+

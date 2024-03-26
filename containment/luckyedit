@@ -1,0 +1,19 @@
+#!/bin/bash
+
+# globální proměnné wtf
+find-kata()
+{
+    PTH=$(find . -name "*$1*" | head -1)
+}
+locate-kata()
+{
+    PTH=$(locate $1 | head -1)
+}
+
+locate-kata $1
+# PTH=${!PTH}    ???
+echo $PTH
+
+[ -d "$PTH" ] && cd "$PTH"
+[ -f "$PTH" ] && vim "$PTH"
+

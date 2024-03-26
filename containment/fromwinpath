@@ -1,0 +1,2 @@
+#!/bin/bash
+echo $1 | sed 's,\\,\/,g' | sed -E 's/^([C-Zc-z]):/\/mnt\/\l\1/'

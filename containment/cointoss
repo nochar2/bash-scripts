@@ -1,0 +1,5 @@
+#!/bin/bash
+
+choice=$[$RANDOM % 2]
+[ $choice -eq 0 ] && echo "head" || echo "tail"
+

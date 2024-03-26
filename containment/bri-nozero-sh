@@ -1,0 +1,6 @@
+#!/bin/sh
+while read x; do
+    B=$(cat /sys/class/backlight/intel_backlight/actual_brightness)
+    echo $B
+    [ $B -eq 0 ] && brightness set 1
+done
