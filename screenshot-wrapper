@@ -1,8 +1,20 @@
 #!/bin/bash
+# shellcheck disable=SC2068 # Is there a better way to pass nothing or -s, in a simple way?
 set -euo pipefail
 
-# shellcheck disable=SC2068 # Is there a better way to pass nothing or -s, in a simple way?
-(date "+%Y-%m-%d_%H%M%S" \
-    | dmenu -p "Choose a screenshot name, or pick the date." \
-    | xargs -I{} maim $@ "$HOME/pic/sshot/{}.png") \
-    && notify-send "scrot" "Screenshot created in $HOME/pic/sshot."
+case "${1:-}" in
+-h|--help) echo -e "usage: $0 (maim options) -- screenshot wrapper, can set date.\n -s  pick screen region"; exit 0;
+esac
+
+basepath="$HOME/pic/sshot"
+curdate=$(date "+%Y-%m-%d_%H%M%S")
+maim $@ -l -c 0.3,0.4,0.6,0.4 "${basepath}/${curdate}.png"
+
+while true; do
+    name="$(dmenu -p "Choose a screenshot name, or keep it as current date." <<< "$curdate")"
+    [ -f "${basepath}/${name}.png" ] || break;
+    notify-send "$0" "File ${basepath}/${name}.png already exists."
+done
+
+mv "${basepath}/${curdate}.png" "${basepath}/${name}.png"
+notify-send "$0" "Screenshot ${name}.png created in ${basepath}."

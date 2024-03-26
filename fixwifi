@@ -1,5 +1,11 @@
-#!/bin/sh
+#!/bin/bash
+set -euo pipefail
+
 # reloads crashed Atheros wifi module
+
+[ "$EUID" != 0 ] && {
+  echo "Reloading kernel modules requires root"; exit 1;
+}
 
 ls /lib/modules | grep -q "$(uname -r)" || {
   echo "(!) Kernel was updated but the system was not restarted yet."

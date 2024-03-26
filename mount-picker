@@ -97,6 +97,7 @@ main() {
     case "$prog" in
         mount-picker-mount) f_mnt "$@";;
         mount-picker-umount) f_umount "$@";;
+        mount-picker) notify-send -u critical "$prog" "use mount or unmount symlink";;
         *) notify-send -u critical "$prog" "bad symlink, got $0"; exit 1;;
     esac
 

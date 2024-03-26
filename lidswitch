@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 lsipath=/etc/systemd/logind.conf.d/lidswitch-inhibit.conf
 

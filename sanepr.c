@@ -23,7 +23,7 @@ int howlongisthis(const char *s)
 
         int len = 0;
         for (wchar_t *pc = (wchar_t *)buf; *pc; pc++) {
-                if (*pc == L'\t') { len += 8; continue; }
+                if (*pc == L'\t') { len += 4; continue; }
                 int charw = mk_wcwidth(*pc);
                 if (charw == -1) { got_invalid_char = true; len += 0; } else { len += charw; }
         }

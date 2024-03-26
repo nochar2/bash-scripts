@@ -43,7 +43,7 @@ suitable_program_for() {
         text/html) dmenu_with_opts firefox "$EDITOR";;
         text/*) echo "$EDITOR";;
         video/*) echo mpv;;
-        application/vnd.ms-htmlhelp) echo kchmviewer;;
+        application/vnd.ms-htmlhelp) echo xchm;;  # .chm files
         *) echo xdg-open;;
     esac
 }

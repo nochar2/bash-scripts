@@ -9,6 +9,7 @@ Have a look around in the code for inspiration and see if there is anything usef
 
 ### Anything specifically useful/interesting?
 - **bri-nozero{,-watcher}**: watches and resists setting display brightness to zero
+    - 
 - **manual-redshift**: allows for finer bluelight-filter control. Just bind the up/down words to your i3/dwm/whatever config.
 - **dashboard**: draws a to-do list on your wallpaper from a .md file
     - requires boxes and compiling sanepr.c (type 'make')
