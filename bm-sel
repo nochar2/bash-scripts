@@ -1,3 +1,0 @@
-#!/bin/sh
-
-xdotool type "$(grep -v ^# $HOME/notes/bookmarks | dmenu -i -l 50 | cut -d" " -f1)"

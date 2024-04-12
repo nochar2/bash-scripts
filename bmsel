@@ -1,0 +1,16 @@
+#!/bin/sh
+
+bm_file="$HOME/notes/bookmarks"
+strip_whitespace() {
+    awk '{$1=$1; print}'
+}
+
+cat "${bm_file}" \
+    | sed "/^# / d" \
+    | strip_whitespace
+    | dmenu -i -l 50 \
+    | cut -d" " -f1 \
+    | xargs xdotool type
+
+# notes="$(sed "/^# / d; s/^\s\+\(.*\)$/\1" "${bm_file}")"
+# xdotool type "echo $notes | dmenu -i -l 50 | cut -d" " -f1)"
