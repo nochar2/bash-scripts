@@ -7,11 +7,8 @@ set -euo pipefail
   echo "Reloading kernel modules requires root"; exit 1;
 }
 
-ls /lib/modules | grep -q "$(uname -r)" || {
-  echo "(!) Kernel was updated but the system was not restarted yet."
-  echo "There are no kernel modules for the currently running kernel,"
-  echo "so unloading one would mean I can't reload it again."
-  echo "This would make wifi unusable until reboot."
+[ -d "/lib/modules/$(uname -r)" ] || {
+  echo "[Error] No kernel modules for this kernel. Most likely, the kernel was just updated but the system was not restarted yet."
   exit 1
 }
 
