@@ -1,0 +1,7 @@
+#!/bin/sh
+outdir="$(xdg-user-dir VIDEOS)/recordings"
+
+mkdir -p 
+file="${outdir}/$(date +%Y-%m-%d_%H%M%S).mp4"
+notify-send "$0"  "Recording to $file using ffmpeg."
+ffmpeg -f x11grab -i "$DISPLAY" -framerate 60 -c:v h264_qsv "$file"

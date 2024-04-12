@@ -1,0 +1,6 @@
+#!/bin/bash
+# credit: https://www.reddit.com/r/seedboxes/comments/9nirh2/which_torrent_clients_can_fetch_torrent_metadata/
+[ -z "$1" ] && {
+	echo -e "usage: $0 FILE\nDownloads a *.torrent file from a magnet link."; exit 1;
+}
+aria2c --bt-metadata-only=true --bt-save-metadata=true "$1"

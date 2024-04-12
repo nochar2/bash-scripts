@@ -1,0 +1,6 @@
+#!/bin/bash
+[ -z "$1" ] && { 
+	echo -e  "usage: $0 file.torrent\nLists files in a .torrent file, in the same way the *find* command shows them."; 
+	exit 1; 
+}
+aria2c --show-files "$1" 2>&1 | grep '^[0-9]' | sed 's/^\([0-9]\)*|\(.*\)$/\2/g'
