@@ -1,43 +1,76 @@
 #!/bin/sh
-# intentional typo in name
-#    nonroot kmscon<TAB><Enter> still runs kmscon and breaks your VT.
+# Typo in name is intentional. You really don't want to accidentally run kmscon without root, which completely freezes
+# with black screen and forces you to either kill it from SSH or reboot
+
+[ "$(whoami)" = root ] || { echo "Need to run kmscon as root. Otherwise, it completely freezes with no ability to Ctrl+C or Alt+Fx at all."; exit 1; }
 
 # Allows to do some work under a Linux console (no X server, 1980s style).
 
-# Why? / What does it feel like?
-# - no distractions whatsoever
-# - byobu <3
-#   - sadly, ctrl-X  and shift-X sometimes don't work => no splits, apps limited
-# - inside kmscon, mpv works
-#   - can view videos, music, images
-#   - fbpdf/jfbview used to work but is now completely broken for me
-# - outside of the kmscon:
-#   - other apps work with xinit, poorly
-#     - can't resize, running as root -> no settings, ...
-#     - see my 'poormans' wrapper
+# ----- Compatibility -----
+# + brain (nearly zero distractions)
+# > windowing (tabs, splits)
+#   + byobu <3
+#     - some keyboard shortcuts are broken, like ctrl+f2 doesn't work
+#       + tmux ctrl+b % works
+#         - but ctrl+b " doesn't ??
+# > Other programs
+#   > Console-based
+#     + ok, need to force truecolor in Helix
+#   > DRM-based
+#     + mpv: works
+#     + fbpdf: works, janky but alright
+#     - fbv: junk, just use mpv for images
+#     - sometimes, auto VT switching doesn't work, you have to switch to different tty and back 
+#   > X11-based
+#     > use xinit (very limited, see the `poormans` script)
+#     - can't resize
+#     - running as root -> no settings
+#     - ...
 
-# Is it usable for serious usage?
-# - No.
+# ---- Related tools -----
+# - fgconsole(1):   number of current console term (prints 4 when on tty4)
+# - showkey(1):     keycodes 
+# - keymaps(5):     ???
+# - anything in `yay -Ss framebuffer`
+# - https://wiki.archlinux.org/title/Linux_console/Keyboard_configuration
 
-# Related tools?
-# - fgconsole         number of current console term (prints 4 when on tty4)
-# - search pacman/aur for "framebuffer", I guess. Good luck.
 
-[ "$(whoami)" = root ] || { echo "Need to run kmscon as root"; exit 1; }
+# ---- Unused settings / notes ----
 
-# 17 is in ms
-kmscon --xkb-layout cz \
+# 16 is in ms
+       #--grab-zoom-in "" \
+       #--grab-zoom-out "" \
+
+       #--session-control on \  <-- broken idk
+       #--xkb-keymap /home/karel/scripts/cz.mod4-is-superl.map \      <-- this wasn't necessary
+
+# these cool shaders only work with gltex backend
+# and when I use that backend, it just shows black screen
+# I don't want to play with this anymore
+# --render-engine gltex \
+
+
+kmscon \
+       --verbose \
+       --xkb-model pc105 \
+       --xkb-layout cz \
        --xkb-variant qwerty \
-       --xkb-repeat-rate 17 \
-       --xkb-options caps:swapescape \
+       --xkb-options caps:swapescape,compose:ins \
+       --xkb-repeat-rate 16 \
        --sb-size 70000 \
        --font-name "JetBrains Mono Bold" \
        --font-dpi 120 \
-       --grab-zoom-in "" \
-       --grab-zoom-out "" \
+       --palette custom \
+       --palette-foreground 0,0,0 \
+       --palette-background 246,251,214 \
+       --palette-light-green  0,140,0 \
+       --palette-light-yellow 140,140,0 \
+       --palette-light-cyan   0,128,128 \
+       --palette-light-blue   0,64,128 \
+       --hwaccel \
        --login -- /bin/bash -i
 
-       # these don't fix anything
-       # --no-drm \  
-       # --hwaccel \
-       # --render-engine bblit \
+# these don't fix/do anything visible for me
+# --no-drm \  
+# --hwaccel \
+# --render-engine bblit \
