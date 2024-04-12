@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# this is really ugly, should I copy some skeleton files from somewhere instead?
+
+echo -e "main: main.c\n\tgcc -Wall -Wextra -o \$@ \$^" > Makefile
+cat > main.c << END
+#include <stdio.h>
+#include <stdlib.h>
+
+int main(void) {
+    return 0;
+}
+END
