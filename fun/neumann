@@ -1,0 +1,31 @@
+#!/bin/sh
+
+root="/tmp/neumann"
+
+
+neumann-rec()
+{
+    count=$1 
+    for i in $(seq 0 $[$count-1]); do
+        echo $i
+        [ -d "$root/$i" ] && { ln -s "$root/$i" "$i"; continue; }
+        mkdir -p $i
+        cd $i
+        neumann-rec $i
+        cd ..
+    done 
+}
+
+
+main()
+{
+    mkdir -p $root && pushd $root
+    
+    count=$1
+    [ $count -eq $count ] || { echo "Not a number, bye" >&2; exit 1; }
+    neumann-rec $count
+
+    popd
+}
+
+main $1

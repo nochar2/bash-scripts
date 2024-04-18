@@ -1,0 +1,29 @@
+#!/bin/sh
+# wrapper for kmscon
+# allows to do reasonable work at text only mode.
+
+# What is the experience like?
+# - byobu is the key (although ctrl- doesn't work)
+# - distractions literally do not exist
+# - xinit for individual apps works, although poorly
+# - mpv still works
+# - viewing pdfs works with difficulty
+# - things are fast
+# - viewing pdfs works, but with difficulty
+
+# Relevant tools
+# - fbpdf?
+# - fgconsole         number of current console term
+
+[ "$(whoami)" = root ] || { echo "Need to run kmscon as root"; exit 1; }
+
+# 21 is in ms
+kmscon --xkb-layout cz \
+       --xkb-variant qwerty \
+       --xkb-repeat-rate 21 \
+       --xkb-options caps:swapescape \
+       --sb-size 30000 \
+       --font-name "JetBrains Mono Bold" \
+       --font-dpi 120 \
+       --hwaccel \
+       --login -- /bin/bash -i

@@ -1,0 +1,6 @@
+#!/bin/sh
+# obviously doesn't work, you would have to source it:
+# . mkcd <dir>
+# which is almost as fast as
+# mkdir <dir>; cd <dir>      anyway.
+mkdir -p "$1" && cd "$1"
