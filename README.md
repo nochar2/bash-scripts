@@ -1,28 +1,21 @@
 # Bash scripts
-A collection of my personal Bash scripts. Most of them are terminal-based and centered around primarily terminal-based workflows, like one would typically have in an i3 environment.
+A collection of my personal shell scripts. Most of them are centered around terminal-focused workflows, like one would typically have with a window manager (i3/dwm/...)
 
-## Why are you publishing this?
-If I die tomorrow, how is this going to be useful to the civilization?
-
-### But why should I care?
-Have a look around in the code for inspiration and see if there is anything useful.
-
-### Anything specifically useful/interesting?
+### Any interesting programs?
 - **bri-nozero{,-watcher}**: watches and resists setting display brightness to zero
-    - 
-- **manual-redshift**: allows for finer bluelight-filter control. Just bind the up/down words to your i3/dwm/whatever config.
+- **manual-redshift**: allows for finer bluelight-filter control. Just call it with the `up` or `down` argument in your i3/dwm/whatever config.
 - **dashboard**: draws a to-do list on your wallpaper from a .md file
-    - requires boxes and compiling sanepr.c (type 'make')
-    - alpha, has bugs
+    - requires `boxes` and compiling sanepr.c (type `make`)
+    - pre alpha quality
 - **mount-picker-{mount,umount}**: mount/unmount/poweroff disks, without root. Bindable to a key.
-- **open-file-somehow**: a substitute (not replacement) for xdg-open for files. A lot faster and easier to configure.
-- **weather**: fetches weather info from wttr.in
+- **open-file-somehow**: a substitute for `xdg-open` for opening a file based on extension/mime-type. Much faster and easier to configure.
 - **jsondict (endict, jisho)**: look up in two online dicts through API
 - **fixxkbmap**: (re)stores my keyboard configuration (layout, repeat rate)
-- **poormans, kmsccon-wrapper**: a silly attempt of working without an X server
+- **poormans, kmsccon-wrapper**: explores a setup without an X server (see comments)
 - **ext/pdfunite-with-bookmarks**: merges pdfs and preserves chapters (code from SO, not mine)
 
-## Things seem broken...
-Many of the scripts have a specific configuration or are tied to my configuration / env variables / file structure. Need to keep secrets separate, for example. 
-
-Still, you can create issues, if that would make it better for everyone.
+## Disclaimer
+Although this repo is useful for me, it is a private repo that is just  
+currently  public for my convenience. Its quality is relatively poor 
+by most repo's standards, and I take zero  responsibility if it breaks 
+your  system if you use it.
