@@ -1,0 +1,54 @@
+#!/bin/bash
+set -euo pipefail
+
+[ "$EUID" -eq 0 ] && { echo "yay musst be run as regular user"; exit 1; }
+cd "$HOME"
+
+# Get yay
+pushd /tmp
+git clone https://aur.archlinux.org/yay.git
+cd yay
+makepkg -si
+popd
+
+browsers=(
+)
+sw_management=(
+    powerpill downgrade
+)
+programming=(
+    emsdk uefi-run vscodium-bin sysls
+)
+rice=(
+    i3-swallow-git 
+)
+games=(
+    python-wpm 
+)
+editing=(
+    vimv-git 
+)
+media=(
+    yt-dlp-drop-in
+)
+utils=(
+    tatsumato hotspot kddockwidgets kddockwidgets-qt6 task-spooler
+)
+# Install AUR programs
+yay -S --noconfirm \
+    "${browsers[@]}"      \
+    "${editing[@]}"       \
+    "${games[@]}"         \
+    "${media[@]}"         \
+    "${programming[@]}"   \
+    "${rice[@]}"          \
+    "${sw_management[@]}" \
+    "${utils[@]}"         \
+  
+
+# My own configs
+git clone git@gitlab.com:nochar/bash_scripts.git scripts
+git clone git@gitlab.com:nochar/dotfiles.git .config
+pushd .config/zroot
+./make_symlinks
+popd

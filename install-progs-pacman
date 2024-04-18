@@ -1,0 +1,32 @@
+#!/bin/bash
+set -euo pipefail
+
+[ "$EUID" -ne 0 ] && { echo "Pacman must be run this as root"; exit 1; }
+
+# was using the git version of zathura but forgot why
+
+browsers=(
+    firefox chromium qutebrowser
+)
+programming=(
+    git imagemagick wget curl alacritty
+)
+rice=(
+    polybar tmux byobu i3 sxhkd bspwm
+)
+editing=(
+    vim helix texlive texlive-lang zathura zathura-ps zathura-djvu zathura-pdf-mupdf
+)
+media=(
+    yt-dlp pamixer
+)
+
+pacman -Syu --noconfirm
+pacman -S --noconfirm     \
+    "${browsers[@]}"      \
+    "${editing[@]}"       \
+    "${media[@]}"         \
+    "${programming[@]}"   \
+    "${rice[@]}"          \
+
+
