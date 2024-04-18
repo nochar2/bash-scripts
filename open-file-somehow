@@ -96,7 +96,7 @@ main() {
     settermtitle "$cmd" "$file"
 
     # cmd can be multiple words so it has to be unquoted
-    [ -n "$just_echo" ] || { $cmd "$file"; }
+    [ -n "$just_echo" ] || { exec $cmd "$file"; }
 
     mkdir -p "$HOME"/.local/state/bash
     echo "$cmd \"$file\"" >> "$HOME"/.local/state/bash/history;

@@ -20,12 +20,12 @@ usage()
 
 set -euo pipefail
 
-# temp files
-tf=/tmp/dashboard
+tf=/tmp/dashboard             # temp files
 notes=$HOME/notes
 plainnotes="$notes/Plain"
 ptd=$plainnotes/priv-todostack.md
 td=$HOME/muni/bp/notes/work/bpwork-todostack.md
+wallpaper="$(xdg-user-dir PICTURES)/wallpaper"
 
 mkdir -p $tf
 
@@ -131,7 +131,7 @@ recreate()
 
 	# used to have  -size 1600x900 xc:black   for a blank pic
 		# -font "helvetica" -pointsize 18 -fill white \
-	convert "$WALLPAPER" \
+	convert "$wallpaper" \
 		-fill black -colorize 50% \
 		-font "JetBrains-Mono-Light" -pointsize 17 -fill white \
 		-gravity center \
@@ -143,7 +143,7 @@ recreate()
 mainloop()
 {
 	recreate
-	inotifywait -e "close_write" $plainnotes $td $HOME/pic/wallpaper $HOME/scripts/sanepr "$0";
+	inotifywait -e "close_write" $plainnotes $td $wallpaper $HOME/scripts/sanepr "$0";
 	exec "$0" "$@"
 }
 

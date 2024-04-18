@@ -15,7 +15,7 @@ A collection of my personal shell scripts. Most of them are centered around term
 - **ext/pdfunite-with-bookmarks**: merges pdfs and preserves chapters (code from SO, not mine)
 
 ## Disclaimer
-Although this repo is useful for me, it is a private repo that is just  
-currently  public for my convenience. Its quality is relatively poor 
-by most repo's standards, and I take zero  responsibility if it breaks 
+Although this repo is useful for me, it is a private repo that is just
+currently  public for my convenience. Its quality is poor
+by most repo's standards, and I take zero  responsibility if it breaks
 your  system if you use it.

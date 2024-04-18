@@ -3,6 +3,12 @@
 options="suspend
 hibernate
 poweroff
-reboot"
-choice="$(dmenu -p "See you later." <<< "$options")"
-systemctl "$choice"
+reboot
+logout"
+
+choice="$(dmenu -p "See you next time." <<< "$options")"
+
+case "$choice" in
+    suspend|hibernate|poweroff|reboot) systemctl "$choice";;
+    logout) bspwm quit; i3-msg exit;;
+esac

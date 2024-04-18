@@ -1,5 +1,5 @@
-#!/bin/sh
-# pink -- A manual Redshift-based color control.
+#!/bin/bash
+# A manual Redshift-based color control.
 
 # date +"%s.%N"  -- for benchmarking, takes about 50 ms rn which is very slow but whatever
 
@@ -91,6 +91,8 @@ color()
     method="drm"
 
     echo heree
+
+    # This is a mess currently
     is_running_under_X && {
         lastid="$(cat /tmp/last-notification)"
         echo hereee
@@ -98,11 +100,23 @@ color()
         # shellcheck disable=SC2086
         newid="$(timeout 0.2 notify-send $lastid_arg -p -t 700 "$(basename "$0")" "Setting screen color temp to ${desired_temp}K")"
         echo hereeee
-        echo "$newid" > /tmp/last-notification
+        echo "$newid" > /tmp/last-notification 
         method="randr"
     }
     echo "$desired_bri"
-    redshift -P -b "${desired_bri}":"${desired_bri}" -m "$method" -O "$desired_temp" >/dev/null
+
+    case "$XDG_SESSION_TYPE" in
+    wayland)
+        # This flickers. The solution is apparently to use some completely different random program.
+        # I am giving up on Wayland, you have to replace basically all your programs to use it.
+        killall gammastep
+        gammastep -P -b "${desired_bri}":"${desired_bri}" -O "$desired_temp" >/dev/null &
+        disown gammastep
+        ;;
+        
+    x11|*)
+        redshift -P -b "${desired_bri}":"${desired_bri}" -m "$method" -O "$desired_temp" >/dev/null;;
+    esac
 }
 
 
