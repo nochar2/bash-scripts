@@ -6,7 +6,7 @@ cd "$HOME"
 
 # Get yay
 pushd /tmp
-git clone https://aur.archlinux.org/yay.git
+git clone https://aur.archlinux.org/yay.git || true
 cd yay
 makepkg -si
 popd
@@ -47,8 +47,8 @@ yay -S --noconfirm \
   
 
 # My own configs
-git clone git@gitlab.com:nochar/bash_scripts.git scripts
-git clone git@gitlab.com:nochar/dotfiles.git .config
+git clone git@gitlab.com:nochar/bash_scripts.git scripts || true
+git clone git@gitlab.com:nochar/dotfiles.git .config || true
 pushd .config/zroot
 ./make_symlinks
 popd

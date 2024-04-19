@@ -8,8 +8,11 @@ set -euo pipefail
 browsers=(
     firefox chromium qutebrowser
 )
+plumbing=(
+    wget curl aria2 fd fzf debugedit picom libspeechd network-manager-applet numlockx dunst redshift dmenu xdotool xclip
+)
 programming=(
-    git imagemagick wget curl alacritty
+    git imagemagick alacritty htop shellcheck
 )
 rice=(
     polybar tmux byobu i3 sxhkd bspwm
@@ -18,15 +21,20 @@ editing=(
     vim helix texlive texlive-lang zathura zathura-ps zathura-djvu zathura-pdf-mupdf
 )
 media=(
-    yt-dlp pamixer
+    yt-dlp pamixer sxiv mpv xwallpaper maim
+)
+fonts=(
+    ttf-jetbrains-mono ttf-jetbrains-mono-nerd
 )
 
-pacman -Syu --noconfirm
-pacman -S --noconfirm     \
+pacman -Syu --noconfirm --needed
+pacman -S --noconfirm --needed     \
     "${browsers[@]}"      \
     "${editing[@]}"       \
     "${media[@]}"         \
+    "${plumbing[@]}"   \
     "${programming[@]}"   \
     "${rice[@]}"          \
+    "${fonts[@]}"         \
 
 
