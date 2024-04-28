@@ -5,14 +5,21 @@ set -euo pipefail
 
 # was using the git version of zathura but forgot why
 
+lsp=(
+    texlab python-lsp-server svelte-language-server haskell-language-server bash-language-server
+)
 browsers=(
     firefox chromium qutebrowser
 )
+# should these two even be separate?
 plumbing=(
-    wget curl aria2 fd fzf debugedit picom libspeechd network-manager-applet numlockx dunst redshift dmenu xdotool xclip
+    debugedit picom libspeechd speech-dispatcher network-manager-applet numlockx dunst 
+)
+utils=(
+    wget curl aria2 fd fzf  unclutter kexec-tools dmenu xdotool xclip brightnessctl cpupower zip p7zip redshift 
 )
 programming=(
-    git imagemagick alacritty htop shellcheck
+    git imagemagick alacritty htop shellcheck intel-gpu-tools jdk21-openjdk
 )
 rice=(
     polybar tmux byobu i3 sxhkd bspwm
@@ -33,8 +40,10 @@ pacman -S --noconfirm --needed     \
     "${editing[@]}"       \
     "${media[@]}"         \
     "${plumbing[@]}"   \
+    "${utils[@]}"   \
     "${programming[@]}"   \
     "${rice[@]}"          \
     "${fonts[@]}"         \
+    "${lsp[@]}"         \
 
 

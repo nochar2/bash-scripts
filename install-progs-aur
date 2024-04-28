@@ -5,19 +5,27 @@ set -euo pipefail
 cd "$HOME"
 
 # Get yay
-pushd /tmp
-git clone https://aur.archlinux.org/yay.git || true
-cd yay
-makepkg -si
-popd
+if ! pacman -Qq yay >/dev/null; then
+    pushd /tmp
+    git clone https://aur.archlinux.org/yay.git || true
+    cd yay
+    makepkg -si
+    popd
+fi
 
+ug=(
+    libnatpmp opencv libcaca libjuice sdl_ttf
+)
+lsp=(
+    vim-language-server cmake-language-server prisma-language-server awk-language-server
+)
 browsers=(
 )
 sw_management=(
     powerpill downgrade
 )
 programming=(
-    emsdk uefi-run vscodium-bin sysls
+    emsdk uefi-run vscodium-bin sysls jdk21-openjdk bear perf-tools flamegraph
 )
 rice=(
     i3-swallow-git 
@@ -32,10 +40,10 @@ media=(
     yt-dlp-drop-in
 )
 utils=(
-    tatsumato hotspot kddockwidgets kddockwidgets-qt6 task-spooler
+    tatsumato hotspot kddockwidgets kddockwidgets-qt6 task-spooler update-grub boxes
 )
 # Install AUR programs
-yay -S --noconfirm \
+yay -S --noconfirm --needed \
     "${browsers[@]}"      \
     "${editing[@]}"       \
     "${games[@]}"         \
@@ -44,11 +52,13 @@ yay -S --noconfirm \
     "${rice[@]}"          \
     "${sw_management[@]}" \
     "${utils[@]}"         \
+    "${lsp[@]}"           \
+    "${ug[@]}"            \
   
 
 # My own configs
-git clone git@gitlab.com:nochar/bash_scripts.git scripts || true
-git clone git@gitlab.com:nochar/dotfiles.git .config || true
+git clone git@gitlab.com:nochar/bash_scripts.git scripts 2>/dev/null || true
+git clone git@gitlab.com:nochar/dotfiles.git .config 2>/dev/null || true
 pushd .config/zroot
-./make_symlinks
+./make_symlinks -f
 popd
