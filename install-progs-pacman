@@ -16,7 +16,7 @@ plumbing=(
     debugedit picom libspeechd speech-dispatcher network-manager-applet numlockx dunst 
 )
 utils=(
-    wget curl aria2 fd fzf  unclutter kexec-tools dmenu xdotool xclip brightnessctl cpupower zip p7zip redshift 
+    wget curl aria2 fd fzf  unclutter kexec-tools dmenu xdotool xclip brightnessctl cpupower zip p7zip redshift  valgrind 
 )
 programming=(
     git imagemagick alacritty htop shellcheck intel-gpu-tools jdk21-openjdk

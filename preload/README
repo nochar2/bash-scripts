@@ -1,0 +1,4 @@
+red: manual redshift setter, red is taken by ed
+gs: git status, is taken by ghostscript
+	preloading this sometimes breaks actual programs like tex because they inherit the function from me
+	don't know how to fix that now

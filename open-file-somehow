@@ -25,6 +25,7 @@ suitable_program_for() {
     # priority extensions
     case "$ext" in
         qpf|qsf|bsf|bdf) echo quartus; return;;
+        desktop) echo dex; return;;
     esac
 
     mime="$(file -L --brief --mime-type "$filename")"
@@ -50,7 +51,11 @@ suitable_program_for() {
 
 swallow_under_i3()
 {
-    pgrep i3 >/dev/null && echo "swallow" || echo ""
+    if [ "$XDG_CURRENT_DESKTOP" = "i3" ]; then
+        echo "swallow"
+    else
+        echo ""
+    fi
 }
 
 cmd_to_open() {
