@@ -2,6 +2,8 @@
 # shellcheck disable=SC2086 # exec $0
 # shellcheck disable=SC2093 # intentional unquoted variables
 
+# BROKEN for some reason
+
 
 usage()
 {
@@ -29,16 +31,20 @@ wallpaper="$(xdg-user-dir PICTURES)/wallpaper"
 
 mkdir -p $tf
 
+escape_slashes_1()
+{
+	echo "$1" | sed 's/\//\\\//g'
+}
 
 cut_md_section()
 {
 	# section="$1"
-	sed -ne "/^# $1/,/^#/p;" | sed -e "1 d;" | cat -s
+	sed -n "/^# $1/,/^#/p;" | sed "1 d;" | cat --squeeze-blank
 }
 
 box_with_title()
 {
-	boxes -d boxquote | sed -e "1s/.*/,----[ $1 ]/"
+	boxes -d boxquote | sed "1s/.*/,----[ $(escape_slashes_1 "$1") ]/"
 }
 
 cut_and_embox()
@@ -158,7 +164,8 @@ main()
 	}
 	mainloop "$@"
 }
-main "$@"
+echo "$0: Broken, don't want to debug it."
+# main "$@"
 
 # cat "$ptd" | cut_md_section ".*"
 # cat "$ptd" | cut_and_embox_each_chunk
