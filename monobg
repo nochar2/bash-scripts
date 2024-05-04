@@ -1,3 +1,24 @@
-#!/bin/sh
-convert -size 1920x1080 xc:"$1" ~/.config/wal.png
+#!/bin/bash
+usage() {
+    echo "usage: $0 COLOR"
+    echo "       $0 -r"
+    echo "creates a single color bg with that color (try: teal, sea green, #400f3d)"
+    echo "for options, see https://en.wikipedia.org/wiki/X11_color_names"
+    echo "-r picks a random color (max 50 % brightness)"
+}
+
+rndcol() {
+    echo $((RANDOM % 128))
+}
+
+[ -z "$1" ] && { usage; exit 1 ; }
+if [ "$1" = "-r" ]; then
+    color="$(printf "#%.2x%.2x%.2x" "$(rndcol)" "$(rndcol)" "$(rndcol)")"
+    echo "$color"
+else
+    color="$1"
+fi
+
+# convert -size 100x100 xc:"$color" ~/.config/wal.png
+convert -size 1920x1080 xc:"$color" ~/.config/wal.png
 xwallpaper --zoom /home/karel/.config/wal.png
