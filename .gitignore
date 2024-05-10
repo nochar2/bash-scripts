@@ -10,7 +10,7 @@ test
 
 # external 
 unversioned/
-ext/
+# ext/
 
 # output junk
 perf.data*
