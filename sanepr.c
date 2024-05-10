@@ -7,8 +7,8 @@ sanepr.c -- place two files in two columns next to each other,
 #include <locale.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "ext/sds.h"
-#include "ext/wcwidth.h"
+#include "ext/sds/sds.h"
+#include "ext/wcwidth.c"
 #include "sdsreadln.c"
 #include <wchar.h>
 #include <assert.h>

@@ -4,11 +4,14 @@ set -euo pipefail
 [ "$EUID" -ne 0 ] && { echo "Pacman must be run this as root"; exit 1; }
 
 # was using the git version of zathura but forgot why
+# todo: change this around, maybe create
+# an actual installation script that would be
+# cool and serve a wider audience
 
 lsp=(
     texlab python-lsp-server svelte-language-server haskell-language-server bash-language-server
 )
-browsers=(
+net_browsers=(
     firefox chromium qutebrowser
 )
 # should these two even be separate?
@@ -16,7 +19,7 @@ plumbing=(
     debugedit picom libspeechd speech-dispatcher network-manager-applet numlockx dunst 
 )
 utils=(
-    wget curl aria2 fd fzf  unclutter kexec-tools dmenu xdotool xclip brightnessctl cpupower zip p7zip redshift  valgrind 
+    wget curl aria2 fd fzf  unclutter kexec-tools dmenu xdotool xclip brightnessctl cpupower zip p7zip redshift valgrind xcolor rpi-imager
 )
 programming=(
     git imagemagick alacritty htop shellcheck intel-gpu-tools jdk21-openjdk
@@ -25,7 +28,7 @@ rice=(
     polybar tmux byobu i3 sxhkd bspwm
 )
 editing=(
-    vim helix texlive texlive-lang zathura zathura-ps zathura-djvu zathura-pdf-mupdf
+    vim helix texlive texlive-lang zathura zathura-ps zathura-djvu zathura-pdf-mupdf lf ueberzug
 )
 media=(
     yt-dlp pamixer sxiv mpv xwallpaper maim
@@ -36,7 +39,7 @@ fonts=(
 
 pacman -Syu --noconfirm --needed
 pacman -S --noconfirm --needed     \
-    "${browsers[@]}"      \
+    "${net_browsers[@]}"      \
     "${editing[@]}"       \
     "${media[@]}"         \
     "${plumbing[@]}"   \

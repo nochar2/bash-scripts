@@ -1,4 +1,8 @@
 #!/bin/bash
+alsoprint() {
+    echo "$@" && "$@"
+}
+
 set -euo pipefail
 
 [ "$EUID" -eq 0 ] && { echo "yay musst be run as regular user"; exit 1; }
@@ -6,11 +10,11 @@ cd "$HOME"
 
 # Get yay
 if ! pacman -Qq yay >/dev/null; then
-    pushd /tmp
-    git clone https://aur.archlinux.org/yay.git || true
-    cd yay
-    makepkg -si
-    popd
+    pushd /tmp; {
+        git clone https://aur.archlinux.org/yay.git || true
+        cd yay
+        makepkg -si
+    }; popd
 fi
 
 ug=(
@@ -40,7 +44,7 @@ media=(
     yt-dlp-drop-in
 )
 utils=(
-    tatsumato hotspot kddockwidgets kddockwidgets-qt6 task-spooler update-grub boxes
+    tatsumato hotspot kddockwidgets kddockwidgets-qt6 task-spooler update-grub boxes ananicy
 )
 # Install AUR programs
 yay -S --noconfirm --needed \
@@ -56,9 +60,16 @@ yay -S --noconfirm --needed \
     "${ug[@]}"            \
   
 
+# Post install startups
+alsoprint systemctl enable --now ananicy
+
 # My own configs
-git clone git@gitlab.com:nochar/bash_scripts.git scripts 2>/dev/null || true
-git clone git@gitlab.com:nochar/dotfiles.git .config 2>/dev/null || true
-pushd .config/zroot
-./make_symlinks -f
-popd
+{
+    git clone git@gitlab.com:nochar/bash_scripts.git scripts 2>/dev/null || true
+    git clone git@gitlab.com:nochar/dotfiles.git .config 2>/dev/null || true
+    pushd .config/zroot
+    ./make_symlinks -f
+    popd
+}
+
+

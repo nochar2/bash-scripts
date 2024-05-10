@@ -11,13 +11,13 @@ rndcol() {
     echo $((RANDOM % 128))
 }
 
-[ -z "$1" ] && { usage; exit 1 ; }
-if [ "$1" = "-r" ]; then
-    color="$(printf "#%.2x%.2x%.2x" "$(rndcol)" "$(rndcol)" "$(rndcol)")"
-    echo "$color"
-else
-    color="$1"
-fi
+case "$1" in
+    "") usage; exit 1;;
+    "-r") 
+        color="$(printf "#%.2x%.2x%.2x" "$(rndcol)" "$(rndcol)" "$(rndcol)")";
+        echo "$color";;
+    *) color="$1";;
+esac
 
 # convert -size 100x100 xc:"$color" ~/.config/wal.png
 convert -size 1920x1080 xc:"$color" ~/.config/wal.png

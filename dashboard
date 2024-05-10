@@ -164,8 +164,10 @@ main()
 	}
 	mainloop "$@"
 }
-echo "$0: Broken, don't want to debug it."
-# main "$@"
+# echo "$0: Broken, don't want to debug it."
+set -x
+main "$@"
+set +x
 
 # cat "$ptd" | cut_md_section ".*"
 # cat "$ptd" | cut_and_embox_each_chunk
