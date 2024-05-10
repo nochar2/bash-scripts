@@ -20,5 +20,9 @@ case "$1" in
 esac
 
 # convert -size 100x100 xc:"$color" ~/.config/wal.png
-convert -size 1920x1080 xc:"$color" ~/.config/wal.png
-xwallpaper --zoom /home/karel/.config/wal.png
+convert -size 1920x1080 xc:"$color" "$(xdg-user-dir PICTURES)/wallpaper.png"
+mv \
+    "$(xdg-user-dir PICTURES)/wallpaper.png" \
+    "$(xdg-user-dir PICTURES)/wallpaper"
+
+xwallpaper --zoom "$(xdg-user-dir PICTURES)/wallpaper"

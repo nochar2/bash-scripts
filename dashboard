@@ -2,8 +2,20 @@
 # shellcheck disable=SC2086 # exec $0
 # shellcheck disable=SC2093 # intentional unquoted variables
 
-# BROKEN for some reason
+# XXX: having a / inside one of these files breaks this thing
+# XXX: changing the wallpaper makes this crash with exit
+#      code 1 for no reason at all
+set -euo pipefail
 
+################ files ########################################
+tmppath=/tmp/dashboard             # temp files
+notes=$HOME/notes
+ptd=$notes/_priv-todostack.md
+bpwtd=$HOME/muni/bp/notes/work/bpwork-todostack.md
+bpttd=$HOME/muni/bp/notes/text/bptext-todostack.md
+wallpaper="$(xdg-user-dir PICTURES)/wallpaper" # this actually remains fixed
+# wallpaper_desc='$(xdg-user-dir PICTURES)/wallpaper' # idk how to expand this
+###############################################################
 
 usage()
 {
@@ -20,16 +32,9 @@ usage()
 	echo "Requires the   boxes   binary. Also, it works ok-ish for me, but there are bugs."
 }
 
-set -euo pipefail
 
-tf=/tmp/dashboard             # temp files
-notes=$HOME/notes
-plainnotes="$notes/Plain"
-ptd=$plainnotes/priv-todostack.md
-td=$HOME/muni/bp/notes/work/bpwork-todostack.md
-wallpaper="$(xdg-user-dir PICTURES)/wallpaper"
 
-mkdir -p $tf
+mkdir -p $tmppath
 
 escape_slashes_1()
 {
@@ -68,13 +73,10 @@ list_recent_files_in()
 
 put_next_to_each_other()
 {
-	cat "$1" >$tf/1al
-	cat "$2" >$tf/2al
-
 	# pr which actually works with UTF-8 characters
 	# see the C source, don't think there's a coreutil
 	# it's definitely nontrivial to do with bash programs
-	sanepr "$tf/1al" "$tf/2al"
+	sanepr "$@"
 }
 
 cut_and_embox_each_chunk()
@@ -82,30 +84,34 @@ cut_and_embox_each_chunk()
 	rejoined=""
 	chunk=""
 	title=""
-	actually_bother_reading_this=1;
+	actually_bother_reading_this_line=1;
 	IFS=$'\n'
 	while read -r l; do
-		# the rhs *has* to be unquoted
+		# the regex on the rhs *has* to be unquoted
+		# title that starts with - is an ignored section
 		if [[ "$l" =~ ^#+\ - ]]; then
-			actually_bother_reading_this=0;
+			actually_bother_reading_this_line=0;
+		# title that doesn't start with - is ok
 		elif [[ "$l" =~ ^#\ [^-] ]]; then
 			title="${l### }"
-			actually_bother_reading_this=1;
+			actually_bother_reading_this_line=1;
 		fi
 
-		if [ 0 -eq "$actually_bother_reading_this" ]; then
+		if [ 0 -eq "$actually_bother_reading_this_line" ]; then
 			continue;
 		fi
 
-		if [ "$l" = "" ]; then
-			if [ "$chunk" != "" ]; then
+		# empty line == end of chunk
+		if [ -z "$l" ]; then
+			if [ -n "$chunk" ]; then
 				rejoined="$rejoined
 $( (fold -w 80 -s | cut_and_embox "$title") <<< "$chunk")
 ";
 				chunk="";
 			fi
-			actually_bother_reading_this=0;
+			actually_bother_reading_this_line=0;
 		else
+			# newline!
 			chunk="$chunk
 $l";
 		fi
@@ -116,41 +122,39 @@ $l";
 
 recreate()
 {
-	# cat $ptd | tee >(cut_and_embox "Todo") >/dev/null | cat >$tf/col1
-
-	cat $ptd | cut_and_embox_each_chunk >$tf/col1
-	# cat $ptd | tee \
-	# 	>(cut_and_embox "Todo") \
-	# 	>(cut_and_embox "Další poznámky") \
-	# 	>(cut_and_embox "Doing") \
-	# 	>(cut_and_embox "Zkoušky") \
-	# 	>/dev/null | cat >$tf/col1
-
-	cat $td | cut_and_embox_each_chunk >$tf/col2
-	# cat $td | tee \
-	# 	>(cut_and_embox "Break down further" "Bakalářka: práce na zpracování") \
-	# 	>(cut_and_embox "To do" "Elementární kroky") \
-	# 	>(cut_and_embox "Zkoušky") \
-	# 	>/dev/null | cat >$tf/col2
+	cat $ptd | cut_and_embox_each_chunk >$tmppath/col1
+	cat $bpttd | cut_and_embox_each_chunk >$tmppath/col2
+	cat $bpwtd | cut_and_embox_each_chunk >$tmppath/col3
 		
-	put_next_to_each_other $tf/col1 $tf/col2 >$tf/result
+	put_next_to_each_other \
+		$tmppath/col1 \
+		$tmppath/col2 \
+		$tmppath/col3 \
+		>$tmppath/result
 
 	# used to have  -size 1600x900 xc:black   for a blank pic
 		# -font "helvetica" -pointsize 18 -fill white \
-	convert "$wallpaper" \
-		-fill black -colorize 50% \
-		-font "JetBrains-Mono-Light" -pointsize 17 -fill white \
-		-gravity center \
-		-annotate +30+30 "@$tf/result" $tf/result.jpg
 
-	xwallpaper --center $tf/result.jpg
+	# -colorize 50% makes this image darker if you want that
+	convert "$wallpaper" \
+		-fill black \
+		-font "JetBrains-Mono-Light" \
+		-pointsize 17 \
+		-fill white \
+		-gravity center \
+		-annotate +30+30 \
+		"@$tmppath/result" \
+		$tmppath/result.jpg
+
+	xwallpaper --center $tmppath/result.jpg
 }
 
 mainloop()
 {
 	recreate
-	inotifywait -e "close_write" $plainnotes $td $wallpaper $HOME/scripts/sanepr "$0";
-	exec "$0" "$@"
+	inotifywait -e "close_write" \
+		$ptd $bpwtd $bpttd $wallpaper $HOME/scripts/sanepr "$0" || true;
+	exec "$0" "$@"    # reload yourself
 }
 
 main()
@@ -159,15 +163,14 @@ main()
 		-h|--help) usage; exit 0;;
 	esac 
 	[ "$(pgrep dashboard | wc -l)" -gt 2 ] && {
-		notify-send -u low "dashboard" "Another instance is already running."
+		notify-send "dashboard" "Another instance is already running."
 		exit 1
 	}
 	mainloop "$@"
 }
-# echo "$0: Broken, don't want to debug it."
-set -x
+# set -x
 main "$@"
-set +x
+# set +x
 
 # cat "$ptd" | cut_md_section ".*"
 # cat "$ptd" | cut_and_embox_each_chunk
