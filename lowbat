@@ -1,4 +1,9 @@
 #!/bin/bash
+# I don't know how to do this without polling
+# inotifywait doesn't work on /sys
+# udevadm monitor doesn't report perc change
+# don't care anymore, this is very low prio just not to inflate PIDs but I don't know
+# how to make this better atm
 
 bat="/sys/class/power_supply/BAT0"
 
