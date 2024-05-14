@@ -17,35 +17,21 @@ if ! pacman -Qq yay >/dev/null; then
     }; popd
 fi
 
-ug=(
-    libnatpmp opencv libcaca libjuice sdl_ttf
-)
-lsp=(
-    vim-language-server cmake-language-server prisma-language-server awk-language-server
-)
-browsers=(
-)
-sw_management=(
-    powerpill downgrade
-)
-programming=(
-    emsdk uefi-run vscodium-bin sysls jdk21-openjdk bear perf-tools flamegraph
-)
-rice=(
-    i3-swallow-git 
-)
-games=(
-    python-wpm 
-)
-editing=(
-    vimv-git 
-)
-media=(
-    yt-dlp-drop-in
-)
-utils=(
-    tatsumato hotspot kddockwidgets kddockwidgets-qt6 task-spooler update-grub boxes ananicy
-)
+# used ananicy, doesn't help that much with responsiveness but now all PIDs are in the millions for some reason
+# used perf-tools, replaced it with bcc-tools because at least perf-tools execsnoop doesn't work fsr...
+
+# hotspot-appimage complains about missing xdot even though it is installed
+lib=( libbacktrace-git )
+ug=( libnatpmp opencv libcaca libjuice sdl_ttf )
+lsp=( vim-language-server cmake-language-server prisma-language-server awk-language-server )
+browsers=()
+sw_management=(powerpill downgrade)
+programming=(emsdk uefi-run vscodium-bin sysls jdk21-openjdk bear flamegraph)
+rice=( i3-swallow-git  )
+games=( python-wpm  )
+editing=( vimv-git  )
+media=( yt-dlp-drop-in )
+utils=(tatsumato hotspot kddockwidgets-qt6 task-spooler update-grub boxes translate-shell)
 # Install AUR programs
 yay -S --noconfirm --needed \
     "${browsers[@]}"      \
@@ -58,10 +44,11 @@ yay -S --noconfirm --needed \
     "${utils[@]}"         \
     "${lsp[@]}"           \
     "${ug[@]}"            \
+    "${lib[@]}"            \
   
 
 # Post install startups
-alsoprint systemctl enable --now ananicy
+# alsoprint systemctl enable --now ananicy 
 
 # My own configs
 {
