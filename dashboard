@@ -1,16 +1,12 @@
 #!/bin/bash
-# shellcheck disable=SC2086 # exec $0
-# shellcheck disable=SC2093 # intentional unquoted variables
+# shellcheck disable=SC2002 # useless "useless cat" remarks
 
 # XXX: having a / inside one of these files breaks this thing
-# XXX: changing the wallpaper makes this crash with exit
-#      code 1 for no reason at all
 set -euo pipefail
 
 ################ files ########################################
 tmppath=/tmp/dashboard             # temp files
-notes=$HOME/notes
-ptd=$notes/_priv-todostack.md
+ptd=$HOME/notes/_priv-todostack.md
 bpwtd=$HOME/muni/bp/notes/work/bpwork-todostack.md
 bpttd=$HOME/muni/bp/notes/text/bptext-todostack.md
 wallpaper="$(xdg-user-dir PICTURES)/wallpaper" # this actually remains fixed
@@ -60,7 +56,8 @@ cut_and_embox()
 
 list_recent_files_in()
 {
-	ls -tcF "$1" | grep -v "[/@*]$" | head
+	# shellcheck disable=SC2010
+	ls --time=ctime --classify "$1" | grep -v "[/@*]$" | head
 }
 
 # pad_to_ideal_width()
@@ -122,15 +119,14 @@ $l";
 
 recreate()
 {
-	cat $ptd | cut_and_embox_each_chunk >$tmppath/col1
-	cat $bpttd | cut_and_embox_each_chunk >$tmppath/col2
-	cat $bpwtd | cut_and_embox_each_chunk >$tmppath/col3
+	printf "%s\n-------------------\n" "$ptd"   >$tmppath/col1
+	cat "$ptd" | cut_and_embox_each_chunk       >>$tmppath/col1
+	printf "%s\n-------------------\n" "$bpttd" >$tmppath/col2
+	cat "$bpttd" | cut_and_embox_each_chunk     >>$tmppath/col2
+	printf "%s\n-------------------\n" "$bpwtd" >$tmppath/col3
+	cat "$bpwtd" | cut_and_embox_each_chunk     >>$tmppath/col3
 		
-	put_next_to_each_other \
-		$tmppath/col1 \
-		$tmppath/col2 \
-		$tmppath/col3 \
-		>$tmppath/result
+	put_next_to_each_other $tmppath/col* >$tmppath/result
 
 	# used to have  -size 1600x900 xc:black   for a blank pic
 		# -font "helvetica" -pointsize 18 -fill white \
@@ -153,7 +149,7 @@ mainloop()
 {
 	recreate
 	inotifywait -e "close_write" \
-		$ptd $bpwtd $bpttd $wallpaper $HOME/scripts/sanepr "$0" || true;
+		"$ptd" "$bpwtd" "$bpttd" "$wallpaper" "$HOME/scripts/sanepr" "$0" || true;
 	exec "$0" "$@"    # reload yourself
 }
 
@@ -169,8 +165,8 @@ main()
 	mainloop "$@"
 }
 # set -x
-main "$@"
-# set +x
+echo "XXX: still broken completely, just work you retard"
+# main "$@"
 
 # cat "$ptd" | cut_md_section ".*"
 # cat "$ptd" | cut_and_embox_each_chunk
