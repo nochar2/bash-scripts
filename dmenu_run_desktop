@@ -1,0 +1,10 @@
+#!/bin/bash
+# there was some other official script probably, I don't remember
+# I just use  rofi -show drun  currently
+
+echo "not implemented, use  rofi -show drun"
+
+# find /usr/share/applications ~/.local/share/applications \
+	# | grep ".desktop$" \
+	# | 
+	# | dmenu | xargs dex

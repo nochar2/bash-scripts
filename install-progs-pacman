@@ -8,13 +8,13 @@ lsp=(texlab python-lsp-server svelte-language-server haskell-language-server bas
 # self-explanatory
 web_browsers=(firefox chromium qutebrowser)
 # things which you can click on in a graphical environment
-gui_utils=(network-manager-applet dmenu rpi-imager xdot)
+gui_utils=(network-manager-applet dmenu rpi-imager xdot timeshift)
 # text-based tools which still need the X server
 cli_utils_x11=(xdotool xclip xcolor)
 # things runnable from the console (maybe move this to programming?)
-cli_utils_con=(wget curl aria2 fd fzf kexec-tools brightnessctl cpupower zip p7zip)
+cli_utils_con=(wget curl aria2 fd fzf kexec-tools brightnessctl cpupower zip p7zip pass parallel)
 # non-interactive components
-gui_lowlevel=(debugedit picom libspeechd speech-dispatcher numlockx dunst xf86-video-intel unclutter redshift)
+gui_lowlevel=(debugedit picom libspeechd speech-dispatcher numlockx dunst xf86-video-intel unclutter redshift dex)
 # various prog tools / compilers / runtimes, strictly for programming
 programming=(git imagemagick alacritty htop shellcheck intel-gpu-tools jdk21-openjdk tcc valgrind tmux byobu vim helix)
 # niche things for weird people
@@ -25,8 +25,9 @@ media=(yt-dlp pamixer sxiv mpv xwallpaper lf ueberzug zathura zathura-ps zathura
 fonts=(ttf-jetbrains-mono ttf-jetbrains-mono-nerd)
 # 4 GB of junk, thanks Mr Lamport
 texlive_all=(texlive texlive-lang)
+wine=(wine winetricks)
 
-guionly=("${web_browsers[@]}" "${gui_utils[@]}" "${cli_utils_x11[@]}" "${media[@]}" "${rice[@]}" "${fonts[@]}" "${gui_lowlevel[@]}")
+guionly=("${web_browsers[@]}" "${gui_utils[@]}" "${cli_utils_x11[@]}" "${media[@]}" "${rice[@]}" "${fonts[@]}" "${gui_lowlevel[@]}" "${wine[@]}")
 clionly=("${programming[@]}" "${lsp[@]}" "${cli_utils_con[@]}")
 
 everything=(
