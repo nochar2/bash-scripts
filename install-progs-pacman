@@ -8,7 +8,7 @@ lsp=(texlab python-lsp-server svelte-language-server haskell-language-server bas
 # self-explanatory
 web_browsers=(firefox chromium qutebrowser)
 # things which you can click on in a graphical environment
-gui_utils=(network-manager-applet dmenu rpi-imager xdot timeshift)
+gui_utils=(network-manager-applet dmenu rofi rpi-imager xdot timeshift)
 # text-based tools which still need the X server
 cli_utils_x11=(xdotool xclip xcolor)
 # things runnable from the console (maybe move this to programming?)
@@ -16,7 +16,7 @@ cli_utils_con=(wget curl aria2 fd fzf kexec-tools brightnessctl cpupower zip p7z
 # non-interactive components
 gui_lowlevel=(debugedit picom libspeechd speech-dispatcher numlockx dunst xf86-video-intel unclutter redshift dex)
 # various prog tools / compilers / runtimes, strictly for programming
-programming=(git imagemagick alacritty htop shellcheck intel-gpu-tools jdk21-openjdk tcc valgrind tmux byobu vim helix)
+programming=(git imagemagick alacritty htop shellcheck intel-gpu-tools jdk21-openjdk tcc valgrind tmux byobu vim helix clang bcc-tools)
 # niche things for weird people
 rice=(polybar i3 sxhkd bspwm)
 # text / audio / video viewers

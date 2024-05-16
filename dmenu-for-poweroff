@@ -6,7 +6,7 @@ poweroff
 reboot
 logout"
 
-choice="$(dmenu -p "See you next time." <<< "$options")"
+choice="$(rofi -dmenu -p "See you next time." <<< "$options")"
 
 case "$choice" in
     suspend|hibernate|poweroff|reboot) systemctl "$choice";;

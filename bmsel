@@ -1,4 +1,6 @@
-#!/bin/sh
+#!/bin/bash
+#shellcheck disable=SC2002 # useless useless cat remarks
+set -euo pipefail
 
 bm_file="$HOME/notes/bookmarks"
 strip_whitespace() {
@@ -8,7 +10,7 @@ strip_whitespace() {
 cat "${bm_file}" \
     | sed "/^# / d" \
     | strip_whitespace \
-    | dmenu -i -l 50 \
+    | rofi -dmenu -i -l 30 \
     | cut -d" " -f1 \
     | xargs xdotool type
 

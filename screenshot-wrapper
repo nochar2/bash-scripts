@@ -11,7 +11,7 @@ curdate=$(date "+%Y-%m-%d_%H%M%S")
 maim $@ -l -c 0.3,0.4,0.6,0.4 "${basepath}/${curdate}.png"
 
 while true; do
-    name="$(dmenu -p "Choose a screenshot name, or keep it as current date." <<< "$curdate")"
+    name="$(rofi -dmenu -p "Choose a screenshot name, or keep it as current date." <<< "$curdate")"
     [ -f "${basepath}/${name}.png" ] || break;
     notify-send "$0" "File ${basepath}/${name}.png already exists."
 done

@@ -5,8 +5,8 @@ selector() {
         assert i_have_cmd fzf
         fzf
     else
-        assert i_have_cmd dmenu
-        dmenu -p "$1"
+        assert i_have_cmd rofi
+        rofi -dmenu -p "$1"
     fi
 }
 
