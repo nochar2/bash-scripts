@@ -48,9 +48,7 @@ get_ms_duration_mediainfo()
 {
 	checkcmd parallel
 	checkcmd mediainfo
-	# v~~ freaking broken but idk what to do
 	parallel --null --eta 'mediainfo --Inform="General;%Duration%"'
-	# xargs -0 -L1 mediainfo --Inform='General;%Duration%'	
 }
 
 main() {
@@ -68,7 +66,6 @@ main() {
 	# v~~ very slow
 	# totaltime=$(find "${1:-}" -type f -print0 | get_ms_duration_exiftool | sum)
 
-	# redirect deletes first, so place this at the very end
 	echo "$totaltime" | tee last-calculated-totaltime
 }
 
