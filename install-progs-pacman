@@ -1,18 +1,19 @@
 #!/bin/bash
 set -euo pipefail
 
+
 [ "$EUID" -ne 0 ] && { echo "Pacman must be run this as root"; exit 1; }
 
 # autocomplete / checks for various langs for Helix (or other editors)
 lsp=(texlab python-lsp-server svelte-language-server haskell-language-server bash-language-server)
 # self-explanatory
-web_browsers=(firefox chromium qutebrowser)
+web_browsers=(firefox firefox-tridactyl firefox-ublock-origin chromium qutebrowser)
 # things which you can click on in a graphical environment
-gui_utils=(network-manager-applet dmenu rofi rpi-imager xdot timeshift uget)
+gui_utils=(network-manager-applet dmenu rofi rpi-imager xdot timeshift uget meld)
 # text-based tools which still need the X server
 cli_utils_x11=(xdotool xclip xcolor)
 # things runnable from the console (maybe move this to programming?)
-cli_utils_con=(wget curl aria2 fd fzf kexec-tools brightnessctl cpupower zip p7zip pass parallel)
+cli_utils_con=(wget curl aria2 fd fzf kexec-tools brightnessctl cpupower zip p7zip pass parallel ccache less man)
 # non-interactive components
 gui_lowlevel=(debugedit picom libspeechd speech-dispatcher numlockx dunst xf86-video-intel unclutter redshift dex)
 # various prog tools / compilers / runtimes, strictly for programming
@@ -37,3 +38,5 @@ everything=(
 )
 
 pacman -Syu --noconfirm --needed "${everything[@]}"
+# pacman -Fy  -- like 50M, shouldn't be updated every 5 minutes
+

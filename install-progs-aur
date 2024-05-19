@@ -21,31 +21,20 @@ fi
 # used perf-tools, replaced it with bcc-tools because at least perf-tools execsnoop doesn't work fsr...
 
 # hotspot-appimage complains about missing xdot even though it is installed
-lib=( libbacktrace-git )
-ug=( libnatpmp opencv libcaca libjuice sdl_ttf )
-lsp=( vim-language-server cmake-language-server prisma-language-server awk-language-server )
-browsers=()
-sw_management=(powerpill downgrade)
-programming=(emsdk uefi-run vscodium-bin sysls jdk21-openjdk bear flamegraph git-lfs)
-rice=( i3-swallow-git  )
-games=( python-wpm  )
-editing=( vimv-git  )
-media=( yt-dlp-drop-in )
-utils=(tatsumato hotspot kddockwidgets-qt6 task-spooler update-grub boxes translate-shell)
+progs=( 
+    libbacktrace-git  # libs
+    libnatpmp opencv libcaca libjuice sdl_ttf # ug
+    vim-language-server cmake-language-server awk-language-server # lsp
+    powerpill downgrade # sw management
+    emsdk uefi-run vscodium-bin sysls jdk21-openjdk bear flamegraph git-lfs # programming
+    i3-swallow-git # i3
+    python-wpm # games
+    vimv-git # editing
+    yt-dlp-drop-in # media
+    tatsumato hotspot kddockwidgets-qt6 task-spooler update-grub boxes translate-shell xdg-ninja # utils
+)
 # Install AUR programs
-yay -S --noconfirm --needed \
-    "${browsers[@]}"      \
-    "${editing[@]}"       \
-    "${games[@]}"         \
-    "${media[@]}"         \
-    "${programming[@]}"   \
-    "${rice[@]}"          \
-    "${sw_management[@]}" \
-    "${utils[@]}"         \
-    "${lsp[@]}"           \
-    "${ug[@]}"            \
-    "${lib[@]}"            \
-  
+yay -S --noconfirm --needed "${progs[@]}"
 
 # Post install startups
 # alsoprint systemctl enable --now ananicy 

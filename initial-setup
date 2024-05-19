@@ -1,0 +1,27 @@
+#!/bin/bash
+# TODO
+
+[ -f "$HOME/.ssh/id_ed25519.pub" ] || {
+    echo "Copy over your ssh keys first."
+    exit 1
+}
+
+mkdir -p "$HOME/zmisc"
+
+passdir="$HOME/.password-store"
+scriptdir="$HOME/scripts"
+
+[ -d "$passdir" ] || \
+    git clone git@gitlab.com:nochar/passwords "$passdir"
+[ -d "$scriptdir" ] || \
+    git clone git@gitlab.com:nochar/bash_scripts "$scriptdir"
+
+# unresolved. this should be managed by
+# GNU stow or something, sadly I can't touch
+# .config after install because that would
+# break kde and friends
+# git clone git@gitlab.com:nochar/dotfiles \
+    # "$HOME"/dotfiles
+
+
+

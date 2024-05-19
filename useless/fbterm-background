@@ -1,0 +1,12 @@
+#!/bin/sh
+echo -ne "\e[?25l"
+$1="/usr/share/wallpapers/Blue Moon Una"
+
+fbv -ciuker "$1" << EOF
+q
+EOF
+
+shift
+export FBTERM_BACKGROUND_IMAGE=1
+exec fbterm "$@"
+

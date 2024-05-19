@@ -5,6 +5,8 @@
 # don't care anymore, this is very low prio just not to inflate PIDs but I don't know
 # how to make this better atm
 
+# alternative: poweralertd
+
 bat="/sys/class/power_supply/BAT0"
 
 get_battery_perc() {
