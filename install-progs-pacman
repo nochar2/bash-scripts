@@ -31,11 +31,12 @@ wine=(wine winetricks)
 guionly=("${web_browsers[@]}" "${gui_utils[@]}" "${cli_utils_x11[@]}" "${media[@]}" "${rice[@]}" "${fonts[@]}" "${gui_lowlevel[@]}" "${wine[@]}")
 clionly=("${programming[@]}" "${lsp[@]}" "${cli_utils_con[@]}")
 
-everything=(
-    "${guionly[@]}"
-    "${clionly[@]}"
-    "${texlive_all[@]}"
-)
+case "$1" in
+    cli) everything=("${clionly[@]}");;
+    gui) everything=("${clionly[@]}" "${guionly[@]}");;
+    guiplustex) everything=( "${guionly[@]}" "${clionly[@]}" "${texlive_all[@]}" );;
+    *) echo "usage: $0 cli/gui/guiplustex";;
+esac
 
 pacman -Syu --noconfirm --needed "${everything[@]}"
 # pacman -Fy  -- like 50M, shouldn't be updated every 5 minutes
