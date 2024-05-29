@@ -10,7 +10,7 @@ strip_whitespace() {
 cat "${bm_file}" \
     | sed "/^# / d" \
     | strip_whitespace \
-    | rofi -dmenu -i -l 30 \
+    | dmenu-provider -i -l 30 \
     | cut -d" " -f1 \
     | xargs xdotool type
 

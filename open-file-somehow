@@ -15,7 +15,7 @@ args_to_lines() {
 dmenu_with_opts() {
     IFS=" "
     prompt="How should I open this?"
-    args_to_lines "$@" | dmenu -p "$prompt"
+    args_to_lines "$@" | dmenu-provider -p "$prompt"
 }
 
 suitable_program_for() {

@@ -23,6 +23,6 @@ case "$1" in
 		echo "usage: $0 sleep/nosleep";
 		echo "disables or enables a lid-switch suspend inhibit in a hacky way (moving some config file)";;
 	*) 
-		set "$(printf "sleep\nnosleep\n" | dmenu -p "which one?")"; 
+		set "$(printf "sleep\nnosleep\n" | dmenu-provider -p "which one?")"; 
 		doitforreal "$1";;
 esac

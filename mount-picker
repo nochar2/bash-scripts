@@ -1,13 +1,8 @@
 #!/bin/bash
+set -euo pipefail
 
 selector() {
-    if [ -z "$can_notify" ]; then
-        assert i_have_cmd fzf
-        fzf
-    else
-        assert i_have_cmd rofi
-        rofi -dmenu -p "$1"
-    fi
+    dmenu-provider -p "$1"
 }
 
 abs_drive_path()
@@ -46,10 +41,6 @@ f_umount()
         }
         $notifysend udisksctl "$poweroff_info"
     }
-}
-
-i_have_cmd() {
-    command -v "$1" >/dev/null
 }
 
 assert() {

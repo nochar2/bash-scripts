@@ -59,7 +59,7 @@ main()
 personal usage
 fgtp development"
 	
-	selection="$(echo "$options" | dmenu -p "What are you doing right now?")"
+	selection="$(echo "$options" | dmenu-provider -p "What are you doing right now?")"
 
 	grep "$selection" <<<"$options" && do_the_setup "$selection"
 

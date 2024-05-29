@@ -2,7 +2,8 @@
 # would love to know if there is a way to do this in an actual config file
 # xset r rate 215 60
 xset r rate 215 65
-setxkbmap "cz(qwerty),us" -option grp:alt_shift_toggle,caps:swapescape,compose:ins
+# setxkbmap "cz(qwerty),us" -option grp:alt_shift_toggle,caps:swapescape,compose:ins
+setxkbmap "cz(qwerty)" -option grp:alt_shift_toggle,caps:swapescape,compose:ins
 # setxkbmap "cz(qwerty),de(qwerty),us" -option grp:alt_shift_toggle,caps:swapescape,terminate:ctrl_alt_bksp,compose:ins
 
 # I wish but layout switching just won't work if this is enabled

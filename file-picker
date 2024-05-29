@@ -1,2 +1,2 @@
 #!/bin/bash
-command fd --type file . "$HOME" | rofi -dmenu | xargs xdg-open
+command fd --type file . "$HOME" | dmenu-provider | xargs xdg-open

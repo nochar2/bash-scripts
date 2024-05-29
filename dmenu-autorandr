@@ -1,0 +1,4 @@
+#!/bin/sh
+selection=$(autorandr | dmenu-provider | cut -d' ' -f1)
+echo $selection
+autorandr "$selection"
