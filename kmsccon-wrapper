@@ -1,18 +1,14 @@
 #!/bin/sh
-# Typo in name is intentional. You really don't want to accidentally run kmscon without root, which completely freezes
-# with black screen and forces you to either kill it from SSH or reboot
 
 [ "$(whoami)" = root ] || { echo "Need to run kmscon as root. Otherwise, it completely freezes with no ability to Ctrl+C or Alt+Fx at all."; exit 1; }
 
 # Allows to do some work under a Linux console (no X server, 1980s style).
+# it is WAY better than fbcon, which has completely broken color parsing
 
 # ----- Compatibility -----
 # + brain (nearly zero distractions)
 # > windowing (tabs, splits)
-#   + byobu <3
-#     - some keyboard shortcuts are broken, like ctrl+f2 doesn't work
-#       + tmux ctrl+b % works
-#         - but ctrl+b " doesn't ??
+#   + use tmux or byobu (byobu has broken ctrl+b " fsr)
 # > Other programs
 #   > Console-based
 #     + ok, need to force truecolor in Helix
@@ -26,6 +22,9 @@
 #     - can't resize
 #     - running as root -> no settings
 #     - ...
+# - can't have bg pics :/
+#   > the MacSlow version has some hardcoded shaders for --render-engine gltex
+#      - had to change something in source to make it work, don't remember
 
 # ---- Related tools -----
 # - fgconsole(1):   number of current console term (prints 4 when on tty4)
@@ -37,17 +36,11 @@
 
 # ---- Unused settings / notes ----
 
-# 16 is in ms
        #--grab-zoom-in "" \
        #--grab-zoom-out "" \
 
        #--session-control on \  <-- broken idk
        #--xkb-keymap /home/karel/scripts/cz.mod4-is-superl.map \      <-- this wasn't necessary
-
-# these cool shaders only work with gltex backend
-# and when I use that backend, it just shows black screen
-# I don't want to play with this anymore
-# --render-engine gltex \
 
 
 kmscon \
