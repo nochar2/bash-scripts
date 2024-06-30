@@ -14,7 +14,8 @@
 #     + ok, need to force truecolor in Helix
 #   > DRM-based
 #     + mpv: works
-#     + fbpdf: works, janky but alright
+#     + fbpdf: normal - black screen, fbterm - barely one page, kmscon - barely one page
+#     + jfbview: normal - nothing, fbterm - works, kmscon - one stripe and segfaults when you scroll
 #     - fbv: junk, just use mpv for images
 #     - sometimes, auto VT switching doesn't work, you have to switch to different tty and back 
 #   > X11-based

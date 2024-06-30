@@ -1,20 +1,54 @@
 #!/bin/bash
-# shellcheck disable=SC2068 # Is there a better way to pass nothing or -s, in a simple way?
 set -euo pipefail
 
-case "${1:-}" in
--h|--help) echo -e "usage: $0 (maim options) -- screenshot wrapper, can set date.\n -s  pick screen region"; exit 0;
-esac
 
-basepath="$HOME/pic/sshot"
-curdate=$(date "+%Y-%m-%d_%H%M%S")
-maim --hidecursor --color=0.3,0.4,0.6 $@ "${basepath}/${curdate}.png"
+usage() {
+    echo "usage: $0 [-sh] [-O dirname] [-o basename]"
+    echo "-s: maim region select"
+    echo "-i: pick name after capture"
+    echo "-n: notify-send after capture"
+    echo "-o: dir name (default $_dirname)"
+    echo "-O: base name (default current time, $_basename)"
+    echo "-h: help"
+}
 
-while true; do
-    name="$(dmenu-provider -p "Choose a screenshot name, or keep it as current date." <<< "$curdate")"
-    [ -f "${basepath}/${name}.png" ] || break;
-    notify-send "$0" "File ${basepath}/${name}.png already exists."
-done
+main() {
+    local _dirname="$(xdg-user-dir PICTURES)/sshot"
+    local _basename="$(date "+%Y-%m-%d_%H%M%S")"
+    local maimopts=""
+    local interactive=""
+    local do_notify=""
 
-mv "${basepath}/${curdate}.png" "${basepath}/${name}.png"
-notify-send "$0" "Screenshot ${name}.png created in ${basepath}."
+    while getopts "o:O:ishn" opt; do
+        case "$opt" in
+            O) _dirname="$OPTARG";;
+            o) _basename="$OPTARG";;
+            s) maimopts="-s ";;
+            h) usage; exit 0;;
+            i) interactive="true";;
+            n) do_notify="true";;
+            *) usage; exit 1;;
+        esac
+    done
+
+    fullname="${_dirname}/${_basename}.png"
+
+    maim --hidecursor --highlight --color=0.3,0.4,0.6,0.7 $maimopts "$fullname"
+
+    if [ -n "$interactive" ]; then
+        while true; do
+            newname="$(dmenu-provider -p "Choose a screenshot name, or keep it as current date." <<< "$_basename")"
+            [ -f "${_basename}/${newname}.png" ] || break;
+            notify-send "$0" "File ${_basename}/${newname}.png already exists."
+        done
+        mv "${_dirname}/${_basename}.png" "${_dirname}/${newname}.png"
+        _basename="$newname"
+    fi
+
+    if [ -n "$do_notify" ]; then
+        notify-send -i "${_dirname}/${_basename}.png" "$0" "Screenshot ${_basename}.png created in ${_dirname}."
+    fi
+
+}
+
+main "$@"

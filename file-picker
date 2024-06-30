@@ -1,2 +1,2 @@
 #!/bin/bash
-command fd --type file . "$HOME" | dmenu-provider | xargs xdg-open
+command fd --type file . "$HOME" | dmenu-provider | xargs open-file-somehow -t

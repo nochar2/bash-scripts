@@ -2,16 +2,14 @@
 set -euo pipefail
 #shellcheck disable=SC2068
 
-if command -v rofi >/dev/null; then
-	rofi -dmenu $@;
-elif command -v dmenu >/dev/null; then
-	dmenu $@;
-elif [ -t 0 ]; then
+if [ -t 1 ]; then
 	if command -v fzf >/dev/null; then
-		fzf $@;
-	else
-		notify-send "$0" "I was asked to display a menu, but cannot! Install  rofi ,  dmenu  or  fzf  if you want to use me from a console."
+		fzf "$@";
 	fi
+elif command -v rofi >/dev/null; then
+	rofi -dmenu "$@";
+elif command -v dmenu >/dev/null; then
+	dmenu "$@";
 else
 	notify-send "$0" "I was asked to display a menu, but cannot! Install rofi or dmenu.\n"
 fi

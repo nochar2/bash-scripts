@@ -7,13 +7,13 @@ selector() {
 
 abs_drive_path()
 {
-    [ -z "$1" ] && exit 1
+    [ -z "${1:-}" ] && exit 1
     [[ "$1" == "/dev/sd"?? ]] && echo "$1" || echo "/dev/disk/by-label/$1"
 }
 
 f_mnt() 
 {
-    drive="$1"
+    drive="${1:-}"
     [ -z "$drive" ] && {
         drive=$(abs_drive_path "$(echo "$files" | selector "Which device to mount?")")
         [ -z "$drive" ] && exit 1;
@@ -23,7 +23,7 @@ f_mnt()
 
 f_umount()
 {
-    drive="$1"
+    drive="${1:-}"
 
     [ -n "$poweroff" ] && maybe_disconnect=" and power off"
 
@@ -44,7 +44,7 @@ f_umount()
 }
 
 assert() {
-    cmd="$1"
+    cmd="${1:-}"
     shift
     "$cmd" "$@" || { $notifysend "$prog" "assertion '$cmd $*' failed"; exit 1; }
 }
@@ -70,8 +70,6 @@ main() {
     notifysend="echo"
     prog="$(basename "$0")"
     poweroff=""
-
-    assert i_have_cmd udisksctl
 
     for arg in "$@"; do
         case "$arg" in

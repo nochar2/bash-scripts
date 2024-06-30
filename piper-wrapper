@@ -1,0 +1,41 @@
+#!/bin/bash
+# meh
+
+set -euo pipefail
+data_path="$HOME/dl/piper"
+langs="de
+cs
+en
+ru"
+
+lang="$(dmenu-provider -p "What language is this text?" <<< "$langs")"
+model="$(find "$data_path" -name "$lang*.onnx" | dmenu-provider -p "What model would you like to use?")"
+config="$(find "$data_path" -name "$lang*.json" | dmenu-provider -p "What is the corresponding config file?")"
+sample_rate="$(jq .audio.sample_rate "$config")"
+speaker_voices="$(jq -r ".speaker_id_map | keys | @tsv" "$config" | tr '\t' '\n')"
+
+# cat "$config" | jq -r ".speaker_id_map | keys | @tsv"
+
+
+if [ -n "$speaker_voices" ]; then
+    voice_name="$(dmenu-provider -p "Which voice should I pick?" <<< "$speaker_voices")"
+    voice_id="$(jq -r ".speaker_id_map.$voice_name" "$config")"
+else
+    voice_id=0
+fi
+
+echo "piper-wrapper: Using model $model."
+echo "piper-wrapper: Using config $config."
+    # --length_scale 1.0 \
+    # --sentence_silence 0.3 \
+    # --noise_w 0.0 \
+
+# time
+piper-tts \
+    -m  "$model" -c "$config" \
+    --length_scale 0.7 \
+    -f - --output_raw \
+    --speaker "$voice_id" \
+    | aplay -r $sample_rate -f S16_LE -t raw -
+    
+# ffplay -f s16le -ar $sample_rate -ac 1 -

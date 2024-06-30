@@ -1,0 +1,113 @@
+#!/usr/bin/env python3
+import json
+import requests
+import os
+import curses
+import sys
+import readline
+
+def openings_and_closings(s, sub):
+	odd_ones = []
+	even_ones = []
+	i = s.find(sub, 0)
+	odd = False
+
+	while i != -1:
+		if odd:
+			odd_ones.append(i)
+		else:
+			even_ones.append(i)
+		i = s.find(sub, i + len(sub))
+
+	return (odd_ones, even_ones)
+
+
+def replace_by_indices(s, 
+                       old_item_len, 
+                       indices, 
+                       replacement):
+	newstr = ""
+	lastptr = 0
+	ptr = 0
+
+	for i in indices:
+		ptr = i
+		newstr += s[lastptr:ptr]
+		newstr += replacement
+
+		ptr += old_item_len
+		lastptr = ptr
+
+	newstr += s[lastptr:]
+	return newstr
+
+
+def send_query_and_get_reply(url, model, api_key, line_from_user):
+	# this would work similarly for openai / other providers
+	
+
+
+	headers = {"Authorization": f"Bearer {api_key}"}
+	# data_template = {"messages": [{"role": "user", "content": "" } ], "model": model, "max_tokens": 200}
+	data_template = {"messages": [{"role": "user", "content": "" } ], "model": model, "temperature": 0.5, }
+	
+	data = data_template
+	data["messages"][0]["content"] = line_from_user
+
+	r = requests.post(url, json=data, headers=headers)
+
+	msg_json = json.loads(r.content)
+	msg = msg_json["choices"][0]["message"]["content"]
+	return msg
+
+
+def main():
+
+	# what model am I run as?
+	ai_service = sys.argv[0].rsplit('/',1)[1]
+	
+	if ai_service == "groq":
+		model = "llama3-70b-8192"
+		api_key = os.environ.get("GROQ_API_KEY")
+		if api_key is None:
+			raise ValueError("The GROQ_API_KEY env variable is not set")
+		url = "https://api.groq.com/openai/v1/chat/completions"
+	elif ai_service == "deepseek":
+		assert False, "Not implemented"
+	else:
+		assert False, "Not implemented"
+
+	# should it be one-off or infinite?
+	infinite = False
+	if len(sys.argv) > 1 and sys.argv[1] == "inf":
+		infinite = True
+
+
+	# repl
+	while True:
+		try:
+			line = input("What do you want to help with?\n> ")
+		except KeyboardInterrupt:
+			print()
+			exit(0)
+
+		line = line.strip()
+		if line == "":
+			break
+
+		# msg = "This is a test message. **This is a bold text.**"
+		msg = send_query_and_get_reply(url, model, api_key, line)
+
+		# make bold text actually bold in terminal
+		# it's not working properly, won't debug rn
+		# bold_openings, bold_closings = openings_and_closings(msg, "**")
+		# msg = replace_by_indices(msg, len("**"), bold_openings, "\x1b[1m")
+		# msg = replace_by_indices(msg, len("**"), bold_closings, "\x1b[0m")
+
+		print(msg)
+
+		if not infinite:
+			break
+
+
+main()

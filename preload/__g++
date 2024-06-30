@@ -1,0 +1,12 @@
+#!/bin/bash
+
+for arg in "$@"; do
+	if [[ "$arg" = "-O2" || "$arg" = "-O3" ]]; then
+		echo "gcc-wrapper: You don't need more than -O1"
+		result+="-O1 "
+	else
+		result+="$arg "
+	fi
+done
+
+/usr/bin/g++ "$result"

@@ -1,0 +1,2 @@
+#!/bin/bash
+yt-dlp --write-auto-subs --skip-download "$1"

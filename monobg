@@ -1,7 +1,6 @@
 #!/bin/bash
 usage() {
-    echo "usage: $0 COLOR"
-    echo "       $0 -r"
+    echo "usage: $0 (COLOR|-r)"
     echo "creates a single color bg with that color (try: teal, sea green, #400f3d)"
     echo "for options, see https://en.wikipedia.org/wiki/X11_color_names"
     echo "-r picks a random color (max 50 % brightness)"
@@ -16,11 +15,12 @@ case "$1" in
     "-r") 
         color="$(printf "#%.2x%.2x%.2x" "$(rndcol)" "$(rndcol)" "$(rndcol)")";
         echo "$color";;
+    "-*") usage; exit 1;; # doesn't get matched, idk how the matching works
     *) color="$1";;
 esac
 
 # convert -size 100x100 xc:"$color" ~/.config/wal.png
-convert -size 1920x1080 xc:"$color" "$(xdg-user-dir PICTURES)/wallpaper.png"
+magick -size 1920x1080 xc:"$color" "$(xdg-user-dir PICTURES)/wallpaper.png"
 mv \
     "$(xdg-user-dir PICTURES)/wallpaper.png" \
     "$(xdg-user-dir PICTURES)/wallpaper"
