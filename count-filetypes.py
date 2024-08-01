@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-from histoprint import text_hist
 import termplotlib as tpl
 
 import os
