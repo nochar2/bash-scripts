@@ -52,7 +52,7 @@ suitable_program_for() {
 
 swallow_under_i3()
 {
-    if [ "$XDG_CURRENT_DESKTOP" = "i3" ]; then
+    if [ "${XDG_CURRENT_DESKTOP:-}" = "i3" ]; then
         echo "swallow"
     else
         echo ""
