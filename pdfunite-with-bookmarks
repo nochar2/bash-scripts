@@ -1,0 +1,84 @@
+#!/bin/bash
+# merges files like pdfunite / mutool merge, but creates chapters
+# from separate file names.
+
+# From https://unix.stackexchange.com/questions/368415/merge-pdf-files-and-automatically-create-a-table-of-contents-with-each-file-as-a
+
+# Edit: replaced pdftk with mutool where possible (it's faster)
+# Todo: this still doesn't merge bookmarks from those separate files
+
+out_file="combined.pdf"
+bookmarks_file="./bookmarks.txt"
+bookmarks_fmt="BookmarkBegin
+BookmarkTitle: %s
+BookmarkLevel: 1
+BookmarkPageNumber: %d
+"
+
+
+dump_bookmarks_of_file() {
+    file="$1"
+    pages_so_far="$2"
+    pdftk "$file" dump_data | grep Bookmark | (while read -r a b; do
+        case "$a" in
+            'BookmarkLevel:') 
+                echo "BookmarkLevel: $((b + 1))";;
+            'BookmarkPageNumber:') 
+                echo "BookmarkPageNumber: $((b + pages_so_far))";;
+            *) echo "$a $b";;
+        esac
+    done)
+}
+
+number_of_pages_in_file() {
+    # pdftk "$1" dump_data | grep NumberOfPages | awk '{print $2}'
+    mutool info "$1" | grep Pages | awk '{print $2}'
+}
+
+usage() {
+    echo "usage: $0 [--nest] file.pdf..."
+    echo "merges the files, chapter/index aware"
+    echo "--no-nest  builds chapter index from file names (default)"
+    echo "--nest     additionally captures chapters from each name under that filename"
+    echo "           (slow, blame pdftk)"
+}
+
+main() {
+    nest=0
+
+    case "${1:}" in
+        --nest)    nest=1; shift;;
+        --no-nest) nest=0; shift;;
+        "")        usage; exit 0;;
+        --*)       usage; exit 1;;
+    esac
+
+    rm -f "$bookmarks_file" "$out_file"
+
+    declare -a files=("$@")
+    page_counter=1
+
+    # Generate bookmarks file.
+    for f in "${files[@]}"; do
+        title="${f%.*}"
+
+        if [ "$nest" = "1" ]; then
+            printf "$bookmarks_fmt" "$title" "$page_counter" >> "$bookmarks_file"
+            dump_bookmarks_of_file "$f" "$page_counter" >> "$bookmarks_file"
+        else
+            printf "$bookmarks_fmt" "$title" "$page_counter" >> "$bookmarks_file"
+        fi
+        num_pages="$(number_of_pages_in_file "$f")"
+        page_counter=$((page_counter + num_pages))
+        echo $page_counter
+    done
+
+    # Combine PDFs and embed the generated bookmarks file.
+    # pdftk "${files[@]}" cat output - | \
+    #    pdftk - update_info "$bookmarks_file" output "$out_file"
+    mutool merge -o "out.pdf" "${files[@]}" 
+    pdftk "out.pdf" update_info "$bookmarks_file" output "$out_file"
+    rm out.pdf
+}
+
+main "$@"
