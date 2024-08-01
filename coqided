@@ -1,0 +1,2 @@
+# idk, I don't use this anyway
+coqide -async-proofs off -async-proofs-command-error-resilience off $@
