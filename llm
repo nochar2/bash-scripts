@@ -1,0 +1,195 @@
+#!/usr/bin/env python3
+import json
+import requests
+import os
+import curses
+import sys
+import readline
+import argparse
+from dataclasses import dataclass
+from typing import List, Tuple, Dict, Optional, Any
+
+@dataclass
+class AiServiceSpec:
+	url: str
+	envvar_name: str
+	models: List[str]
+	
+
+Url = str
+Models = List[str]
+ai_service_map: Dict[str, AiServiceSpec] = {
+	"groq": AiServiceSpec(
+		"https://api.groq.com/openai/v1/chat/completions", 
+		"GROQ_API_KEY",
+		[
+			"llama-3.1-70b-versatile",
+			"llama3-70b-8192"
+		],
+	),
+	"openrouter": AiServiceSpec(
+		"https://openrouter.ai/api/v1/chat/completions",
+		"OPENROUTER_API_KEY",
+		[
+			"anthropic/claude-3.5-sonnet"
+			# todo: others
+		],
+	)
+}
+
+###########################
+
+# XXX: this is supposed to turn bold marks to actually
+# bold text, but I'm unsure if it actually works
+
+Positions = List[int]
+def openings_and_closings(s: str, sub: str) \
+		-> Tuple[Positions, Positions]:
+	odd_ones = []
+	even_ones = []
+	i = s.find(sub, 0)
+	odd = False
+
+	while i != -1:
+		if odd:
+			odd_ones.append(i)
+		else:
+			even_ones.append(i)
+		i = s.find(sub, i + len(sub))
+
+	return (odd_ones, even_ones)
+
+
+def replace_by_indices(s: str, 
+                       old_item_len: int, 
+                       indices: List[int], 
+                       replacement: str) -> str:
+	newstr = ""
+	lastptr = 0
+	ptr = 0
+
+	for i in indices:
+		ptr = i
+		newstr += s[lastptr:ptr]
+		newstr += replacement
+
+		ptr += old_item_len
+		lastptr = ptr
+
+	newstr += s[lastptr:]
+	return newstr
+
+#########################
+
+
+def send_query_and_get_reply(url: str, 
+			                 model: str, 
+			                 api_key: str, 
+			                 line_from_user: str) ->str:
+	# this would work similarly for openai / other providers
+	
+
+
+	MessageSpec = Dict[str, str]
+	
+	headers = {"Authorization": f"Bearer {api_key}"}
+	# data_template = {"messages": [{"role": "user", "content": "" } ], "model": model, "max_tokens": 200}
+	data_template = {
+		"messages": [
+			{"role": "user", "content": line_from_user } 
+		], 
+	   "model": model, 
+	   "temperature": 0.5
+	}
+	
+	data = data_template
+
+	r = requests.post(url, json=data, headers=headers)
+
+	msg_json: Dict[Any, Any] = json.loads(r.content)
+	print(type(msg_json))
+
+	# print(msg_json)
+	msg: str = msg_json["choices"][0]["message"]["content"]
+	return msg
+
+
+
+def main() -> None:
+	parser = argparse.ArgumentParser(description="CLI program for querying large language models.")
+	parser.add_argument("-i", "--infinite", action="store_true", help="Ask for input repeatedly")
+	parser.add_argument("-s", "--service", help="API service (supported: groq)")
+	parser.add_argument("-m", "--model", help="Language model name")
+	args = parser.parse_args()
+
+	infinite = args.infinite
+	assert isinstance(infinite, bool)
+
+	# get the 
+	ai_service_input = args.service or "groq"
+
+	ai_service_matches = [
+		srv for srv in ai_service_map.keys() 
+		if srv.startswith(ai_service_input)
+	]
+	ai_service = None
+	if len(ai_service_matches) == 0:
+		print(f"Unknown service {ai_service_input}"); exit(1)
+	elif len(ai_service_matches) > 1:
+		print(f"Input {ai_service_input} is ambiguous"); exit(1)
+	else:
+		ai_service = ai_service_matches[0]
+		
+		
+	metadata: Optional[AiServiceSpec] \
+		= ai_service_map.get(ai_service)
+	if metadata is None:
+		assert False, f"ai service {ai_service} not implemented"
+	url    = metadata.url
+	models = metadata.models
+	envvar_name = metadata.envvar_name
+
+	model = args.model or None
+
+	if model is None:
+		model = models[0]
+		print(f"Using provider {ai_service}, model {model} (default).")
+	elif model in models:
+		print(f"Using provider {ai_service}, model {model}.")
+	else:
+		print(f"Unknown model {model} for service {ai_service}.")
+		exit(1)
+
+	api_key = os.environ.get(envvar_name)
+	if api_key is None: 
+		raise ValueError(f"The {envvar_name} env variable is not set")
+
+
+	# repl
+	while True:
+		try:
+			line = input("What do you want to help with?\n> ")
+		except KeyboardInterrupt:
+			print() # newline
+			return
+
+		line = line.strip()
+		if line == "":
+			break
+
+		# msg = "This is a test message. **This is a bold text.**"
+		msg = send_query_and_get_reply(url, model, api_key, line)
+
+		# make bold text actually bold in terminal
+		# it's not working properly, won't debug rn
+		# bold_openings, bold_closings = openings_and_closings(msg, "**")
+		# msg = replace_by_indices(msg, len("**"), bold_openings, "\x1b[1m")
+		# msg = replace_by_indices(msg, len("**"), bold_closings, "\x1b[0m")
+
+		print(msg)
+
+		if not infinite:
+			break
+
+
+main()
