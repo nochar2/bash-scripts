@@ -5,7 +5,7 @@
 # From https://unix.stackexchange.com/questions/368415/merge-pdf-files-and-automatically-create-a-table-of-contents-with-each-file-as-a
 
 # Edit: replaced pdftk with mutool where possible (it's faster)
-# Todo: this still doesn't merge bookmarks from those separate files
+# Todo: broken if pdfs have a different size
 
 out_file="combined.pdf"
 bookmarks_file="./bookmarks.txt"
@@ -46,7 +46,7 @@ usage() {
 main() {
     nest=0
 
-    case "${1:}" in
+    case "${1:-}" in
         --nest)    nest=1; shift;;
         --no-nest) nest=0; shift;;
         "")        usage; exit 0;;
@@ -76,9 +76,14 @@ main() {
     # Combine PDFs and embed the generated bookmarks file.
     # pdftk "${files[@]}" cat output - | \
     #    pdftk - update_info "$bookmarks_file" output "$out_file"
-    mutool merge -o "out.pdf" "${files[@]}" 
-    pdftk "out.pdf" update_info "$bookmarks_file" output "$out_file"
-    rm out.pdf
+
+    ### all three create a garbled pdf if the pdfs differ in canvas size
+    mutool merge -o "out.pdf" "${files[@]}"
+    # pdfunite "${files[@]}" out.pdf
+    # pdftk "${files[@]}" output out.pdf
+
+    # pdftk "out.pdf" update_info "$bookmarks_file" output "$out_file"
+    # rm out.pdf
 }
 
 main "$@"
