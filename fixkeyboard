@@ -1,0 +1,56 @@
+#!/bin/bash
+set -euo pipefail
+
+# reloads touchpad module in an effort to fix buggy touchpad firmware (rarely successfully)
+
+# What I know so far:
+# - how it breaks
+#   - resume from suspend breaks it
+#     - adding an unload/reload hook doesn't fix it (unsure if it works)
+#   - after some time from boot (20 mins - several hours), it breaks itself also, can't reproduce
+#
+# - symptoms
+#   - errors in dmesg
+#     - "timeout waiting for bus ready" spam in dmesg (not always)
+#     - "controller timed out" on each reload
+#   - nonfunctional touchpad (doesn't show to the OS), stuttery keyboard
+#
+# - fixes
+#   - kernel
+#     - very very rarely, reloading the i2c_hid_acpi kernel module fixes it
+#       - in any case, it at least stops the dmesg flood
+#     - there is some "poke the PCI" tool that didn't help
+#       - last time, that made BIOS yell at me for "keyboard initialization failure"
+#   - power-related
+#     - suspend+resume doesn't help
+#       - there is a small scroll jerk and then it's dead
+#     - kexec doesn't help (or at least not always)
+#     - often, this gets fixed by reboot
+#       - but sometimes, it doesn't 
+#     - not sure about cold shutdown + boot
+#     - shutdown + walk away for a while + boot works reliably
+#     - rebooting to Windows helps (not sure, I don't do that often)
+#   - obscure
+#     - it fixed itself once when writing from /dev/urandom (can't reproduce)
+#   - psmouse
+#     - this makes the touchpad work, pretending it's a PS/2 mouse
+#       - none of the functionality like scrolling, disable while typing
+#         etc...  works, also no I still can't reload the i2c_hid_acpi
+#       - I already encountered this state under Windows, so I'm concluding it's a hardware issue
+#
+# - context
+#   - same loaded kernel modules pre and post breakage
+#   - broken as of 6.6.23-1-lts, in previous versions also as far as I remember
+#   - in 6.8.2, it doesn't seem to break anymore much but not 100 % never
+
+[ "$EUID" != 0 ] && {
+  echo "[Error] Reloading kernel modules requires root"; exit 1;
+}
+
+[ -d "/lib/modules/$(uname -r)" ] || {
+  echo "[Error] No kernel modules for this kernel. Most likely, the kernel was just updated but the system was not restarted yet."
+  exit 1
+}
+
+sudo modprobe -r atkbd
+sudo modprobe    atkbd reset=1
