@@ -25,6 +25,7 @@ f_umount()
 {
     drive="${1:-}"
 
+    maybe_disconnect=""
     [ -n "$poweroff" ] && maybe_disconnect=" and power off"
 
     [ -z "$drive" ] && {
@@ -59,7 +60,7 @@ usage() {
 notifications_work() {
     # non-zero exit if it timeouts
     # also TODO check in other DE.
-    timeout 0.2 notify-send -t 1 "$prog" "Testing if notifications are consumed. If you are reading this, your DE/WM ignores the notification timeout, because it should be gone after a millisecond (dunst/other daemon not running?). 
+    notify-send -t 1 "$prog" "Testing if notifications are consumed. If you are reading this, your DE/WM ignores the notification timeout, because it should be gone after a millisecond (dunst/other daemon not running?). 
     
     Please suggest how to check this better.
     "  
