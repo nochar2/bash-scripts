@@ -1,16 +1,4 @@
 #!/bin/bash
 set -euo pipefail
-
-# reloads crashed Atheros wifi module
-
-[ "$EUID" != 0 ] && {
-  echo "Reloading kernel modules requires root"; exit 1;
-}
-
-[ -d "/lib/modules/$(uname -r)" ] || {
-  echo "[Error] No kernel modules for this kernel. Most likely, the kernel was just updated but the system was not restarted yet."
-  exit 1
-}
-
-sudo rmmod ath10k_pci
-sudo modprobe ath10k_pci
+# reload a crashed Atheros wifi module
+reload-kernel-module ath10k_pci

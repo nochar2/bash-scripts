@@ -1,0 +1,19 @@
+#!/bin/bash
+set -euo pipefail
+
+[ -z "${1:-}" ] && {
+  echo "usage: $0 MODULE options"
+  echo "reloads a kernel module (wrapper around modprobe)"
+}
+
+[ "$EUID" != 0 ] && {
+  echo "Reloading kernel modules requires root"; exit 1;
+}
+
+[ -d "/lib/modules/$(uname -r)" ] || {
+  echo "[Error] No kernel modules for this kernel. Most likely, the kernel was just updated but the system was not restarted yet."
+  exit 1
+}
+
+sudo modprobe -r "$@"
+sudo modprobe    "$@"
