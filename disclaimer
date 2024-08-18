@@ -1,0 +1,2 @@
+#!/bin/sh
+echo "/!\\ Disclaimer: This file is from a private repo. It works fine for me, but it might do unexpected things on your system. If you're not sure, check the code. /!\\"

@@ -4,7 +4,7 @@ A collection of my personal shell scripts. Most of them are centered around term
 ### Any interesting programs?
 - **bri-nozero{,-watcher}**: watches and resists setting display brightness to zero
 - **manual-redshift**: allows for finer bluelight-filter control. Just call it with the `up` or `down` argument in your i3/dwm/whatever config.
-- **dashboard**: draws a to-do list on your wallpaper from a .md file
+- **dashboard**: draws a to-do list on your wallpaper from a .md file (CURRENTLY BROKEN)
     - requires `boxes` and compiling sanepr.c (type `make`)
     - pre alpha quality
 - **mount-picker-{mount,umount}**: mount/unmount/poweroff disks, without root. Bindable to a key.
@@ -15,7 +15,4 @@ A collection of my personal shell scripts. Most of them are centered around term
 - **ext/pdfunite-with-bookmarks**: merges pdfs and preserves chapters (code from SO, not mine)
 
 ## Disclaimer
-Although this repo is useful for me, it is a private repo that is just
-currently  public for my convenience. Its quality is poor
-by most repo's standards, and I take zero  responsibility if it breaks
-your  system if you use it.
+Although the files work for me, they might do unexpected things on your system. If you're not sure, check the code.
