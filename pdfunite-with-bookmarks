@@ -63,10 +63,10 @@ main() {
         title="${f%.*}"
 
         if [ "$nest" = "1" ]; then
-            printf "$bookmarks_fmt" "$title" "$page_counter" >> "$bookmarks_file"
+            printf '%s %s %s' "$bookmarks_fmt" "$title" "$page_counter" >> "$bookmarks_file"
             dump_bookmarks_of_file "$f" "$page_counter" >> "$bookmarks_file"
         else
-            printf "$bookmarks_fmt" "$title" "$page_counter" >> "$bookmarks_file"
+            printf '%s %s %s' "$bookmarks_fmt" "$title" "$page_counter" >> "$bookmarks_file"
         fi
         num_pages="$(number_of_pages_in_file "$f")"
         page_counter=$((page_counter + num_pages))

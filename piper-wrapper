@@ -1,5 +1,8 @@
 #!/bin/bash
-# meh
+# shellcheck disable=2086
+
+# TODO: option to just export wav / convert to opus
+# instead of streaming
 
 set -euo pipefail
 data_path="$HOME/dl/piper"

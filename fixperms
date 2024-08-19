@@ -25,7 +25,7 @@ main()
   [ -z "$*" ] && { usage; exit 0; }
 
   getopt_result=$(getopt -o o:dfsh --long ownership:,dirperms,fileperms,scriptperms,help -- "$@")
-  if [ $? != 0 ] ; then echo "getopt failed, exiting." >&2 ; exit 1 ; fi
+  # if [ $? != 0 ] ; then echo "getopt failed, exiting." >&2 ; exit 1 ; fi
   eval set -- "$getopt_result"
 
   [ "$#" = 0 ] && { usage; exit 0; };

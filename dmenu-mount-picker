@@ -74,7 +74,7 @@ main() {
 
     for arg in "$@"; do
         case "$arg" in
-            -n|--notify) assert notifications_work; can_notify=1; notifysend="notify-send -t 4000"; shift;;
+            -n|--notify) assert notifications_work; notifysend="notify-send -t 4000"; shift;;
             -p|--poweroff) poweroff=1; shift;;
             -h|--help) usage; exit 0;;
             -*) usage; exit 1;;

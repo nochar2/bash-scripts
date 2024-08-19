@@ -83,7 +83,7 @@ color()
     # shellcheck disable=SC2086
     newid=$(notify-send $lastid_arg -p -t 700 "$(basename "$0")" "Setting screen color temp to ${desired_temp}K")
     echo "$desired_bri"
-    redshift -P -b ${desired_bri}:1.0 -O "$desired_temp" >/dev/null
+    redshift -P -b "${desired_bri}":1.0 -O "$desired_temp" >/dev/null
     echo "$newid" > /tmp/last-notification
 }
 

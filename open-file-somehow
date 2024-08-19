@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 set -euo pipefail
 # ^ don't ever run shell scripts interactively with -i, this destroys your history.
 

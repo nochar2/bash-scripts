@@ -20,7 +20,7 @@ fusage()
 
 flistdir()
 {
-    ls *.md
+    ls -- *.md
 }
 
 fspecified()
@@ -38,25 +38,25 @@ fexists()
 frename()
 {
     [ -f "$1" ] || return 1;
-    [ "$2" == ".md" ] && { echo "New name not specified"; return 1; }
+    [ "$2" = ".md" ] && { echo "New name not specified"; return 1; }
     [ -d "$2" ] && { echo "Target $2 is an existing directory; I want to rename, not move"; return 1; }
     mv "$1" "$2"
 }
 
 # shopt -s expand_aliases
-BASEPATH=$HOME/notes/Plain
-NOTENAME="$2".md
+basepath=$HOME/notes/Plain
+notename="$2".md
 
-cd "$BASEPATH"
+cd "$basepath" || exit
 
 case "$1" in
     help|h|"") fusage;;
     list|l) flistdir;;
-    show|s) fspecified "$NOTENAME" && fexists $NOTENAME && cat "$NOTENAME";;
-    edit|e) fspecified "$NOTENAME" && $EDITOR "$NOTENAME";;
-    rename|r) frename "$NOTENAME" "$3".md;;
-    delete|d) mkdir -p trash; mv "$NOTENAME" trash;;
-    fdelete|fd) rm "$NOTENAME";;
+    show|s) fspecified "$notename" && fexists "$notename" && cat "$notename";;
+    edit|e) fspecified "$notename" && $EDITOR "$notename";;
+    rename|r) frename "$notename" "$3".md;;
+    delete|d) mkdir -p trash; mv "$notename" trash;;
+    fdelete|fd) rm "$notename";;
     *) cat "$1".md
 esac
 

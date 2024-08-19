@@ -31,8 +31,9 @@ ai_service_map: Dict[str, AiServiceSpec] = {
 		"https://openrouter.ai/api/v1/chat/completions",
 		"OPENROUTER_API_KEY",
 		[
-			"anthropic/claude-3.5-sonnet"
-			# todo: others
+			# todo: maybe just fetch all options online and add a fzf picker
+			"anthropic/claude-3.5-sonnet",
+			"meta-llama/llama-3.1-405b-instruct"
 		],
 	)
 }

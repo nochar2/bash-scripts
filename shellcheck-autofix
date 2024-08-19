@@ -1,0 +1,3 @@
+#!/bin/sh
+[ -z "$*" ] && { echo "usage: $0 FILES..."; exit 0; }
+shell-scripts-of "$@" | xargs shellcheck -f diff | git apply --allow-empty

@@ -13,8 +13,8 @@ usage() {
 }
 
 main() {
-    local _dirname="$(xdg-user-dir PICTURES)/sshot"
-    local _basename="$(date "+%Y-%m-%d_%H%M%S")"
+    _dirname="$(xdg-user-dir PICTURES)/sshot"; local _dirname
+    _basename="$(date "+%Y-%m-%d_%H%M%S")"; local _basename
     local maimopts=""
     local interactive=""
     local do_notify=""
@@ -33,6 +33,7 @@ main() {
 
     fullname="${_dirname}/${_basename}.png"
 
+    # shellcheck disable=2086
     maim --hidecursor --highlight --color=0.3,0.4,0.6,0.7 $maimopts "$fullname"
 
     if [ -n "$interactive" ]; then

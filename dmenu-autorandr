@@ -1,5 +1,5 @@
 #!/bin/bash
 set -euo pipefail
 selection=$(autorandr | dmenu-provider | cut -d' ' -f1)
-echo $selection
+echo "$selection"
 autorandr "$selection"
