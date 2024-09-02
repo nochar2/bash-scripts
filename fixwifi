@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 set -euo pipefail
 # reload a crashed Atheros wifi module
 reload-kernel-module ath10k_pci

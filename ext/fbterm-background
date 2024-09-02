@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #fbterm-bi: a wrapper script to enable background image with fbterm
 # usage: fbterm-bi /path/to/image fbterm-options
 

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # A manual Redshift-based color control.
 
 # date +"%s.%N"  -- for benchmarking, takes about 50 ms rn which is very slow but whatever

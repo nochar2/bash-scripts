@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 choice=$[$RANDOM % 2]
 [ $choice -eq 0 ] && echo "head" || echo "tail"

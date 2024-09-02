@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 for arg in "$@"; do
 	if [[ "$arg" = "-O2" || "$arg" = "-O3" ]]; then

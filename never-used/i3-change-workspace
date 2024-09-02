@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # DON'T USE
 # This was some idea to setup i3 workspace names for everything

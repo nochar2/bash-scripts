@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Used for WSL before
 # launches cmd.exe with arguments
 # WINPATH=$(echo $DIR | sed "s/://" | sed "s/\//\\\/g")

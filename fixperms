@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 set -euo pipefail
 
 usage() {
@@ -15,7 +15,7 @@ refuse_stupid_dirs()
 {
   case "$PWD" in
   /|/home|/etc|/usr/bin|/usr/lib|/var|/bin|/lib)
-    echo "Sorry, I don't feel that suicidal today."; exit 1;;
+    echo "Refusing to clobber system directories."; exit 1;;
   esac 
 }
 

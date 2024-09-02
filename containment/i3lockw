@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Locks the screen with a blurred, dimmed version of an image
 

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # not mine, bash is required
 
 declare -i ID

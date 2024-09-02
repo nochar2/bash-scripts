@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 [ -z "$1" ] && { 
 	echo -e  "usage: $0 file.torrent\nLists files in a .torrent file, in the same way the *find* command shows them."; 
 	exit 1; 

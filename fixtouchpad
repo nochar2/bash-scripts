@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 set -euo pipefail
 # reload-kernel-module i2c_hid_acpi
 reload-kernel-module i2c_hid

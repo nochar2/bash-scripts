@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # shellcheck disable=2086
 
 # TODO: option to just export wav / convert to opus

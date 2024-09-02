@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # there was some other official script probably, I don't remember
 # I just use  rofi -show drun  currently
 

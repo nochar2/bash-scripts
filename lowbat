@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # I don't know how to do this without polling
 # inotifywait doesn't work on /sys
 # udevadm monitor doesn't report perc change

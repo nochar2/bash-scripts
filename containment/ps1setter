@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # ideas from here:
 # https://codereview.stackexchange.com/questions/174019/ps1-for-bash-prompt-showing-last-exit-status-written-mostly-in-python
 

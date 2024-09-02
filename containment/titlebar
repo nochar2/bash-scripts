@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 assert()
 {
     "$@" || { echo "Assertion failed on command: $@"; exit 16; }

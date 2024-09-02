@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # works fine, but not ideal
 # also, **incredibly** slow for longer (100+) words.

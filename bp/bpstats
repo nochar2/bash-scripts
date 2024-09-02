@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 #[ "$1" = "-r" ] && { possible_redirect=">/var/tmp/bpio"; shift; }
 

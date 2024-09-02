@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # A dumb script that mounts an external drive and opens a file browser
 # with anime listings, to ease setting up an Anki workflow for Japanese

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # merges files like pdfunite / mutool merge, but creates chapters
 # from separate file names.
 

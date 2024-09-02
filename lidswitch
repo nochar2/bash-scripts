@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 inhibit_file=/etc/systemd/logind.conf.d/lidswitch-inhibit.conf
 

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 set -euo pipefail
 selection=$(autorandr | dmenu-provider | cut -d' ' -f1)
 echo "$selection"

@@ -62,7 +62,7 @@ kmscon \
        --palette-light-cyan   0,128,128 \
        --palette-light-blue   0,64,128 \
        --hwaccel \
-       --login -- /bin/bash -i
+       --login -- /usr/bin/env bash -i
 
 # these don't fix/do anything visible for me
 # --no-drm \  

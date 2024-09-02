@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # This script allows me to show Etterna packs of specific skillset I want to
 # practice. It creates symlinks to my categorized pack dirs, creating 
 # an illusion of packs located directly in Songs/ folder

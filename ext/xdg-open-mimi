@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # bash is required
 
 echo "$(date) | $0 was called with arguments [$@]" >> /var/tmp/xdg-open.log
