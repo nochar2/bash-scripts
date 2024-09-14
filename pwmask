@@ -5,10 +5,10 @@
 
 fusage()
 {
+    echo "Usage: $(basename "$0") MASK"
+    echo ""
     echo "$(basename "$0") creates a user-defined sequence of consonants and"
     echo "wovels. It can be used for generating random usernames and passwords."
-    echo ""
-    echo "Usage: $(basename "$0") MASK"
     echo ""
     echo "MASK is a string of c a w: e.g. cwccwccwcwcwc"
     echo "c is replaced with a random consonant, w with a random wovel."

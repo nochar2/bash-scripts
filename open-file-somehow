@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
+
 # ^ don't ever run shell scripts interactively with -i, this destroys your history.
 
 # This is similar to xdg-query / xdg-open. It is much easier to customize
@@ -94,11 +95,11 @@ usage() {
 main() {
     just_echo=0
     termprefix=""
-    [ "$1" = "-n" ] && { just_echo=1; shift; }
-    [ "$1" = "-t" ] && { termprefix="$TERMINAL -e "; shift; }
-    { [ "$1" = "--help" ] || [ "$1" = "-h" ]; } && { usage; exit 0; }
-    { [ "$#" != 1 ] || [ -z "$1" ]; } && { usage; exit 1; }
 
+    if [ "$1" = "-n" ]; then just_echo=1; shift; fi
+    if [ "$1" = "-t" ]; then termprefix="$TERMINAL -e "; shift; fi
+    if [ "$1" = "--help" -o "$1" = "-h" ]; then echo a; usage; exit 0; fi
+    if [ -z "$1" ];           then echo b; usage; exit 1; fi
 
     file="$*"
     cmd=$(cmd_to_open "$file")

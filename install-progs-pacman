@@ -9,7 +9,7 @@ lsp=(texlab python-lsp-server svelte-language-server haskell-language-server bas
 # self-explanatory
 web_browsers=(firefox firefox-tridactyl firefox-ublock-origin chromium qutebrowser)
 # things which you can click on in a graphical environment
-gui_utils=(network-manager-applet dmenu rofi rpi-imager xdot timeshift uget meld)
+gui_utils=(network-manager-applet dmenu rofi rpi-imager xdot timeshift uget meld vscodium)
 # text-based tools which still need the X server
 cli_utils_x11=(xdotool xclip xcolor)
 # things runnable from the console (maybe move this to programming?)
