@@ -1,11 +1,10 @@
 #!/usr/bin/env bash
-# merges files like pdfunite / mutool merge, but creates chapters
-# from separate file names.
+#shellcheck disable=2059 # printf +variable
 
+# merges files like pdfunite / mutool merge, but creates chapters from separate file names.
 # From https://unix.stackexchange.com/questions/368415/merge-pdf-files-and-automatically-create-a-table-of-contents-with-each-file-as-a
 
-# Edit: replaced pdftk with mutool where possible (it's faster)
-# Todo: broken if pdfs have a different size
+# sadly the merging is broken if the pdfs have different page sizes, no matter what backend you use :(
 
 out_file="combined.pdf"
 bookmarks_file="./bookmarks.txt"
@@ -15,6 +14,7 @@ BookmarkLevel: 1
 BookmarkPageNumber: %d
 "
 
+i_have() { command -v "$1" >/dev/null; } 
 
 dump_bookmarks_of_file() {
     file="$1"
@@ -31,8 +31,12 @@ dump_bookmarks_of_file() {
 }
 
 number_of_pages_in_file() {
-    # pdftk "$1" dump_data | grep NumberOfPages | awk '{print $2}'
-    mutool info "$1" | grep Pages | awk '{print $2}'
+    if i_have mutool; then
+        # mutool pages "$1" | grep pagenum | wc -l
+        mutool info "$1" | grep Pages | awk '{print $2}'
+    else
+        pdftk "$1" dump_data | grep NumberOfPages | awk '{print $2}'
+    fi
 }
 
 usage() {
@@ -52,6 +56,11 @@ main() {
         "")        usage; exit 0;;
         --*)       usage; exit 1;;
     esac
+
+    if ! i_have pdftk; then
+        echo "pdftk is required to extract chapters (also mutool is optional to get page counts faster)" >&2
+        exit 1
+    fi
 
     rm -f "$bookmarks_file" "$out_file"
 
@@ -77,13 +86,15 @@ main() {
     # pdftk "${files[@]}" cat output - | \
     #    pdftk - update_info "$bookmarks_file" output "$out_file"
 
-    ### all three create a garbled pdf if the pdfs differ in canvas size
-    mutool merge -o "out.pdf" "${files[@]}"
-    # pdfunite "${files[@]}" out.pdf
-    # pdftk "${files[@]}" output out.pdf
-
+    ### all three create a garbled pdf if the pdfs differ in canvas size :(
+    if i_have mutool; then
+        mutool merge -o "out.pdf" "${files[@]}"
+    elif i_have pdfunite; then
+        pdfunite "${files[@]}" out.pdf
+    else
+        pdftk "${files[@]}" output out.pdf # slowest
+    fi
     pdftk "out.pdf" update_info "$bookmarks_file" output "$out_file"
-    # rm out.pdf
 }
 
 main "$@"
