@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+
+# XXX: this is ugly, also use chaotic-aur versions where possible
+
 alsoprint() {
     echo "$@" && "$@"
 }
@@ -18,20 +21,26 @@ if ! pacman -Qq yay >/dev/null; then
 fi
 
 # used ananicy, doesn't help that much with responsiveness but now all PIDs are in the millions for some reason
-# used perf-tools, replaced it with bcc-tools because at least perf-tools execsnoop doesn't work fsr...
-
 # hotspot-appimage complains about missing xdot even though it is installed
 progs=( 
-    libbacktrace-git  # libs
-    libnatpmp opencv libcaca libjuice sdl_ttf # ug
-    vim-language-server cmake-language-server awk-language-server # lsp
-    powerpill downgrade # sw management
-    emsdk uefi-run vscodium-bin sysls jdk21-openjdk bear flamegraph git-lfs # programming
-    i3-swallow-git # i3
-    python-wpm # games
-    vimv-git # editing
-    yt-dlp-drop-in # media
-    tatsumato hotspot kddockwidgets-qt6 task-spooler update-grub boxes translate-shell xdg-ninja # utils
+    # -- libs
+    libbacktrace-git   # XXX: ???
+    # --old uni shit
+    # libnatpmp opencv libcaca libjuice sdl_ttf                   
+    # -- lsp
+    vim-language-server cmake-language-server awk-language-server 
+    # --sw management
+    powerpill downgrade 
+    # --programming
+    emsdk uefi-run vscodium-bin sysls jdk21-openjdk bear flamegraph git-lfs 
+    # --i3
+    i3-swallow-git 
+    # -- games
+    python-wpm 
+    # -- media
+    yt-dlp-drop-in 
+    # -- utils
+    tatsumato hotspot kddockwidgets-qt6 task-spooler update-grub boxes translate-shell xdg-ninja vimv-git 
 )
 # Install AUR programs
 yay -S --noconfirm --needed "${progs[@]}"
@@ -39,13 +48,11 @@ yay -S --noconfirm --needed "${progs[@]}"
 # Post install startups
 # alsoprint systemctl enable --now ananicy 
 
-# My own configs
-{
-    git clone git@gitlab.com:nochar/bash_scripts.git scripts 2>/dev/null || true
-    git clone git@gitlab.com:nochar/dotfiles.git .config 2>/dev/null || true
-    pushd .config/zroot
-    ./make_symlinks -f
-    popd
-}
+# My own configs (XXX: this belongs elsewhere !!!!!)
+# {
+#     git clone git@gitlab.com:nochar/bash_scripts.git scripts 2>/dev/null || true
+#     git clone git@gitlab.com:nochar/dotfiles.git .config 2>/dev/null || true
+#     pushd dotfiles; stow everything; popd
+# }
 
 

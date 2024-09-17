@@ -4,38 +4,82 @@ set -euo pipefail
 
 [ "$EUID" -ne 0 ] && { echo "Pacman must be run this as root"; exit 1; }
 
-# autocomplete / checks for various langs for Helix (or other editors)
-lsp=(texlab python-lsp-server svelte-language-server haskell-language-server bash-language-server)
-# self-explanatory
-web_browsers=(firefox firefox-tridactyl firefox-ublock-origin chromium qutebrowser)
-# things which you can click on in a graphical environment
-gui_utils=(network-manager-applet dmenu rofi rpi-imager xdot timeshift uget meld vscodium)
-# text-based tools which still need the X server
-cli_utils_x11=(xdotool xclip xcolor)
-# things runnable from the console (maybe move this to programming?)
-cli_utils_con=(wget curl aria2 fd fzf kexec-tools brightnessctl cpupower zip p7zip pass parallel ccache less man)
-# non-interactive components
-gui_lowlevel=(debugedit picom libspeechd speech-dispatcher numlockx dunst xf86-video-intel unclutter redshift dex)
-# various prog tools / compilers / runtimes, strictly for programming
-programming=(git imagemagick alacritty htop shellcheck intel-gpu-tools jdk21-openjdk tcc valgrind tmux byobu vim helix clang bcc-tools)
-# niche things for weird people
-rice=(polybar i3 sxhkd bspwm)
-# text / audio / video viewers
-media=(yt-dlp pamixer sxiv mpv xwallpaper lf ueberzug zathura zathura-ps zathura-djvu zathura-pdf-mupdf maim)
-# font packs
-fonts=(ttf-jetbrains-mono ttf-jetbrains-mono-nerd)
-# 4 GB of junk, thanks Mr Lamport
-texlive_all=(texlive texlive-lang)
-wine=(wine winetricks)
+#################################################
+# some of this could see some cleanup
+################################################
 
-guionly=("${web_browsers[@]}" "${gui_utils[@]}" "${cli_utils_x11[@]}" "${media[@]}" "${rice[@]}" "${fonts[@]}" "${gui_lowlevel[@]}" "${wine[@]}")
-clionly=("${programming[@]}" "${lsp[@]}" "${cli_utils_con[@]}")
+# autocomplete / checks for various langs for Helix (or other editors)
+lsp=(
+	texlab
+	python-lsp-server
+	svelte-language-server
+	haskell-language-server
+	bash-language-server
+)
+
+web_browsers=(
+	firefox  firefox-tridactyl  firefox-ublock-origin 
+	chromium 
+	qutebrowser
+)
+
+# todo: cleanup / split
+guiutils=(
+	xdotool xclip xcolor
+	wl-clipboard
+	network-manager-applet dmenu rofi rpi-imager xdot timeshift uget meld
+	debugedit picom libspeechd speech-dispatcher numlockx dunst xf86-video-intel unclutter redshift dex
+	wine winetricks
+	# bluetooth?
+	qt5-connectivity qt6-connectivity
+)
+
+cliutils=(
+	wget curl aria2 fd fzf kexec-tools brightnessctl cpupower zip p7zip pass parallel ccache less man
+	# bluetooth
+	bluez-utils 
+)
+
+programming=(
+	git imagemagick alacritty htop shellcheck intel-gpu-tools jdk21-openjdk tcc valgrind tmux byobu vim helix clang bcc-tools
+)
+
+rice=(
+	polybar i3 sxhkd bspwm
+)
+
+media=(
+	yt-dlp pamixer sxiv mpv xwallpaper lf ueberzug zathura zathura-ps zathura-djvu zathura-pdf-mupdf maim
+)
+
+fonts=(
+	ttf-jetbrains-mono ttf-jetbrains-mono-nerd noto-fonts-cjk
+)
+
+texlive_all=(
+	texlive texlive-lang tectonic
+)
+
+
+guionly=(
+	"${web_browsers[@]}" 
+	"${media[@]}" 
+	"${rice[@]}" 
+	"${fonts[@]}" 
+	"${wine[@]}"
+	"${guiutils[@]}"
+)
+clionly=(
+	"${programming[@]}" 
+	"${lsp[@]}" 
+	"${cliutils[@]}"
+)
 
 case "${1:-}" in
     cli) everything=("${clionly[@]}");;
     gui) everything=("${clionly[@]}" "${guionly[@]}");;
     guiplustex) everything=( "${guionly[@]}" "${clionly[@]}" "${texlive_all[@]}" );;
-    *) echo "usage: $0 cli/gui/guiplustex";;
+    *) echo "usage: $0 cli/gui/guiplustex"; exit 1;;
 esac
 
 pacman -Syu --noconfirm --needed "${everything[@]}"
