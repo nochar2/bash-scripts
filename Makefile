@@ -1,11 +1,18 @@
-all: sanepr bri-nozero
-bri-nozero: bri-nozero.c
-	gcc -g -Wall -Wextra -o $@ $^
+SRC = $(wildcard *.c)
+EXE = $(SRC:.c=)
 
-sanepr: sanepr.c ext/sds/sds.c
-	gcc -g -Wall -Wextra -o $@ $^
+all: $(EXE)
+.PHONY: $(EXE) all clean
+
+# took me 20 minutes to find how to do this again ugh
+$(EXE): %: %.c
+	echo trying to build $@ from $^
+	gcc -g -Wall -Wextra -o $@ $<
+
+clean:
+	rm -f $(EXE)
+
 
 ext/wcwidth/wcwidth.a: ext/wcwidth/wcwidth.c
 	gcc -g -o $@ -c $^
 
-.PHONY: sanepr

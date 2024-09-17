@@ -1,6 +1,0 @@
-#!/bin/sh
-[ -z "$1" ] && { echo "first argument must be color name or #hex value"; exit 1; }
-out="$XDG_CONFIG_HOME/wal.jpg"
-convert -size 1920x1080 xc:"$1" "$out"
-xwallpaper --zoom "$out"
-

@@ -4,6 +4,7 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <string.h>
+#include "sds/sds.c"
 
 typedef int64_t s64;
 typedef uint64_t u64;

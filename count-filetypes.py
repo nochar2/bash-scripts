@@ -37,9 +37,4 @@ def main():
     # types = list(map(lambda x: x[0], types_and_counts))
     # counts = list(map(lambda x: x[1], types_and_counts))
 
-
-
-
-	
-
 main()
