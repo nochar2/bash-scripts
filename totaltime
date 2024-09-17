@@ -52,7 +52,7 @@ get_ms_duration_mediainfo()
 }
 
 main() {
-	[ -z "$1" ] && { 
+	[ -z "${1:-}" ] && { 
 		echo -e "usage: $0 DIR\nCalculates time of all media files in a dir.";
 		exit 1;
 	}
