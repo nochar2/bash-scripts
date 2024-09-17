@@ -56,7 +56,6 @@ color()
     desired_temp="$current_temp"
     desired_bri="$current_bri"
 
-    echo here
     if [ "$cmd" = "-b" ]; then
         if [ "$1" = "up" ]; then
             desired_bri=$(python -c "print(max(min(1.0, $current_bri+$bri_change), 0.1))") \
@@ -79,7 +78,6 @@ color()
             echo "Argument is not a number" >&2; exit 1; 
         fi
     fi
-    echo here
 
     echo "$desired_temp" > "/tmp/red-colortemp"
     echo "$desired_bri" > "/tmp/red-colorbri"
@@ -90,16 +88,13 @@ color()
 
     method="drm"
 
-    echo heree
 
     # This is a mess currently
     is_running_under_X && {
         lastid="$(cat /tmp/last-notification)"
-        echo hereee
         [ -n "$lastid" ] && lastid_arg="-r $lastid" || lastid_arg=""
         # shellcheck disable=SC2086
         newid="$(timeout 0.2 notify-send $lastid_arg -p -t 700 "$(basename "$0")" "Setting screen color temp to ${desired_temp}K")"
-        echo hereeee
         echo "$newid" > /tmp/last-notification 
         method="randr"
     }
