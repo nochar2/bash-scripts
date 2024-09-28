@@ -32,16 +32,32 @@ guiutils=(
 	wine winetricks
 	# bluetooth?
 	qt5-connectivity qt6-connectivity
+	syncthing
+	tectonic
+	# plasma wants this
+	power-profiles-daemon
 )
 
 cliutils=(
 	wget curl aria2 fd fzf kexec-tools brightnessctl cpupower zip p7zip pass parallel ccache less man
 	# bluetooth
 	bluez-utils 
+	linux-wifi-hotspot haveged dnsmasq
+	translate-shell
+	powertop
+	# mkfs.fat
+	dosfstools
 )
 
 programming=(
-	git imagemagick alacritty htop shellcheck intel-gpu-tools jdk21-openjdk tcc valgrind tmux byobu vim helix clang bcc-tools
+	vim helix  # editing
+	git imagemagick  alacritty htop bcc-tools  tmux byobu intel-gpu-tools  # misc tools
+	tcc valgrind clang bear # c
+	rust # rust
+	jdk21-openjdk # java
+	shellcheck  # bash
+	protobuf # interop
+	verilator # hw dev
 )
 
 rice=(
@@ -57,7 +73,8 @@ fonts=(
 )
 
 texlive_all=(
-	texlive texlive-lang tectonic
+	# use tectonic instead if possible
+	texlive texlive-lang 
 )
 
 
@@ -78,8 +95,8 @@ clionly=(
 case "${1:-}" in
     cli) everything=("${clionly[@]}");;
     gui) everything=("${clionly[@]}" "${guionly[@]}");;
-    guiplustex) everything=( "${guionly[@]}" "${clionly[@]}" "${texlive_all[@]}" );;
-    *) echo "usage: $0 cli/gui/guiplustex"; exit 1;;
+    guitex) everything=( "${guionly[@]}" "${clionly[@]}" "${texlive_all[@]}" );;
+    *) echo "usage: $0 cli/gui/guitex"; exit 1;;
 esac
 
 pacman -Syu --noconfirm --needed "${everything[@]}"
