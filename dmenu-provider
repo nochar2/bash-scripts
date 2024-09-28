@@ -9,7 +9,8 @@ if [ -t 1 ]; then
 
 elif command -v tofi >/dev/null; then  
 	# works under nix plasma wayland, but ugly
-	tofi "$@";
+	shift # HACK: tofi doesn't like -p
+	tofi --prompt-text "$@";
 elif command -v rofi >/dev/null; then
 	# works under arch * xorg, broken on nix plasma wayland
 	rofi -dmenu "$@";   # single -

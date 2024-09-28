@@ -13,8 +13,10 @@ usage() {
 }
 
 main() {
-    _dirname="$(xdg-user-dir PICTURES)/sshot"; local _dirname
-    _basename="$(date "+%Y-%m-%d_%H%M%S")"; local _basename
+    local _dirname
+    _dirname="$(xdg-user-dir PICTURES)/sshot"; 
+    local _basename
+    _basename="$(date "+%Y-%m-%d_%H%M%S")"; 
     local maimopts=""
     local interactive=""
     local do_notify=""
