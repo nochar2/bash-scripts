@@ -1,0 +1,8 @@
+#!/bin/bash
+[ -z "$*" ] && {
+	echo "usage: $0 COMMAND"
+	echo "literally \"while true; do COMMAND && break; done\""
+	echo "(you can use this if you have broken adb that only works a millisecond after connection)"
+	exit 0
+}
+while true; do $* && break; done
