@@ -58,7 +58,7 @@ main() {
     esac
 
     if ! i_have pdftk; then
-        echo "pdftk is required to extract chapters (also mutool is optional to get page counts faster)" >&2
+        echo "pdftk is required to extract chapters (also mutool from mupdf-tools is optional to get page counts faster)" >&2
         exit 1
     fi
 
