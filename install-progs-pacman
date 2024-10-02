@@ -15,6 +15,13 @@ lsp=(
 	svelte-language-server
 	haskell-language-server
 	bash-language-server
+	lua-language-server          # nvim
+	vscode-html-languageserver
+	vscode-css-languageserver
+	vscode-json-languageserver
+)
+python_modules=(
+	python-pyserial  # hw dev
 )
 
 web_browsers=(
@@ -36,6 +43,8 @@ guiutils=(
 	tectonic
 	# plasma wants this
 	power-profiles-daemon
+	# xev, xkill and more
+	xorg-apps
 )
 
 cliutils=(
@@ -47,6 +56,7 @@ cliutils=(
 	powertop
 	# mkfs.fat
 	dosfstools
+	man-pages
 )
 
 programming=(
@@ -90,6 +100,7 @@ clionly=(
 	"${programming[@]}" 
 	"${lsp[@]}" 
 	"${cliutils[@]}"
+	"${python_modules[@]}"
 )
 
 case "${1:-}" in

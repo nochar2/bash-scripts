@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# ^ don't ever run shell scripts interactively with -i, this destroys your history.
-
 # This is similar to xdg-query / xdg-open. It is much easier to customize
 # and faster (xdg-open takes like .5 seconds for no reason). Still,
 # xdg-open/xdg-query is used in some system apps (firefox?) which is 
@@ -14,7 +12,7 @@ args_to_lines() {
     done
 }
 
-dmenu_with_opts() {
+ask_the_user() {
     IFS=" "
     prompt="How should I open this?"
     args_to_lines "$@" | dmenu-provider -p "$prompt"
@@ -32,22 +30,22 @@ suitable_program_for() {
 
     mime="$(file -L --brief --mime-type "$filename")"
     case "$mime" in
-        application/epub+zip) echo zathura;;
-        application/json) dmenu_with_opts "jq ." vim helix kwrite;;
-        application/pdf) echo zathura;;
-        application/javascript) echo "$EDITOR";;  # .lua is detected as this
-        audio/*) echo mpv;;
-        document/*) echo zathura;;
-        html/*) echo firefox;;
-        image/vnd.djvu) echo zathura;;
-        image/*) echo sxiv;;
-        inode/directory) echo dolphin;;
-        inode/x-empty) echo "$EDITOR";;
-        text/html) dmenu_with_opts firefox "$EDITOR";;
-        text/*) echo "$EDITOR";;
-        video/*) echo mpv;;
+        application/epub+zip)        echo zathura;;
+        application/json)            ask_the_user "jq ." vim helix kwrite;;
+        application/pdf)             echo zathura;;
+        application/javascript)      echo "$EDITOR";;  # .lua is detected as this
+        audio/*)                     echo mpv;;
+        document/*)                  echo zathura;;
+        html/*)                      echo firefox;;
+        image/vnd.djvu)              echo zathura;;
+        image/*)                     echo sxiv;;
+        inode/directory)             echo dolphin;;
+        inode/x-empty)               echo "$EDITOR";;
+        text/html)                   ask_the_user firefox "$EDITOR";;
+        text/*)                      echo "$EDITOR";;
+        video/*)                     echo mpv;;
         application/vnd.ms-htmlhelp) echo xchm;;  # .chm files
-        *) echo xdg-open;;
+        *)                           echo xdg-open;;
     esac
 }
 
