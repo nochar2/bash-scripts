@@ -6,7 +6,6 @@ all: $(EXE)
 
 # took me 20 minutes to find how to do this again ugh
 $(EXE): %: %.c
-	echo trying to build $@ from $^
 	gcc -g -Wall -Wextra -o $@ $<
 
 clean:

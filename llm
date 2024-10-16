@@ -9,34 +9,97 @@ import argparse
 from dataclasses import dataclass
 from typing import List, Tuple, Dict, Optional, Any
 
-@dataclass
-class AiServiceSpec:
-	url: str
-	envvar_name: str
-	models: List[str]
-	
+# TODO: google uses a different format
 
-Url = str
-Models = List[str]
-ai_service_map: Dict[str, AiServiceSpec] = {
-	"groq": AiServiceSpec(
-		"https://api.groq.com/openai/v1/chat/completions", 
-		"GROQ_API_KEY",
-		[
+@dataclass
+
+
+class AiServiceSpec:
+	name: str
+	url: Optional[str]
+	models: List[str]
+	is_openai_compatible: bool
+	api_key_envvar_name: str
+
+
+AI_SERVICES: List[AiServiceSpec] = [
+	AiServiceSpec(
+		name="groq", 
+		url="https://api.groq.com/openai/v1/chat/completions", 
+		models=[
 			"llama-3.1-70b-versatile",
 			"llama3-70b-8192"
-		],
+		], 
+		is_openai_compatible=True, 
+		api_key_envvar_name="GROQ_API_KEY",
 	),
-	"openrouter": AiServiceSpec(
-		"https://openrouter.ai/api/v1/chat/completions",
-		"OPENROUTER_API_KEY",
-		[
+	AiServiceSpec(
+		name="openrouter",
+		url="https://openrouter.ai/api/v1/chat/completions",
+		models=[
 			# todo: maybe just fetch all options online and add a fzf picker
 			"anthropic/claude-3.5-sonnet",
 			"meta-llama/llama-3.1-405b-instruct"
 		],
+		is_openai_compatible=True, 
+		api_key_envvar_name="OPENROUTER_API_KEY"
 	)
-}
+	# XXX: BROKEN :(
+	# ,
+	# AiServiceSpec(
+	# 	name="google",
+	# 	url=None,
+	# 	models=[
+	# 		"gemini-1.5-flash-latest"
+	# 		# TODO more
+	# 	],
+	# 	is_openai_compatible=False, 
+	# 	api_key_envvar_name="GOOGLE_AI_API_KEY"
+	# )
+]
+
+
+class AiModel:
+	headers: Dict[str, str] = {}
+	model_name: str = ""
+	api_key: str = ""
+
+	def __init__(self, ai_service: AiServiceSpec, model: str, api_key: str):
+		if model not in ai_service.models:
+			print(f"[Error] Model {model} not in known models for {ai_service.name}: {ai_service.models}")
+			exit(1)
+		self.model = model
+
+		self.headers["Content-Type"] = "application-json"		
+		if ai_service.is_openai_compatible:
+			self.headers["Authorization"] = f"Bearer {api_key}"
+
+		self.ai_service = ai_service
+		self.api_key = api_key
+
+		
+	def msg_to_json(self, text: str) -> Dict[str, Any]:
+		if self.ai_service.is_openai_compatible:
+			return {
+				"messages": [ {"role": "user", "content": text }  ], 
+			    "model": self.model, 
+			    "temperature": 0.5
+		   }
+		elif self.ai_service.name == "google":
+			return {"contents": [ {"parts": [ {"text":text} ] } ] }
+		else:
+			print(f"[Error] I don't recognize ai service {self.ai_service.name}")
+			exit(1)
+
+	def get_endpoint(self):
+		if self.ai_service.is_openai_compatible:
+			return self.ai_service.url
+		elif self.ai_service.name == "google":
+			return f"https://generativelanguage.googleapis.com/v1beta/models/{self.model_name}:generateContent?key={self.api_key}"
+		else:
+			print(f"[Error] I don't recognize ai service {self.ai_service.name}")
+			exit(1)
+
 
 ###########################
 
@@ -83,87 +146,74 @@ def replace_by_indices(s: str,
 #########################
 
 
-def send_query_and_get_reply(url: str, 
-			                 model: str, 
-			                 api_key: str, 
+def send_query_and_get_reply(ai_model: AiModel,
 			                 line_from_user: str) ->str:
 	# this would work similarly for openai / other providers
 	
+	r = requests.post(ai_model.get_endpoint(), 
+	                  json=ai_model.msg_to_json(line_from_user), 
+	                  headers=ai_model.headers)
 
-
-	MessageSpec = Dict[str, str]
-	
-	headers = {"Authorization": f"Bearer {api_key}"}
-	# data_template = {"messages": [{"role": "user", "content": "" } ], "model": model, "max_tokens": 200}
-	data_template = {
-		"messages": [
-			{"role": "user", "content": line_from_user } 
-		], 
-	   "model": model, 
-	   "temperature": 0.5
-	}
-	
-	data = data_template
-
-	r = requests.post(url, json=data, headers=headers)
-
+	print(r)
+	print(r.content)
 	msg_json: Dict[Any, Any] = json.loads(r.content)
-	print(type(msg_json))
-
+	# print(type(msg_json))
 	# print(msg_json)
+
+	# this will be broken 
+	print(msg_json)
 	msg: str = msg_json["choices"][0]["message"]["content"]
 	return msg
 
 
 
 def main() -> None:
+	ai_services_supp = ", ".join(list(map(lambda s: s.name, AI_SERVICES)))
+
 	parser = argparse.ArgumentParser(description="CLI program for querying large language models.")
 	parser.add_argument("-i", "--infinite", action="store_true", help="Ask for input repeatedly")
-	parser.add_argument("-s", "--service", help="API service (supported: groq)")
+	parser.add_argument("-s", "--service", help=f"API service (supported: {ai_services_supp})")
 	parser.add_argument("-m", "--model", help="Language model name")
 	args = parser.parse_args()
 
 	infinite = args.infinite
 	assert isinstance(infinite, bool)
 
-	# get the 
-	ai_service_input = args.service or "groq"
-
-	ai_service_matches = [
-		srv for srv in ai_service_map.keys() 
-		if srv.startswith(ai_service_input)
+	ai_service_requested = args.service or "groq"
+	ai_services_found: List[AiServiceSpec] = [
+		srv
+		for srv in AI_SERVICES 
+		if srv.name.startswith(ai_service_requested)
 	]
-	ai_service = None
-	if len(ai_service_matches) == 0:
-		print(f"Unknown service {ai_service_input}"); exit(1)
-	elif len(ai_service_matches) > 1:
-		print(f"Input {ai_service_input} is ambiguous"); exit(1)
-	else:
-		ai_service = ai_service_matches[0]
-		
-		
-	metadata: Optional[AiServiceSpec] \
-		= ai_service_map.get(ai_service)
-	if metadata is None:
-		assert False, f"ai service {ai_service} not implemented"
-	url    = metadata.url
-	models = metadata.models
-	envvar_name = metadata.envvar_name
 
-	model = args.model or None
-
-	if model is None:
-		model = models[0]
-		print(f"Using provider {ai_service}, model {model} (default).")
-	elif model in models:
-		print(f"Using provider {ai_service}, model {model}.")
+	ai_service: Optional[AiServiceSpec] = None
+	if len(ai_services_found) == 0:
+		print(f"Unknown service {ai_service_requested}"); exit(1)
+	elif len(ai_services_found) > 1:
+		print(f"Input {ai_service_requested} is ambiguous, found these matches: {ai_services_found}"); exit(1)
 	else:
-		print(f"Unknown model {model} for service {ai_service}.")
+		ai_service = ai_services_found[0]
+	assert ai_service is not None
+
+
+	model_name_req = args.model or None
+	model_name_actual = None
+	if model_name_req is None:
+		model_name_actual = ai_service.models[0]
+		print(f"Using provider {ai_service.name}, model {model_name_actual} (default).")
+	elif model_name_req in ai_service.models:
+		model_name_actual = model_name_req
+		print(f"Using provider {ai_service.name}, model {model_name_actual}.")
+	else:
+		print(f"Unknown model {model_name_req} for service {ai_service}.")
 		exit(1)
 
+	envvar_name = ai_service.api_key_envvar_name
 	api_key = os.environ.get(envvar_name)
 	if api_key is None: 
 		raise ValueError(f"The {envvar_name} env variable is not set")
+
+	model = AiModel(ai_service, model_name_actual, api_key)
 
 
 	# repl
@@ -179,7 +229,7 @@ def main() -> None:
 			break
 
 		# msg = "This is a test message. **This is a bold text.**"
-		msg = send_query_and_get_reply(url, model, api_key, line)
+		msg = send_query_and_get_reply(model, line)
 
 		# make bold text actually bold in terminal
 		# it's not working properly, won't debug rn

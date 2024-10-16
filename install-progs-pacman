@@ -52,10 +52,10 @@ guiutils=(
 )
 
 cliutils=(
-	wget curl aria2 fd fzf kexec-tools brightnessctl cpupower zip p7zip pass parallel ccache less man
+	wget curl aria2 fd fzf kexec-tools brightnessctl cpupower zip p7zip pass parallel ccache less man make
 	# bluetooth
 	bluez-utils 
-	linux-wifi-hotspot haveged dnsmasq
+	# linux-wifi-hotspot haveged dnsmasq
 	translate-shell
 	powertop
 	# mkfs.fat
