@@ -20,28 +20,31 @@ if ! pacman -Qq yay >/dev/null; then
     }; popd
 fi
 
-# used ananicy, doesn't help that much with responsiveness but now all PIDs are in the millions for some reason
-# hotspot-appimage complains about missing xdot even though it is installed
-progs=( 
-    # -- libs
-    libbacktrace-git   # XXX: ???
-    # --old uni shit
-    # libnatpmp opencv libcaca libjuice sdl_ttf                   
-    # -- lsp
-    vim-language-server cmake-language-server awk-language-server 
-    # --sw management
-    powerpill downgrade 
-    # --programming
-    emsdk uefi-run vscodium-bin sysls jdk21-openjdk bear flamegraph git-lfs 
-    # --i3
-    i3-swallow-git 
-    # -- games
-    python-wpm 
-    # -- media
-    yt-dlp-drop-in 
-    # -- utils
-    tatsumato hotspot kddockwidgets-qt6 task-spooler update-grub boxes translate-shell xdg-ninja vimv-git 
+# required!
+progs=(
+    systemd-boot-pacman-hook
+    pacman-hook-kernel-install
 )
+
+# old=( 
+#     # -- libs
+#     libbacktrace-git   # XXX: ???
+#     # -- lsp
+#     vim-language-server cmake-language-server awk-language-server 
+#     # --sw management
+#     powerpill downgrade 
+#     # --programming
+#     emsdk uefi-run vscodium-bin sysls jdk21-openjdk bear flamegraph git-lfs 
+#     # --i3
+#     i3-swallow-git 
+#     # -- games
+#     python-wpm 
+#     # -- media
+#     yt-dlp-drop-in 
+#     # -- utils
+#     tatsumato hotspot kddockwidgets-qt6 task-spooler update-grub boxes translate-shell xdg-ninja vimv-git 
+# )
+
 # Install AUR programs
 yay -S --noconfirm --needed "${progs[@]}"
 
@@ -49,10 +52,14 @@ yay -S --noconfirm --needed "${progs[@]}"
 # alsoprint systemctl enable --now ananicy 
 
 # My own configs (XXX: this belongs elsewhere !!!!!)
-# {
-#     git clone git@gitlab.com:nochar/bash_scripts.git scripts 2>/dev/null || true
-#     git clone git@gitlab.com:nochar/dotfiles.git .config 2>/dev/null || true
-#     pushd dotfiles; stow everything; popd
-# }
+postinstall()
+{
+    git clone git@gitlab.com:nochar/bash_scripts.git "$HOME"/scripts  2>/dev/null || true
+    git clone git@gitlab.com:nochar/dotfiles.git     "$HOME"/dotfiles 2>/dev/null || true
+    pushd dotfiles; {
+        stow home
+        sudo stow root --target=/
+    }; popd
+}
 
 

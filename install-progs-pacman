@@ -34,7 +34,7 @@ web_browsers=(
 guiutils=(
 	xdotool xclip xcolor
 	wl-clipboard
-	network-manager-applet dmenu rofi rpi-imager xdot timeshift uget meld
+	network-manager-applet dmenu rofi rpi-imager xdot timeshift uget meld sqlitebrowser
 	debugedit picom libspeechd speech-dispatcher numlockx dunst xf86-video-intel unclutter redshift dex
 	wine winetricks
 	# bluetooth?
@@ -45,6 +45,10 @@ guiutils=(
 	power-profiles-daemon
 	# xev, xkill and more
 	xorg-apps
+
+	# virtualization
+	virt-manager
+	qemu-desktop
 )
 
 cliutils=(
