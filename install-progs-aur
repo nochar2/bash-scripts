@@ -1,30 +1,48 @@
 #!/usr/bin/env bash
-
-# XXX: this is ugly, also use chaotic-aur versions where possible
-
-alsoprint() {
-    echo "$@" && "$@"
-}
-
 set -euo pipefail
 
-[ "$EUID" -eq 0 ] && { echo "yay musst be run as regular user"; exit 1; }
-cd "$HOME"
+# XXX: this is ugly and has junk that should be elsewhere
+# also I should try to setup and use chaotic-aur
 
-# Get yay
-if ! pacman -Qq yay >/dev/null; then
-    pushd /tmp; {
-        git clone https://aur.archlinux.org/yay.git || true
-        cd yay
-        makepkg -si
-    }; popd
-fi
+
+aur_install() {
+    if command -v pamac; then
+        pamac build "$@"
+    elif command -v yay; then
+        yay -S --noconfirm --needed "$@"
+    elif command -v paru; then
+        yay -S --noconfirm --needed "$@"
+    else
+        echo "E: no known AUR helper installed (tried pamac/yay/paru)"
+        exit 1
+    fi
+}
+aur_install "${progs[@]}"
+
 
 # required!
 progs=(
     systemd-boot-pacman-hook
     pacman-hook-kernel-install
+    anki-bin
 )
+
+[ "$EUID" -eq 0 ] && { 
+    echo "yay must be run as regular user"; 
+    exit 1; 
+}
+
+
+# Get yay ?
+# cd "$HOME"
+# if ! pacman -Qq yay >/dev/null; then
+#     pushd /tmp; {
+#         git clone https://aur.archlinux.org/yay.git || true
+#         cd yay
+#         makepkg -si
+#     }; popd
+# fi
+
 
 # old=( 
 #     # -- libs
@@ -44,22 +62,3 @@ progs=(
 #     # -- utils
 #     tatsumato hotspot kddockwidgets-qt6 task-spooler update-grub boxes translate-shell xdg-ninja vimv-git 
 # )
-
-# Install AUR programs
-yay -S --noconfirm --needed "${progs[@]}"
-
-# Post install startups
-# alsoprint systemctl enable --now ananicy 
-
-# My own configs (XXX: this belongs elsewhere !!!!!)
-postinstall()
-{
-    git clone git@gitlab.com:nochar/bash_scripts.git "$HOME"/scripts  2>/dev/null || true
-    git clone git@gitlab.com:nochar/dotfiles.git     "$HOME"/dotfiles 2>/dev/null || true
-    pushd dotfiles; {
-        stow home
-        sudo stow root --target=/
-    }; popd
-}
-
-

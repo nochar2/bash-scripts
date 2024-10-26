@@ -22,6 +22,7 @@ lsp=(
 )
 python_modules=(
 	python-pyserial  # hw dev
+	python-markdown
 )
 
 web_browsers=(
@@ -61,6 +62,8 @@ cliutils=(
 	# mkfs.fat
 	dosfstools
 	man-pages
+	android-tools
+	strace
 )
 
 programming=(
