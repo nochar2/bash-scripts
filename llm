@@ -12,8 +12,6 @@ from typing import List, Tuple, Dict, Optional, Any
 # TODO: google uses a different format
 
 @dataclass
-
-
 class AiServiceSpec:
 	name: str
 	url: Optional[str]
@@ -27,7 +25,7 @@ AI_SERVICES: List[AiServiceSpec] = [
 		name="groq", 
 		url="https://api.groq.com/openai/v1/chat/completions", 
 		models=[
-			"llama-3.1-70b-versatile",
+			"llama-3.3-70b-versatile",
 			"llama3-70b-8192"
 		], 
 		is_openai_compatible=True, 
@@ -39,7 +37,8 @@ AI_SERVICES: List[AiServiceSpec] = [
 		models=[
 			# todo: maybe just fetch all options online and add a fzf picker
 			"anthropic/claude-3.5-sonnet",
-			"meta-llama/llama-3.1-405b-instruct"
+			"meta-llama/llama-3.1-405b-instruct",
+			"deepseek/deepseek-chat",
 		],
 		is_openai_compatible=True, 
 		api_key_envvar_name="OPENROUTER_API_KEY"
@@ -171,31 +170,37 @@ def main() -> None:
 	ai_services_supp = ", ".join(list(map(lambda s: s.name, AI_SERVICES)))
 
 	parser = argparse.ArgumentParser(description="CLI program for querying large language models.")
-	parser.add_argument("-i", "--infinite", action="store_true", help="Ask for input repeatedly")
+	parser.add_argument("-i", "--infinite", action="store_true", help="Ask for input repeatedly (note: there is no context yet)")
 	parser.add_argument("-s", "--service", help=f"API service (supported: {ai_services_supp})")
 	parser.add_argument("-m", "--model", help="Language model name")
+	parser.add_argument("-M", "--models", help="List supported models for service", action="store_true")
 	args = parser.parse_args()
 
 	infinite = args.infinite
 	assert isinstance(infinite, bool)
 
 	ai_service_requested = args.service or "groq"
-	ai_services_found: List[AiServiceSpec] = [
+	ai_service_matches: List[AiServiceSpec] = [
 		srv
 		for srv in AI_SERVICES 
 		if srv.name.startswith(ai_service_requested)
 	]
 
 	ai_service: Optional[AiServiceSpec] = None
-	if len(ai_services_found) == 0:
+	if len(ai_service_matches) == 0:
 		print(f"Unknown service {ai_service_requested}"); exit(1)
-	elif len(ai_services_found) > 1:
-		print(f"Input {ai_service_requested} is ambiguous, found these matches: {ai_services_found}"); exit(1)
+	elif len(ai_service_matches) > 1:
+		print(f"Input {ai_service_requested} is ambiguous, found these matches: {ai_service_matches}"); exit(1)
 	else:
-		ai_service = ai_services_found[0]
+		ai_service = ai_service_matches[0]
 	assert ai_service is not None
 
 
+	list_models = args.models or False
+	if list_models:
+		print(f"Models for service `{ai_service.name}`:`\n  {ai_service.models}")
+		exit(0)
+	
 	model_name_req = args.model or None
 	model_name_actual = None
 	if model_name_req is None:
@@ -205,7 +210,7 @@ def main() -> None:
 		model_name_actual = model_name_req
 		print(f"Using provider {ai_service.name}, model {model_name_actual}.")
 	else:
-		print(f"Unknown model {model_name_req} for service {ai_service}.")
+		print(f"Unknown model {model_name_req} for service {ai_service.name}.")
 		exit(1)
 
 	envvar_name = ai_service.api_key_envvar_name
