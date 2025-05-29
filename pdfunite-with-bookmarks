@@ -1,13 +1,19 @@
 #!/usr/bin/env bash
 #shellcheck disable=2059 # printf +variable
+set -euo pipefail
 
+# DON'T USE THIS
+# 'mutool merge' works just fine with the bookmarks in there
+# idk why i made this
+# 
 # merges files like pdfunite / mutool merge, but creates chapters from separate file names.
 # From https://unix.stackexchange.com/questions/368415/merge-pdf-files-and-automatically-create-a-table-of-contents-with-each-file-as-a
 
 # sadly the merging is broken if the pdfs have different page sizes, no matter what backend you use :(
 
 out_file="combined.pdf"
-bookmarks_file="./bookmarks.txt"
+tmp_out_file="out.pdf"
+bookmarks_file="bookmarks.txt"
 bookmarks_fmt="BookmarkBegin
 BookmarkTitle: %s
 BookmarkLevel: 1
@@ -42,27 +48,39 @@ number_of_pages_in_file() {
 usage() {
     echo "usage: $0 [--nest] file.pdf..."
     echo "merges the files, chapter/index aware"
-    echo "--no-nest  builds chapter index from file names (default)"
-    echo "--nest     additionally captures chapters from each name under that filename"
-    echo "           (slow, blame pdftk)"
+    echo "--chapters      include chapters from each file (default)"
+    echo "--no-chapters   don't"
+    echo "--names         group by file name (default)"
+    echo "--no-names      don't"
 }
 
-main() {
-    nest=0
+longopts="chapters,no-chapters,names,no-names"
 
-    case "${1:-}" in
-        --nest)    nest=1; shift;;
-        --no-nest) nest=0; shift;;
-        "")        usage; exit 0;;
-        --*)       usage; exit 1;;
-    esac
+main() {
+    chapters=1
+    names=1
+
+
+    # parsed=$(getopt --longoptions="$longopts" --name "$0" -- "$@")
+    # eval set -- "$parsed"
+    # echo "$parsed"
+
+    while true; do
+        case "$1" in
+            --chapters)    chapters=1; shift;;
+            --no-chapters) chapters=0; shift;;
+            --names)       names=1; shift;;
+            --no-names)    names=0; shift;;
+            --)            shift; break;;
+            "")            usage; exit 0;;
+            *)             break;;
+        esac
+    done
 
     if ! i_have pdftk; then
         echo "pdftk is required to extract chapters (also mutool from mupdf-tools is optional to get page counts faster)" >&2
         exit 1
     fi
-
-    rm -f "$bookmarks_file" "$out_file"
 
     declare -a files=("$@")
     page_counter=1
@@ -71,11 +89,11 @@ main() {
     for f in "${files[@]}"; do
         title="${f%.*}"
 
-        if [ "$nest" = "1" ]; then
+        if [ "$names" = "1" ]; then
             printf "$bookmarks_fmt" "$title" "$page_counter" >> "$bookmarks_file"
+        fi
+        if [ "$chapters" = "1" ]; then
             dump_bookmarks_of_file "$f" "$page_counter" >> "$bookmarks_file"
-        else
-            printf "$bookmarks_fmt" "$title" "$page_counter" >> "$bookmarks_file"
         fi
         num_pages="$(number_of_pages_in_file "$f")"
         page_counter=$((page_counter + num_pages))
@@ -88,13 +106,21 @@ main() {
 
     ### all three create a garbled pdf if the pdfs differ in canvas size :(
     if i_have mutool; then
-        mutool merge -o "out.pdf" "${files[@]}"
+        mutool merge -o "$tmp_out_file" "${files[@]}"
     elif i_have pdfunite; then
-        pdfunite "${files[@]}" out.pdf
+        pdfunite "${files[@]}" "$tmp_out_file"
     else
-        pdftk "${files[@]}" output out.pdf # slowest
+        pdftk "${files[@]}" output "$tmp_out_file" # slowest
     fi
-    pdftk "out.pdf" update_info "$bookmarks_file" output "$out_file"
+
+    if [ "$chapters" = 1 -o "$names" = 1 ]; then
+        pdftk "$tmp_out_file" update_info "$bookmarks_file" output "$out_file"
+    else
+        mv "$tmp_out_file" "$out_file"
+    fi
+
+    # clean up after yourself
+    rm -f "$tmp_out_file" "$bookmarks_file"
 }
 
 main "$@"

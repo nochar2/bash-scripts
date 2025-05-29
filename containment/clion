@@ -1,3 +1,0 @@
-#!/usr/bin/env bash
-clion.sh >/dev/null 2>/dev/null &
-disown clion

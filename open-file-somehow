@@ -6,6 +6,8 @@ set -euo pipefail
 # xdg-open/xdg-query is used in some system apps (firefox?) which is 
 # inconsistent but I can live with it.
 
+# TODO: background gui apps
+# 
 args_to_lines() {
     for line in "$@"; do
         echo "$line"
@@ -31,7 +33,9 @@ suitable_program_for() {
     mime="$(file -L --brief --mime-type "$filename")"
     case "$mime" in
         application/epub+zip)        echo zathura;;
-        application/json)            ask_the_user "jq ." vim helix kwrite;;
+        # HACK: on Arch, the binary is called 'helix', but every time
+        # I try to parametrize it I break everything
+        application/json)            ask_the_user "jq ." vim hx kwrite;;
         application/pdf)             echo zathura;;
         application/javascript)      echo "$EDITOR";;  # .lua is detected as this
         audio/*)                     echo mpv;;
@@ -103,7 +107,7 @@ main() {
     cmd=$(cmd_to_open "$file")
 
     echo "$cmd" "$file"
-    settermtitle "$cmd" "$file"
+    # settermtitle "$cmd" "$file"
 
     # cmd can be multiple words so it has to be unquoted
     # exec is used so this script is replaced with the program properly by bspswallow
