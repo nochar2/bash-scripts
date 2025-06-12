@@ -1,6 +1,0 @@
-#!/bin/sh
-# make unzip actually work like any sane linux program
-case "$1" in
-    "") echo -e "usage: unzipn ZIP_FILES...\nUnzip with actual expected behavior";;
-    *) while [ -f "$1" ]; do unzip "$1"; shift; done;;
-esac

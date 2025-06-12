@@ -1,3 +1,0 @@
-#!/bin/sh
-# XXX: Doesn't this break your desktop environment or something? Don't want to try rn.
-# sudoedit /etc/systemd/logind.conf && systemctl reload systemd-logind

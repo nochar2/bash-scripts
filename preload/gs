@@ -1,3 +1,0 @@
-#!/bin/sh
-# this overrides gs, which would otherwise run ghostscript, to show "git status".
-git status

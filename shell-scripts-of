@@ -1,7 +1,0 @@
-#!/usr/bin/env bash
-
-for f in "$@"; do
-	if file "$f" | grep -q "shell script"; then
-		echo "$f"
-	fi
-done

@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+set -euo pipefail
+#shellcheck disable=SC2068
+
+if [ -t 1 ]; then
+	if command -v fzf >/dev/null; then
+		fzf "$@";
+	fi
+
+elif command -v tofi >/dev/null; then  
+	# works under nix plasma wayland, but ugly
+	shift # HACK: tofi doesn't like -p
+	tofi --prompt-text "$@";
+elif command -v rofi >/dev/null; then
+	# works under arch * xorg, broken on nix plasma wayland
+	rofi -dmenu "$@";   # single -
+elif command -v wofi >/dev/null; then
+	wofi --dmenu "$@";  # double --
+elif command -v dmenu >/dev/null; then
+	# works under arch * xorg, broken on nix plasma wayland
+	dmenu "$@";
+else
+	notify-send "$0" "I was asked to display a menu, but cannot! Install rofi or dmenu.\n"
+	exit 1
+fi

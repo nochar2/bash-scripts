@@ -1,6 +1,0 @@
-#!/usr/bin/env bash
-# bash is required (RANDOM)
-
-choice=$(($RANDOM % 2))
-[ $choice -eq 0 ] && echo "head" || echo "tail"
-

@@ -1,0 +1,42 @@
+#!/bin/sh
+# shellcheck disable=2086
+
+pathprefix='/usr/bin/'
+commands_that_need_sudo="hotspot"
+commands_that_need_geom="hotspot mpv"
+# geom_broken="zathura firefox"      # can't fix by setting geometry
+
+must_use_sudo_for()
+{
+    echo "$commands_that_need_sudo" | grep -q "$1"
+}
+
+must_use_geom_for()
+{
+    echo "$commands_that_need_geom" | grep -q "$1"
+}
+
+usage()
+{
+    echo "usage: $0 [local] program args..."
+    echo "runs xinit with the program and maybe tries to set geometry (badly)"
+    echo ""
+    echo "(cool when you want to try to work without an X server"
+    echo "hardcore 1980s style. Hard and inconvenient, but basically"
+    echo "eliminates all distractions/multitasking. Most programs"
+    echo "will be completely broken.)"
+}
+
+[ -z "$1" ] && { usage; exit 0; }
+
+prog=$1
+shift
+
+islocal=$1
+[ "$islocal" = local ] && { pathprefix=""; shift; }
+
+must_use_sudo_for "$prog" && maybe_sudo="sudo"
+must_use_geom_for "$prog" && maybe_geom="-geometry 1920x1080+0+0"
+
+echo "$maybe_sudo" xinit "${pathprefix}${prog}" $maybe_geom "$@" -- :0 "vt$(fgconsole)"
+$maybe_sudo xinit "${pathprefix}${prog}" $maybe_geom "$@" -- :0 "vt$(fgconsole)"

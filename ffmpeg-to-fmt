@@ -1,7 +1,0 @@
-#!/bin/sh
-[ -z "$1" ] &&  { echo "Usage: $0 OUTPUT-EXTENSION FILE [ rest of ffmpeg args ... ]"; exit 1; }
-ext="$1"
-input="$2"
-shift 2
-
-ffmpeg -i "$input" "$@" "${input%.*}.$ext"

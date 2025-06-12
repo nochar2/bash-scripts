@@ -1,6 +1,0 @@
-#!/bin/sh
-# Used for WSL before
-# launches cmd.exe with arguments
-# WINPATH=$(echo $DIR | sed "s/://" | sed "s/\//\\\/g")
-[ -z "$1" ] && cmd.exe || { cmd.exe /c "$@"; }
-

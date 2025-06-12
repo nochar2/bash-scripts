@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+# This script allows me to show Etterna packs of specific skillset I want to
+# practice. It creates symlinks to my categorized pack dirs, creating 
+# an illusion of packs located directly in Songs/ folder
+
+# Songs directory has directories with packs, sorted by skillset
+# Script must be in Songs directory
+# If I somehow don't have instructions.txt, I must be in a wrong directory
+
+echo "This script is currently broken";
+exit 1;
+
+
+cd "$HOME/Data/github/etterna/Songs"
+[ -f "instructions.txt" ] || { echo "This is not a Songs directory..." >&2; exit 1; }
+
+# Ask what I want to play
+# Answer will be stored in this file:
+choice_path="/tmp/skillset-choice"
+touch $choice_path
+touch "$choice_path"-new
+
+dialog --title "Skillset selection" \
+    --menu "Choose the skillset you'd like to practice today:" 12 65 5 \
+    Chordjack "Verticality with high skill ceiling" \
+    Variety "" \
+    Stream "trrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrt." \
+    Stamina "Tough trills and stuff." \
+    Solo "Learn something different" \
+    Nothing "List only real directories, no symlinks" 2>"$choice_path"-new
+
+# Quit if user cancels
+[ "$?" -ne 0 ] && { clear; echo "Quit: nothing selected"; rm "$choice_path"-new; exit 1; }
+
+# If successful and the selection has changed from last time, ...
+[ "$(cat "$choice_path"-new)" != "$(cat "$choice_path")" ] &&\
+{
+    cp "$choice_path"-new "$choice_path"
+    # ...delete old symlinks...
+    for link in *; do
+        [ -L "$link" ] && rm "$link";
+    done
+    # ... and create new ones based on my selection
+    dir=$(cat "$choice_path")
+    [ "$dir" = "Nothing" ] || {
+        for x in $dir/*; do ln -v -s "$x" "./$(basename "$x")"; done; 
+    }
+}
+
+# Cleanup and run game
+rm "$choice_path"-new
+../Etterna
+

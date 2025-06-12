@@ -1,5 +1,0 @@
-#!/bin/sh
-prefix="$1"
-file="$2"
-mv -n "$file" "${file#$prefix}"
-

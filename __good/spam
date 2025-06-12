@@ -1,0 +1,8 @@
+#!/usr/bin/env sh
+[ -z "$*" ] && {
+	echo "usage: $0 COMMAND"
+	echo "literally \"while true; do COMMAND && break; done\""
+	echo "(Originally used for adb on broken connection.)"
+	exit 0
+}
+while true; do "$@" && break; done

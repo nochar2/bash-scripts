@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+#######################################
+# I think this is completely broken...
+#######################################
+set -euo pipefail
+
+inhibit_file=/etc/systemd/logind.conf.d/lidswitch-inhibit.conf
+
+# TODO: assumes graphical session, idk how to check for it for now
+# TODO: this is a really hacky implementation, need to create that .conf inhibit file first
+
+# sudo_helper='kdesu -c'
+sudo_helper='gksu'
+# sudo_helper='sudo sh -c '
+
+doitforreal()
+{
+	case "$1" in
+		sleep|s)    $sudo_helper "mv ${inhibit_file} ${inhibit_file}.inactive || true; systemctl reload systemd-logind"; exit 0;;
+		nosleep|ns) $sudo_helper "mv ${inhibit_file}.inactive ${inhibit_file} || true; systemctl reload systemd-logind"; exit 0;;
+	esac
+}
+case "$1" in
+	sleep|s|nosleep|ns) 
+		doitforreal "$1";;
+	help|h|"")
+		echo "usage: $0 sleep/nosleep";
+		echo "disables or enables a lid-switch suspend inhibit in a hacky way (moving some config file)";;
+	*) 
+		set "$(printf "sleep\nnosleep\n" | dmenu-provider -p "which one?")"; 
+		doitforreal "$1";;
+esac

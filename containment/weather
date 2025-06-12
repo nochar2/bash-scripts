@@ -1,7 +1,0 @@
-#!/usr/bin/env bash
-V2=""
-[ "$1" = "v2" ] && { V2='v2.'; shift; }
-[ -z "$1" ] && set "$(cat $HOME/scripts/net/location)";
-
-curl "http://${V2}wttr.in/$(echo "$1" | urlenc)"
-

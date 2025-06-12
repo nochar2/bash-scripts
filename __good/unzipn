@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+case "$1" in
+    "") echo -e "usage: unzipn ZIP_FILES...\nUnzip several zip archives instead of one";;
+    *) while [ -f "$1" ]; do unzip "$1"; shift; done;;
+esac

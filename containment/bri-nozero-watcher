@@ -1,4 +1,0 @@
-#!/bin/sh
-
-inotifywait -m "/sys/class/backlight/intel_backlight" | stdbuf -i0 -o0 grep "MODIFY" | bri-nozero
-

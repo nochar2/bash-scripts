@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+[ -z "$*" ] && { echo -e "usage: $0 files...\nprints files which are shell scripts" >&2; exit 0; }
+
+file --mime-type "$@" | grep 'x-shellscript' | cut -d':' -f1
+# for f in "$@"; do
+# 	# if file -b  "$f" | grep -q "shell script" ; then
+# 	if [ "$(file -b --mime-type "$f")" = "text/x-shellscript" ]; then
+# 		echo "$f"
+# 	fi
+# done

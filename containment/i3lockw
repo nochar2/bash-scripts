@@ -1,8 +1,0 @@
-#!/usr/bin/env bash
-
-# Locks the screen with a blurred, dimmed version of an image
-
-BGPATH="/tmp/i3-bg.png"
-convert $HOME/Obrázky/mint.jpg -sample 1600 -gravity center -blur 8x8 -modulate 40,100,100 "$BGPATH"
-[ -f "$BGPATH" ] && i3lock -i "$BGPATH"
-

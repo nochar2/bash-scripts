@@ -1,0 +1,101 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+selector() {
+    dmenu-provider -p "$1"
+}
+
+# abs_drive_path()
+# {
+#     [ -z "${1:-}" ] && exit 1
+#     [[ "$1" == "/dev/sd"?? ]] && echo "$1" || echo "/dev/disk/by-label/$1"
+# }
+
+f_mnt() 
+{
+    drive="${1:-}"
+    [ -z "$drive" ] && {
+        drive=$(echo "$files" | selector "Which device to mount?")
+        # drive=$(abs_drive_path "$(echo "$files" | selector "Which device to mount?")")
+        [ -z "$drive" ] && exit 1;
+    }
+    $notifysend udisksctl "$(udisksctl mount -b "$drive" 2>&1)"
+}
+
+f_umount()
+{
+    drive="${1:-}"
+
+    maybe_disconnect=""
+    [ -n "$poweroff" ] && maybe_disconnect=" and power off"
+
+    [ -z "$drive" ] && {
+        # drive=$(abs_drive_path "$(echo "$files" \
+        #     | selector "Which device to unmount${maybe_disconnect}?")")
+        drive=$(echo "$files" | selector "Which device to unmount${maybe_disconnect}?")
+        [ -z "$drive" ] && exit 1;
+    }
+    $notifysend udisksctl "$(udisksctl unmount -b "$drive" 2>&1)"
+
+    [ -n "$poweroff" ] && {
+        poweroff_info="$(udisksctl power-off -b "$drive" 2>&1)"
+        [ -z "$poweroff_info" ] && {
+            poweroff_info="Drive $drive is now powered off."
+        }
+        $notifysend udisksctl "$poweroff_info"
+    }
+}
+
+assert() {
+    cmd="${1:-}"
+    shift
+    "$cmd" "$@" || { $notifysend "$prog" "assertion '$cmd $*' failed"; exit 1; }
+}
+
+usage() {
+    echo "usage: $0 --notify|-p|--poweroff|-h|--help"
+    echo "-n|--notify     use notify-send instead of echo"
+    echo "-p|--poweroff   unmount will also poweroff"
+    echo "-h|--help       this help"
+}
+
+# notifications_work() {
+    # non-zero exit if it timeouts
+    # also TODO check in other DE.
+#     notify-send -t 1 "$prog" "Testing if notifications are consumed. If you are reading this, your DE/WM ignores the notification timeout, because it should be gone after a millisecond (dunst/other daemon not running?). 
+    
+#     Please suggest how to check this better.
+#     "  
+# }
+
+main() {    
+    IFS=" "
+    notifysend="echo"
+    prog="${0##*/}"
+    poweroff=""
+
+    echo "${prog}"
+    for arg in "$@"; do
+        case "$arg" in
+            -n|--notify)
+                # assert notifications_work;
+                notifysend="notify-send -t 4000"; shift;;
+            -p|--poweroff) poweroff=1; shift;;
+            -h|--help) usage; exit 0;;
+            -*) usage; exit 1;;
+            *) ;;
+        esac
+    done
+
+    files=$(ls /dev/disk/by-label/* /dev/sd?? | grep -vE "NO_LABEL|swap"  )
+
+    case "$prog" in
+        mount-picker-mount) f_mnt "$@";;
+        mount-picker-umount) f_umount "$@";;
+        mount-picker) notify-send -u critical "$prog" "use mount or unmount symlink";;
+        *) notify-send -u critical "$prog" "bad symlink, got $0"; exit 1;;
+    esac
+
+}
+
+main "$@"

@@ -1,7 +1,0 @@
-#!/bin/sh
-V2=""
-[ "$1" = "v2" ] && { V2='v2.'; shift; }
-[ -z "$1" ] && set "$(cat "$HOME/scripts/secrets/location")";
-
-curl "http://${V2}wttr.in/$(echo "$1" | urlenc)"
-

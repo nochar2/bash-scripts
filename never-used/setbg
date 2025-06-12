@@ -1,6 +1,0 @@
-#!/bin/sh
-# todo: can be .png, this will break
-# cp "$1" "$HOME/.config/wal.jpg" 2>/dev/null
-xwallpaper --zoom "$1"
-# wal -c
-# wal -i "$1"

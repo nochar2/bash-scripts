@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# query website from command line, read json response in less
+[ -z "${1:-}" ] && { echo -e "Usage: $0 query\nSearches a word in an English dictionary (dictionaryapi.dev)"; exit 0; }
+query=$(echo "${1:-}" | urlenc)
+url="https://api.dictionaryapi.dev/api/v2/entries/en/$query"
+curl "$url" 2>/dev/null | jq --color-output | less --RAW-CONTROL-CHARS
