@@ -6,8 +6,8 @@ set -euo pipefail
 # xdg-open/xdg-query is used in some system apps (firefox?) which is 
 # inconsistent but I can live with it.
 
-# TODO: background gui apps
-# 
+# TODO: background gui apps (needs rewrite)
+
 args_to_lines() {
     for line in "$@"; do
         echo "$line"
@@ -98,24 +98,35 @@ main() {
     just_echo=0
     termprefix=""
 
-    if [ "$1" = "-n" ]; then just_echo=1; shift; fi
-    if [ "$1" = "-t" ]; then termprefix="$TERMINAL -e "; shift; fi
-    if [ "$1" = "--help" -o "$1" = "-h" ]; then echo a; usage; exit 0; fi
-    if [ -z "$1" ];           then echo b; usage; exit 1; fi
+    file=""
+    possibly_background=""
+    # this is also completely wrong
+    case "$1" in
+        -n) just_echo=1; shift;;
+        -t) termprefix="$TERMINAL -e"; shift;;
+        -b) possibly_background="&"; shift;;
+        --help|-h) usage; exit 0;;
+        "") usage; exit 1;;
+        *) file="$*";;
+    esac
 
-    file="$*"
+    # if [ "$1" = "-n" ]; then just_echo=1; shift; fi
+    # if [ "$1" = "-t" ]; then termprefix="$TERMINAL -e "; shift; fi
+    # if [ "$1" = "--help" -o "$1" = "-h" ]; then usage; exit 0; fi
+    # if [ -z "$1" ]; then usage; exit 1; fi
+    # file="$*"
+
     cmd=$(cmd_to_open "$file")
 
     echo "$cmd" "$file"
-    # settermtitle "$cmd" "$file"
 
     # cmd can be multiple words so it has to be unquoted
     # exec is used so this script is replaced with the program properly by bspswallow
-    [ "$just_echo" -gt 0 ] || { exec $cmd "$file"; }
+    [ "$just_echo" -gt 0 ] || { $cmd "$file" $possibly_background; }
 
-    mkdir -p "$HOME"/.local/state/bash
-    echo "$cmd \"$file\"" >> "$HOME"/.local/state/bash/history;
-
+    # this is also hacky and doesn't really work I think
+    # mkdir -p "$HOME"/.local/state/bash
+    # echo "$cmd \"$file\"" >> "$HOME"/.local/state/bash/history;
 }
 
 main "$@"

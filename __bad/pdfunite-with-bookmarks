@@ -2,9 +2,11 @@
 #shellcheck disable=2059 # printf +variable
 set -euo pipefail
 
-# DON'T USE THIS
-# 'mutool merge' works just fine with the bookmarks in there
-# idk why i made this
+####################################
+### DON'T USE THIS
+### use 'mutool merge', which works just fine with bookmarks
+### TODO: I forgot why I made this, but it didn't work before?
+####################################
 # 
 # merges files like pdfunite / mutool merge, but creates chapters from separate file names.
 # From https://unix.stackexchange.com/questions/368415/merge-pdf-files-and-automatically-create-a-table-of-contents-with-each-file-as-a

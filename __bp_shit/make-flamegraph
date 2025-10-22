@@ -1,4 +1,0 @@
-#!/usr/bin/env bash
-set -euo pipefail
-cat cycles | flamegraph --minwidth 2 --title " " --colors orange --height 20 --fontsize 15 --bgcolors "#ffffff"  >flamegraph.svg
-cp flamegraph.svg "$HOME/muni/bp/thesis/recorded/example/flamegraph.svg"

@@ -1,6 +1,6 @@
-#!/bin/sh
+#!/usr/bin/env sh
 
-[ "$(whoami)" = root ] || { echo "Need to run kmscon as root. Otherwise, it completely freezes with no ability to Ctrl+C or Alt+Fx at all."; exit 1; }
+# [ "$(whoami)" = root ] || { echo "Need to run kmscon as root. Otherwise, it completely freezes with no ability to Ctrl+C or Alt+Fx at all."; exit 1; }
 
 # Allows to do some work under a Linux console (no X server, 1980s style).
 # it is WAY better than fbcon, which has completely broken color parsing
@@ -10,9 +10,11 @@
 # > windowing (tabs, splits)
 #   + use tmux or byobu (byobu has broken ctrl+b " fsr)
 # > Other programs
+#   > Qt 
+#     + add `-platform linuxfb` to the command line
 #   > Console-based
 #     + ok, need to force truecolor in Helix
-#   > DRM-based
+#   > DRM-based (mostly poor)
 #     + mpv: works
 #     + fbpdf: normal - black screen, fbterm - barely one page, kmscon - barely one page
 #     + jfbview: normal - nothing, fbterm - works, kmscon - one stripe and segfaults when you scroll
@@ -31,6 +33,7 @@
 # - fgconsole(1):   number of current console term (prints 4 when on tty4)
 # - showkey(1):     keycodes 
 # - keymaps(5):     ???
+# - chvt:           switches virtual terminal instead of ctrl+alt+f key
 # - anything in `yay -Ss framebuffer`
 # - https://wiki.archlinux.org/title/Linux_console/Keyboard_configuration
 
@@ -50,7 +53,8 @@ kmscon \
        --xkb-layout cz \
        --xkb-variant qwerty \
        --xkb-options caps:swapescape,compose:ins \
-       --xkb-repeat-rate 16 \
+       --xkb-repeat-delay 190 \
+       --xkb-repeat-rate 15 \
        --sb-size 70000 \
        --font-name "JetBrains Mono Bold" \
        --font-dpi 120 \
