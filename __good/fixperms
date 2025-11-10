@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# XXX: chown / chmod HAVE AN -R FLAG, USE THAT INSTEAD.
+# I have no idea why I wrote this...
 set -euo pipefail
 
 usage() {

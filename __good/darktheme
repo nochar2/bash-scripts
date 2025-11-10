@@ -2,5 +2,5 @@
 sed -Ei '/@darktheme/ {s/^# //}; /@lighttheme/ {s/^([^#])/# \1/}' \
     "$XDG_CONFIG_HOME/alacritty/alacritty.toml" \
     "$XDG_CONFIG_HOME/helix/config.toml"
-lookandfeeltool -platform offscreen -a org.kde.breezedark.desktop
+lookandfeeltool --keep-auto --apply org.kde.breezedark.desktop
 pkill -USR1 hx

@@ -27,7 +27,7 @@ suitable_program_for() {
     # priority extensions
     case "$ext" in
         qpf|qsf|bsf|bdf) echo quartus; return;;
-        desktop) echo dex; return;;
+        desktop)         echo dex; return;;
     esac
 
     mime="$(file -L --brief --mime-type "$filename")"
@@ -35,7 +35,7 @@ suitable_program_for() {
         application/epub+zip)        echo zathura;;
         # HACK: on Arch, the binary is called 'helix', but every time
         # I try to parametrize it I break everything
-        application/json)            ask_the_user "jq ." vim hx kwrite;;
+        application/json)            echo hx;;
         application/pdf)             echo zathura;;
         application/javascript)      echo "$EDITOR";;  # .lua is detected as this
         audio/*)                     echo mpv;;
@@ -45,7 +45,7 @@ suitable_program_for() {
         image/*)                     echo sxiv;;
         inode/directory)             echo dolphin;;
         inode/x-empty)               echo "$EDITOR";;
-        text/html)                   ask_the_user firefox "$EDITOR";;
+        text/html)                   ask_the_user "$EDITOR" firefox;;
         text/*)                      echo "$EDITOR";;
         video/*)                     echo mpv;;
         application/vnd.ms-htmlhelp) echo xchm;;  # .chm files
