@@ -1,0 +1,26 @@
+#!/usr/bin/env sh
+set -xe
+
+organization="task"
+docs="zathura zathura-pdf-mupdf helix"
+tests="xeyes"
+browsers="chromium"
+tools="bat"
+dbtools="sqlitebrowser sqlite3"
+ctools="gcc clang libubsan"
+gotools="golang"
+rusttools="cargo rust rust-analyzer"
+haskelltools="ghc cabal-install"
+programming="$dbtools $ctools $gotools $rusttools $haskelltools"
+
+sudo dnf install $docs $tests $browsers $tools $programming
+
+curl -L --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install-from-binstall-release.sh | bash
+
+# package       | binary
+# --------------|-----------------------
+# skim          | sk
+# fd-find       | fd
+# cargo-update  | cargo install-update
+
+cargo binstall -y cargo-update skim tokei fd-find bacon bat vimv
